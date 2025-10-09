@@ -1,11 +1,156 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { UrlAnalyzer } from "@/components/UrlAnalyzer";
+import { AnalysisResults } from "@/components/AnalysisResults";
+import { toast } from "sonner";
+
+interface HeadingInfo {
+  level: number;
+  text: string;
+  position: { top: number; left: number };
+}
+
+interface AnalysisData {
+  url: string;
+  screenshot?: string;
+  headings: HeadingInfo[];
+  meta: {
+    title?: string;
+    description?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+  };
+  html: string;
+}
 
 const Index = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+
+  const parseHeadings = (html: string): HeadingInfo[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const headings: HeadingInfo[] = [];
+
+    ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach((tag) => {
+      const elements = doc.querySelectorAll(tag);
+      elements.forEach((el) => {
+        const level = parseInt(tag.substring(1));
+        const text = el.textContent?.trim() || '';
+        if (text) {
+          headings.push({
+            level,
+            text,
+            position: { top: 0, left: 0 } // In real implementation, would calculate actual position
+          });
+        }
+      });
+    });
+
+    return headings.sort((a, b) => {
+      if (a.level !== b.level) return a.level - b.level;
+      return 0;
+    });
+  };
+
+  const parseMeta = (html: string) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    const getMetaContent = (selector: string) => {
+      const element = doc.querySelector(selector);
+      return element?.getAttribute('content') || undefined;
+    };
+
+    return {
+      title: doc.querySelector('title')?.textContent || undefined,
+      description: getMetaContent('meta[name="description"]'),
+      ogTitle: getMetaContent('meta[property="og:title"]'),
+      ogDescription: getMetaContent('meta[property="og:description"]'),
+      ogImage: getMetaContent('meta[property="og:image"]'),
+    };
+  };
+
+  const analyzeUrl = async (url: string) => {
+    setIsLoading(true);
+    setAnalysisData(null);
+
+    try {
+      // Use a CORS proxy for fetching the website
+      const corsProxy = 'https://api.allorigins.win/raw?url=';
+      const response = await fetch(corsProxy + encodeURIComponent(url));
+      
+      if (!response.ok) {
+        throw new Error('Kon de website niet ophalen');
+      }
+
+      const html = await response.text();
+      const headings = parseHeadings(html);
+      const meta = parseMeta(html);
+
+      // For screenshot, we would normally use a service like Puppeteer or a screenshot API
+      // For now, we'll note that this needs to be implemented with a backend service
+      const screenshotPlaceholder = undefined;
+
+      const data: AnalysisData = {
+        url,
+        screenshot: screenshotPlaceholder,
+        headings,
+        meta,
+        html,
+      };
+
+      setAnalysisData(data);
+      toast.success("Analyse voltooid!");
+      
+      // Scroll to results
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 100);
+    } catch (error) {
+      console.error('Analyse fout:', error);
+      toast.error("Er is een fout opgetreden bij het analyseren van de URL");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen py-12 px-4">
+      <div className="container mx-auto">
+        <div className="mb-16">
+          <UrlAnalyzer onAnalyze={analyzeUrl} isLoading={isLoading} />
+        </div>
+
+        {analysisData && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <AnalysisResults data={analysisData} />
+          </div>
+        )}
+
+        {!analysisData && !isLoading && (
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-primary mb-6 shadow-glow">
+              <svg 
+                className="w-10 h-10 text-white" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" 
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-semibold mb-3">Klaar om te beginnen?</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Voer een URL in om de technische SEO structuur te analyseren en inzicht te krijgen in heading hierarchie, meta data en meer.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
