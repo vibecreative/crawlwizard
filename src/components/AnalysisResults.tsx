@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, FileText, Hash, TrendingUp } from "lucide-react";
+import { HeadingStructureScore } from "./HeadingStructureScore";
 
 interface HeadingInfo {
   level: number;
@@ -66,6 +67,9 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
           </div>
         </div>
       </div>
+
+      {/* Heading Structure Score - Prominent at top */}
+      <HeadingStructureScore headings={data.headings} />
 
       {/* Visual Screenshot with Heading Markers */}
       {data.screenshot && (
