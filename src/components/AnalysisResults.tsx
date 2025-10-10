@@ -117,17 +117,24 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
           </div>
 
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {data.headings.map((heading, idx) => (
-              <div 
-                key={idx}
-                className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-              >
-                <Badge className={`${getHeadingColor(heading.level)} text-white shrink-0`}>
-                  H{heading.level}
-                </Badge>
-                <p className="text-sm flex-1">{heading.text}</p>
-              </div>
-            ))}
+            {data.headings.map((heading, idx) => {
+              // Calculate indentation based on heading level (H1 = 0, H2 = 1, etc.)
+              const indentLevel = Math.max(0, heading.level - 1);
+              const marginLeft = indentLevel * 24; // 24px per level
+              
+              return (
+                <div 
+                  key={idx}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  style={{ marginLeft: `${marginLeft}px` }}
+                >
+                  <Badge className={`${getHeadingColor(heading.level)} text-white shrink-0`}>
+                    H{heading.level}
+                  </Badge>
+                  <p className="text-sm flex-1">{heading.text}</p>
+                </div>
+              );
+            })}
           </div>
         </Card>
 
