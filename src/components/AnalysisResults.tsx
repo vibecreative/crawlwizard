@@ -118,11 +118,14 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
 
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {(() => {
+              // First, sort headings by their position on the page (top to bottom)
+              const sortedHeadings = [...data.headings].sort((a, b) => a.position.top - b.position.top);
+              
               // Group headings by H2 sections
               const groups: Array<{ h2?: HeadingInfo; children: HeadingInfo[] }> = [];
               let currentGroup: { h2?: HeadingInfo; children: HeadingInfo[] } = { children: [] };
               
-              data.headings.forEach((heading) => {
+              sortedHeadings.forEach((heading) => {
                 if (heading.level === 1) {
                   // H1 gets its own standalone display
                   groups.push({ children: [heading] });
