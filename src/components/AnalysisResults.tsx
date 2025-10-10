@@ -116,25 +116,86 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
             ))}
           </div>
 
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {data.headings.map((heading, idx) => {
-              // Calculate indentation based on heading level (H1 = 0, H2 = 1, etc.)
-              const indentLevel = Math.max(0, heading.level - 1);
-              const marginLeft = indentLevel * 24; // 24px per level
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {(() => {
+              // Group headings by H2 sections
+              const groups: Array<{ h2?: HeadingInfo; children: HeadingInfo[] }> = [];
+              let currentGroup: { h2?: HeadingInfo; children: HeadingInfo[] } = { children: [] };
               
-              return (
-                <div 
-                  key={idx}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                  style={{ marginLeft: `${marginLeft}px` }}
-                >
-                  <Badge className={`${getHeadingColor(heading.level)} text-white shrink-0`}>
-                    H{heading.level}
-                  </Badge>
-                  <p className="text-sm flex-1">{heading.text}</p>
-                </div>
-              );
-            })}
+              data.headings.forEach((heading) => {
+                if (heading.level === 1) {
+                  // H1 gets its own standalone display
+                  groups.push({ children: [heading] });
+                } else if (heading.level === 2) {
+                  // Start new H2 group
+                  if (currentGroup.h2 || currentGroup.children.length > 0) {
+                    groups.push(currentGroup);
+                  }
+                  currentGroup = { h2: heading, children: [] };
+                } else {
+                  // H3, H4, H5, H6 - add to current group
+                  currentGroup.children.push(heading);
+                }
+              });
+              
+              // Push last group
+              if (currentGroup.h2 || currentGroup.children.length > 0) {
+                groups.push(currentGroup);
+              }
+              
+              return groups.map((group, groupIdx) => {
+                // Handle H1 standalone
+                if (group.children.length === 1 && group.children[0].level === 1) {
+                  const h1 = group.children[0];
+                  return (
+                    <div key={`h1-${groupIdx}`} className="flex items-start gap-3 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
+                      <Badge className={`${getHeadingColor(1)} text-white shrink-0`}>
+                        H1
+                      </Badge>
+                      <p className="text-sm flex-1 font-semibold">{h1.text}</p>
+                    </div>
+                  );
+                }
+                
+                // Handle H2 groups
+                if (!group.h2) return null;
+                
+                return (
+                  <div key={`group-${groupIdx}`} className="border border-border/50 rounded-lg p-3 bg-secondary/20">
+                    {/* H2 Header */}
+                    <div className="flex items-start gap-3 p-2 rounded-lg bg-secondary/50 mb-2">
+                      <Badge className={`${getHeadingColor(2)} text-white shrink-0`}>
+                        H2
+                      </Badge>
+                      <p className="text-sm flex-1 font-medium">{group.h2.text}</p>
+                    </div>
+                    
+                    {/* Children (H3, H4, etc.) */}
+                    {group.children.length > 0 && (
+                      <div className="ml-4 space-y-2 mt-2">
+                        {group.children.map((child, childIdx) => {
+                          const indentLevel = Math.max(0, child.level - 3); // H3 = 0, H4 = 1, etc.
+                          const marginLeft = indentLevel * 20;
+                          
+                          return (
+                            <div 
+                              key={`child-${groupIdx}-${childIdx}`}
+                              className="flex items-start gap-3 p-2 rounded-lg bg-background/50 hover:bg-secondary/30 transition-colors"
+                              style={{ marginLeft: `${marginLeft}px` }}
+                            >
+                              <Badge className={`${getHeadingColor(child.level)} text-white shrink-0 text-xs`}>
+                                H{child.level}
+                              </Badge>
+                              <p className="text-sm flex-1">{child.text}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              });
+            })()}
           </div>
         </Card>
 
