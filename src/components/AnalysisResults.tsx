@@ -123,26 +123,37 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
               
               // Group headings by H2 sections
               const groups: Array<{ h2?: HeadingInfo; children: HeadingInfo[] }> = [];
-              let currentGroup: { h2?: HeadingInfo; children: HeadingInfo[] } = { children: [] };
+              let currentGroup: { h2?: HeadingInfo; children: HeadingInfo[] } | null = null;
               
               sortedHeadings.forEach((heading) => {
                 if (heading.level === 1) {
-                  // H1 gets its own standalone display
-                  groups.push({ children: [heading] });
-                } else if (heading.level === 2) {
-                  // Start new H2 group
-                  if (currentGroup.h2 || currentGroup.children.length > 0) {
+                  // Save current group if exists
+                  if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
                     groups.push(currentGroup);
                   }
+                  // H1 gets its own standalone display
+                  groups.push({ children: [heading] });
+                  currentGroup = null;
+                } else if (heading.level === 2) {
+                  // Save previous H2 group if exists
+                  if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
+                    groups.push(currentGroup);
+                  }
+                  // Start new H2 group
                   currentGroup = { h2: heading, children: [] };
                 } else {
                   // H3, H4, H5, H6 - add to current group
-                  currentGroup.children.push(heading);
+                  if (!currentGroup) {
+                    // If no H2 group exists yet, create orphan group
+                    currentGroup = { children: [heading] };
+                  } else {
+                    currentGroup.children.push(heading);
+                  }
                 }
               });
               
               // Push last group
-              if (currentGroup.h2 || currentGroup.children.length > 0) {
+              if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
                 groups.push(currentGroup);
               }
               
