@@ -121,14 +121,24 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
               // First, sort headings by their position on the page (top to bottom)
               const sortedHeadings = [...data.headings].sort((a, b) => a.position.top - b.position.top);
               
+              // Debug: Log the sorted headings to console
+              console.log('Sorted headings:', sortedHeadings.map(h => ({ 
+                level: h.level, 
+                text: h.text.substring(0, 50), 
+                top: h.position.top 
+              })));
+              
               // Group headings by H2 sections
               const groups: Array<{ h2?: HeadingInfo; children: HeadingInfo[] }> = [];
               let currentGroup: { h2?: HeadingInfo; children: HeadingInfo[] } | null = null;
               
-              sortedHeadings.forEach((heading) => {
+              sortedHeadings.forEach((heading, idx) => {
+                console.log(`Processing heading ${idx}: H${heading.level} - ${heading.text.substring(0, 30)}`);
+                
                 if (heading.level === 1) {
                   // Save current group if exists
                   if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
+                    console.log('Saving H2 group before H1:', currentGroup.h2?.text);
                     groups.push(currentGroup);
                   }
                   // H1 gets its own standalone display
@@ -137,16 +147,20 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
                 } else if (heading.level === 2) {
                   // Save previous H2 group if exists
                   if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
+                    console.log('Saving previous H2 group:', currentGroup.h2?.text, 'with', currentGroup.children.length, 'children');
                     groups.push(currentGroup);
                   }
                   // Start new H2 group
+                  console.log('Starting new H2 group:', heading.text);
                   currentGroup = { h2: heading, children: [] };
                 } else {
                   // H3, H4, H5, H6 - add to current group
                   if (!currentGroup) {
                     // If no H2 group exists yet, create orphan group
+                    console.log('Creating orphan group for:', heading.text);
                     currentGroup = { children: [heading] };
                   } else {
+                    console.log('Adding to current H2 group:', heading.text);
                     currentGroup.children.push(heading);
                   }
                 }
@@ -154,8 +168,11 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
               
               // Push last group
               if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
+                console.log('Saving final group:', currentGroup.h2?.text, 'with', currentGroup.children.length, 'children');
                 groups.push(currentGroup);
               }
+              
+              console.log('Total groups created:', groups.length);
               
               return groups.map((group, groupIdx) => {
                 // Handle H1 standalone
