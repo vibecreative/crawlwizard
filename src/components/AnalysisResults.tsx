@@ -127,35 +127,9 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
                 top: h.position.top 
               })));
               
-              // Helper to detect if upcoming H3s should belong to next H2
-              const shouldMoveH3sToNextH2 = (startIdx: number): number => {
-                // Look ahead to find next H2 and count consecutive H3s
-                let consecutiveH3s = 0;
-                let nextH2Distance = -1;
-                
-                for (let i = startIdx; i < sortedHeadings.length; i++) {
-                  const h = sortedHeadings[i];
-                  if (h.level === 2) {
-                    nextH2Distance = i - startIdx;
-                    break;
-                  } else if (h.level === 3) {
-                    consecutiveH3s++;
-                  } else if (h.level < 3) {
-                    break; // H1 found, stop
-                  }
-                }
-                
-                // If there are 3+ consecutive H3s before next H2 within 6 headings, they likely belong to next H2
-                if (nextH2Distance > 0 && nextH2Distance <= 6 && consecutiveH3s >= 3) {
-                  return consecutiveH3s;
-                }
-                return 0;
-              };
-              
               // Group headings by H2 sections
               const groups: Array<{ h2?: HeadingInfo; children: HeadingInfo[] }> = [];
               let currentGroup: { h2?: HeadingInfo; children: HeadingInfo[] } | null = null;
-              let pendingH3s: HeadingInfo[] = []; // H3s waiting for their proper H2
               
               sortedHeadings.forEach((heading, idx) => {
                 console.log(`Processing heading ${idx}: H${heading.level} - ${heading.text.substring(0, 30)}`);
@@ -169,42 +143,23 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
                   // H1 gets its own standalone display
                   groups.push({ children: [heading] });
                   currentGroup = null;
-                  pendingH3s = [];
                 } else if (heading.level === 2) {
                   // Save previous H2 group if exists
                   if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
                     console.log('Saving previous H2 group:', currentGroup.h2?.text, 'with', currentGroup.children.length, 'children');
                     groups.push(currentGroup);
                   }
-                  
-                  // Start new H2 group and attach any pending H3s
-                  console.log('Starting new H2 group:', heading.text, 'with', pendingH3s.length, 'pending H3s');
-                  currentGroup = { h2: heading, children: [...pendingH3s] };
-                  pendingH3s = [];
-                } else if (heading.level === 3) {
-                  // Check if this H3 should be moved to next H2
-                  if (currentGroup?.h2 && currentGroup.children.length >= 6) {
-                    const moveCount = shouldMoveH3sToNextH2(idx);
-                    if (moveCount > 0) {
-                      console.log(`Moving H3 to pending for next H2: ${heading.text}`);
-                      pendingH3s.push(heading);
-                      return;
-                    }
-                  }
-                  
-                  // Add to current group
+                  // Start new H2 group
+                  console.log('Starting new H2 group:', heading.text);
+                  currentGroup = { h2: heading, children: [] };
+                } else {
+                  // H3, H4, H5, H6 - add to current group
                   if (!currentGroup) {
+                    // If no H2 group exists yet, create orphan group
                     console.log('Creating orphan group for:', heading.text);
                     currentGroup = { children: [heading] };
                   } else {
                     console.log('Adding to current H2 group:', heading.text);
-                    currentGroup.children.push(heading);
-                  }
-                } else {
-                  // H4, H5, H6 - add to current group
-                  if (!currentGroup) {
-                    currentGroup = { children: [heading] };
-                  } else {
                     currentGroup.children.push(heading);
                   }
                 }
