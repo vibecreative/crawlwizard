@@ -32,25 +32,24 @@ const Index = () => {
     const doc = parser.parseFromString(html, 'text/html');
     const headings: HeadingInfo[] = [];
 
-    ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach((tag) => {
-      const elements = doc.querySelectorAll(tag);
-      elements.forEach((el) => {
-        const level = parseInt(tag.substring(1));
-        const text = el.textContent?.trim() || '';
-        if (text) {
-          headings.push({
-            level,
-            text,
-            position: { top: 0, left: 0 } // In real implementation, would calculate actual position
-          });
-        }
-      });
+    // Get all heading elements in document order
+    const allElements = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    
+    allElements.forEach((el, index) => {
+      const tagName = el.tagName.toLowerCase();
+      const level = parseInt(tagName.substring(1));
+      const text = el.textContent?.trim() || '';
+      
+      if (text) {
+        headings.push({
+          level,
+          text,
+          position: { top: index, left: 0 } // Use index as position to maintain document order
+        });
+      }
     });
 
-    return headings.sort((a, b) => {
-      if (a.level !== b.level) return a.level - b.level;
-      return 0;
-    });
+    return headings;
   };
 
   const parseMeta = (html: string) => {
