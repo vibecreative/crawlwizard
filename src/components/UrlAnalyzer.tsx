@@ -47,7 +47,7 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Voer een URL in (bijv. example.com)"
+              placeholder="example.com (https:// wordt automatisch toegevoegd)"
               className="h-14 px-6 text-lg border-0 bg-transparent focus-visible:ring-0"
               disabled={isLoading}
             />
