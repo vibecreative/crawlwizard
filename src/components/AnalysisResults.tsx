@@ -3,11 +3,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw } from "lucide-react";
 import { HeadingStructureScore } from "./HeadingStructureScore";
+import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
 
 interface HeadingInfo {
   level: number;
   text: string;
   position: { top: number; left: number };
+}
+
+interface StructuredDataItem {
+  type: string;
+  data: any;
 }
 
 interface AnalysisData {
@@ -21,6 +27,7 @@ interface AnalysisData {
     ogDescription?: string;
     ogImage?: string;
   };
+  structuredData: StructuredDataItem[];
   html: string;
 }
 
@@ -80,6 +87,9 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
 
       {/* Heading Structure Score - Prominent at top */}
       <HeadingStructureScore headings={data.headings} />
+
+      {/* Structured Data Analysis */}
+      <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
 
       {/* Visual Screenshot with Heading Markers */}
       {data.screenshot && (

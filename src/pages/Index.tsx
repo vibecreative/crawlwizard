@@ -9,6 +9,11 @@ interface HeadingInfo {
   position: { top: number; left: number };
 }
 
+interface StructuredDataItem {
+  type: string;
+  data: any;
+}
+
 interface AnalysisData {
   url: string;
   screenshot?: string;
@@ -20,6 +25,7 @@ interface AnalysisData {
     ogDescription?: string;
     ogImage?: string;
   };
+  structuredData: StructuredDataItem[];
   html: string;
 }
 
@@ -70,6 +76,43 @@ const Index = () => {
     };
   };
 
+  const parseStructuredData = (html: string): StructuredDataItem[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const structuredData: StructuredDataItem[] = [];
+
+    // Parse JSON-LD
+    const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+    jsonLdScripts.forEach((script) => {
+      try {
+        const data = JSON.parse(script.textContent || '');
+        const type = data['@type'] || (Array.isArray(data) ? 'Multiple' : 'Unknown');
+        structuredData.push({ type: `JSON-LD: ${type}`, data });
+      } catch (e) {
+        console.error('Failed to parse JSON-LD:', e);
+      }
+    });
+
+    // Check for common microdata types
+    const itemScopes = doc.querySelectorAll('[itemscope]');
+    const microdataTypes = new Set<string>();
+    itemScopes.forEach((element) => {
+      const itemType = element.getAttribute('itemtype');
+      if (itemType) {
+        microdataTypes.add(itemType.split('/').pop() || 'Unknown');
+      }
+    });
+    
+    if (microdataTypes.size > 0) {
+      structuredData.push({ 
+        type: 'Microdata', 
+        data: Array.from(microdataTypes) 
+      });
+    }
+
+    return structuredData;
+  };
+
   const analyzeUrl = async (url: string) => {
     setIsLoading(true);
     setAnalysisData(null);
@@ -86,6 +129,7 @@ const Index = () => {
       const html = await response.text();
       const headings = parseHeadings(html);
       const meta = parseMeta(html);
+      const structuredData = parseStructuredData(html);
 
       // For screenshot, we would normally use a service like Puppeteer or a screenshot API
       // For now, we'll note that this needs to be implemented with a backend service
@@ -96,6 +140,7 @@ const Index = () => {
         screenshot: screenshotPlaceholder,
         headings,
         meta,
+        structuredData,
         html,
       };
 
