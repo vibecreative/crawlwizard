@@ -28,6 +28,13 @@ interface AnalysisResultsProps {
 }
 
 export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
+  // Helper to decode HTML entities for accurate character counting
+  const decodeHtmlEntities = (text: string): string => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
+
   const getHeadingColor = (level: number) => {
     const colors = {
       1: "bg-heading-h1",
@@ -246,7 +253,7 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
                   {data.meta.title}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Lengte: {data.meta.title.length} karakters {data.meta.title.length > 60 && "(⚠️ Te lang)"}
+                  Lengte: {decodeHtmlEntities(data.meta.title).length} karakters {decodeHtmlEntities(data.meta.title).length > 60 && "(⚠️ Te lang)"}
                 </p>
               </div>
             )}
@@ -260,7 +267,7 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
                   {data.meta.description}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Lengte: {data.meta.description.length} karakters {data.meta.description.length > 160 && "(⚠️ Te lang)"}
+                  Lengte: {decodeHtmlEntities(data.meta.description).length} karakters {decodeHtmlEntities(data.meta.description).length > 160 && "(⚠️ Te lang)"}
                 </p>
               </div>
             )}
