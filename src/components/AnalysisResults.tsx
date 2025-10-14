@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, FileText, Hash, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw } from "lucide-react";
 import { HeadingStructureScore } from "./HeadingStructureScore";
 
 interface HeadingInfo {
@@ -25,9 +26,10 @@ interface AnalysisData {
 
 interface AnalysisResultsProps {
   data: AnalysisData;
+  onReset: () => void;
 }
 
-export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
+export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
   // Helper to decode HTML entities for accurate character counting
   const decodeHtmlEntities = (text: string): string => {
     const textarea = document.createElement('textarea');
@@ -73,6 +75,14 @@ export const AnalysisResults = ({ data }: AnalysisResultsProps) => {
             </a>
           </div>
         </div>
+        <Button 
+          onClick={onReset}
+          variant="outline"
+          className="gap-2"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Nieuwe analyse
+        </Button>
       </div>
 
       {/* Heading Structure Score - Prominent at top */}

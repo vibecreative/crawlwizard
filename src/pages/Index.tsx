@@ -114,6 +114,11 @@ const Index = () => {
     }
   };
 
+  const handleReset = () => {
+    setAnalysisData(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="container mx-auto">
@@ -123,7 +128,7 @@ const Index = () => {
 
         {analysisData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <AnalysisResults data={analysisData} />
+            <AnalysisResults data={analysisData} onReset={handleReset} />
           </div>
         )}
 
