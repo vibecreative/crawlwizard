@@ -72,20 +72,6 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
           </Button>
         </div>
       </form>
-
-      <div className="mt-6 flex flex-wrap gap-2 justify-center">
-        <span className="text-sm text-muted-foreground">Probeer bijvoorbeeld:</span>
-        {["lovable.dev", "github.com", "stripe.com"].map((example) => (
-          <button
-            key={example}
-            onClick={() => setUrl(`https://${example}`)}
-            className="text-sm px-3 py-1 rounded-full bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
-            disabled={isLoading}
-          >
-            {example}
-          </button>
-        ))}
-      </div>
     </div>
   );
 };
