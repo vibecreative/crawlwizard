@@ -69,13 +69,6 @@ const Index = () => {
 
     const titleElement = doc.querySelector('title');
     const rawTitle = titleElement?.textContent?.trim() || undefined;
-    
-    console.log('Title debug:', {
-      innerHTML: titleElement?.innerHTML,
-      textContent: titleElement?.textContent,
-      trimmed: rawTitle,
-      length: rawTitle?.length
-    });
 
     return {
       title: rawTitle,
