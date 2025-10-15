@@ -88,9 +88,6 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
       {/* Heading Structure Score - Prominent at top */}
       <HeadingStructureScore headings={data.headings} />
 
-      {/* Structured Data Analysis */}
-      <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
-
       {/* Visual Screenshot with Heading Markers */}
       {data.screenshot && (
         <Card className="p-6 shadow-soft">
@@ -322,6 +319,9 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
           </div>
         </Card>
       </div>
+
+      {/* Structured Data Analysis */}
+      <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
 
       {/* Placeholder Cards for DR/UR and Keywords */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

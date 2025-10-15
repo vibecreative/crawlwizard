@@ -62,13 +62,23 @@ const Index = () => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
+    // Decode HTML entities properly for accurate character counting
+    const decodeHtml = (text: string | null | undefined) => {
+      if (!text) return undefined;
+      const txt = document.createElement('textarea');
+      txt.innerHTML = text;
+      return txt.value;
+    };
+
     const getMetaContent = (selector: string) => {
       const element = doc.querySelector(selector);
       return element?.getAttribute('content') || undefined;
     };
 
+    const rawTitle = doc.querySelector('title')?.textContent;
+
     return {
-      title: doc.querySelector('title')?.textContent || undefined,
+      title: decodeHtml(rawTitle),
       description: getMetaContent('meta[name="description"]'),
       ogTitle: getMetaContent('meta[property="og:title"]'),
       ogDescription: getMetaContent('meta[property="og:description"]'),
