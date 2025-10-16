@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw } from "lucide-react";
 import { HeadingStructureScore } from "./HeadingStructureScore";
 import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
+import { JsonLdGenerator } from "./JsonLdGenerator";
 
 interface HeadingInfo {
   level: number;
@@ -322,6 +323,9 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
 
       {/* Structured Data Analysis */}
       <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
+
+      {/* JSON-LD Generator */}
+      <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} />
 
       {/* Placeholder Cards for DR/UR and Keywords */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
