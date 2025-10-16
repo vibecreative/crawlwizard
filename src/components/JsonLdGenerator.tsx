@@ -27,6 +27,18 @@ export const JsonLdGenerator = ({ url, meta, headings }: JsonLdGeneratorProps) =
     article: false,
   });
 
+  const allSelected = selectedSchemas.website && selectedSchemas.organization && 
+                      selectedSchemas.breadcrumb && selectedSchemas.article;
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedSchemas({
+      website: checked,
+      organization: checked,
+      breadcrumb: checked,
+      article: checked,
+    });
+  };
+
   const getDomainName = (url: string) => {
     try {
       const domain = new URL(url).hostname.replace('www.', '');
@@ -181,6 +193,21 @@ ${JSON.stringify(jsonLdContent, null, 2)}
       </div>
 
       <div className="space-y-4 mb-6">
+        <label className="flex items-center gap-3 p-4 rounded-lg border-2 border-primary/50 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+          <Checkbox
+            checked={allSelected}
+            onCheckedChange={handleSelectAll}
+          />
+          <div className="flex-1">
+            <div className="font-semibold text-primary">Selecteer alles</div>
+            <div className="text-xs text-muted-foreground">
+              Genereer alle schema types in één gecombineerde JSON-LD code
+            </div>
+          </div>
+        </label>
+
+        <div className="h-px bg-border my-4" />
+
         <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors cursor-pointer">
           <Checkbox
             checked={selectedSchemas.website}
