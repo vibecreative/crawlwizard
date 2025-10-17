@@ -7,6 +7,7 @@ interface HeadingInfo {
   level: number;
   text: string;
   position: { top: number; left: number };
+  content?: string;
 }
 
 interface StructuredDataItem {
@@ -38,21 +39,50 @@ const Index = () => {
     const doc = parser.parseFromString(html, 'text/html');
     const headings: HeadingInfo[] = [];
 
-    // Get all heading elements in document order
-    const allElements = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    // Get all heading elements and all body elements
+    const headingElements = Array.from(doc.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+    const allElements = Array.from(doc.body.querySelectorAll('*'));
     
-    allElements.forEach((el, index) => {
+    headingElements.forEach((el, index) => {
       const tagName = el.tagName.toLowerCase();
       const level = parseInt(tagName.substring(1));
       const text = el.textContent?.trim() || '';
       
-      if (text) {
-        headings.push({
-          level,
-          text,
-          position: { top: index, left: 0 } // Use index as position to maintain document order
-        });
+      if (!text) return;
+      
+      // Extract content between this heading and the next
+      let content = "";
+      const headingIndex = allElements.indexOf(el);
+      const nextHeadingIndex = headingElements
+        .slice(index + 1)
+        .map(h => allElements.indexOf(h))
+        .find(idx => idx > headingIndex);
+      
+      // Collect text content from elements between this heading and the next
+      const contentElements: string[] = [];
+      for (let i = headingIndex + 1; i < (nextHeadingIndex || allElements.length); i++) {
+        const element = allElements[i];
+        
+        // Skip if element is a heading
+        if (element.matches('h1, h2, h3, h4, h5, h6')) break;
+        
+        // Only include visible text content from paragraph-like elements
+        if (element.matches('p, li, td, th')) {
+          const elementText = element.textContent?.trim() || '';
+          if (elementText && !contentElements.includes(elementText)) {
+            contentElements.push(elementText);
+          }
+        }
       }
+      
+      content = contentElements.join('\n\n');
+      
+      headings.push({
+        level,
+        text,
+        position: { top: index, left: 0 },
+        content: content.trim() || undefined,
+      });
     });
 
     return headings;

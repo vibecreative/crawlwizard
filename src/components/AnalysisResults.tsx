@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw } from "lucide-react";
+import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { HeadingStructureScore } from "./HeadingStructureScore";
 import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
 import { JsonLdGenerator } from "./JsonLdGenerator";
@@ -10,6 +11,7 @@ interface HeadingInfo {
   level: number;
   text: string;
   position: { top: number; left: number };
+  content?: string;
 }
 
 interface StructuredDataItem {
@@ -211,12 +213,26 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
                 return (
                   <div key={`group-${groupIdx}`} className="border border-border/50 rounded-lg p-3 bg-secondary/20">
                     {/* H2 Header */}
-                    <div className="flex items-start gap-3 p-2 rounded-lg bg-secondary/50 mb-2">
-                      <Badge className={`${getHeadingColor(2)} text-white shrink-0`}>
-                        H2
-                      </Badge>
-                      <p className="text-sm flex-1 font-medium">{group.h2.text}</p>
-                    </div>
+                    <Collapsible>
+                      <CollapsibleTrigger className="w-full">
+                        <div className="flex items-start gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary/60 transition-colors group">
+                          <Badge className={`${getHeadingColor(2)} text-white shrink-0`}>
+                            H2
+                          </Badge>
+                          <p className="text-sm flex-1 font-medium text-left">{group.h2.text}</p>
+                          {group.h2.content && (
+                            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                          )}
+                        </div>
+                      </CollapsibleTrigger>
+                      {group.h2.content && (
+                        <CollapsibleContent className="mt-2">
+                          <div className="text-xs text-muted-foreground p-3 rounded-md bg-background/50 whitespace-pre-wrap ml-2 border-l-2 border-primary/30">
+                            {group.h2.content}
+                          </div>
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
                     
                     {/* Children (H3, H4, etc.) */}
                     {group.children.length > 0 && (
@@ -226,16 +242,32 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
                           const marginLeft = indentLevel * 20;
                           
                           return (
-                            <div 
-                              key={`child-${groupIdx}-${childIdx}`}
-                              className="flex items-start gap-3 p-2 rounded-lg bg-background/50 hover:bg-secondary/30 transition-colors"
-                              style={{ marginLeft: `${marginLeft}px` }}
-                            >
-                              <Badge className={`${getHeadingColor(child.level)} text-white shrink-0 text-xs`}>
-                                H{child.level}
-                              </Badge>
-                              <p className="text-sm flex-1">{child.text}</p>
-                            </div>
+                            <Collapsible key={`child-${groupIdx}-${childIdx}`}>
+                              <CollapsibleTrigger className="w-full">
+                                <div 
+                                  className="flex items-start gap-3 p-2 rounded-lg bg-background/50 hover:bg-secondary/30 transition-colors group"
+                                  style={{ marginLeft: `${marginLeft}px` }}
+                                >
+                                  <Badge className={`${getHeadingColor(child.level)} text-white shrink-0 text-xs`}>
+                                    H{child.level}
+                                  </Badge>
+                                  <p className="text-sm flex-1 text-left">{child.text}</p>
+                                  {child.content && (
+                                    <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                                  )}
+                                </div>
+                              </CollapsibleTrigger>
+                              {child.content && (
+                                <CollapsibleContent className="mt-2">
+                                  <div 
+                                    className="text-xs text-muted-foreground p-2 rounded-md bg-background/30 whitespace-pre-wrap ml-2 border-l-2 border-muted"
+                                    style={{ marginLeft: `${marginLeft}px` }}
+                                  >
+                                    {child.content}
+                                  </div>
+                                </CollapsibleContent>
+                              )}
+                            </Collapsible>
                           );
                         })}
                       </div>
