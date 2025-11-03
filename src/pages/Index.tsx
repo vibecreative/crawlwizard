@@ -127,8 +127,7 @@ const Index = () => {
   const parseStructuredData = (html: string): StructuredDataItem[] => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const structuredData: StructuredDataItem[] = [];
-    const seenTypes = new Set<string>();
+    const typeMap = new Map<string, any>(); // Use Map to store unique types with their data
 
     // Parse JSON-LD
     const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
@@ -150,10 +149,9 @@ const Index = () => {
               const types = Array.isArray(obj['@type']) ? obj['@type'] : [obj['@type']];
               types.forEach((type: string) => {
                 const typeLabel = `JSON-LD: ${type}`;
-                // Only add if we haven't seen this type before
-                if (!seenTypes.has(typeLabel)) {
-                  seenTypes.add(typeLabel);
-                  structuredData.push({ type: typeLabel, data: obj });
+                // Only store the first occurrence of each type
+                if (!typeMap.has(typeLabel)) {
+                  typeMap.set(typeLabel, obj);
                 }
               });
             }
@@ -165,6 +163,12 @@ const Index = () => {
         console.error('Failed to parse JSON-LD:', e);
       }
     });
+
+    // Convert Map to array of StructuredDataItem
+    const structuredData: StructuredDataItem[] = Array.from(typeMap.entries()).map(([type, data]) => ({
+      type,
+      data
+    }));
 
     // Check for common microdata types
     const itemScopes = doc.querySelectorAll('[itemscope]');
