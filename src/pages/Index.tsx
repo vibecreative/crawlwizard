@@ -48,7 +48,22 @@ const Index = () => {
       const level = parseInt(tagName.substring(1));
       const text = el.textContent?.trim() || '';
       
+      // Skip empty headings
       if (!text) return;
+      
+      // Skip hidden elements
+      const style = el.getAttribute('style') || '';
+      const isHidden = 
+        el.getAttribute('hide') === 'true' ||
+        style.includes('display: none') ||
+        style.includes('display:none') ||
+        style.includes('visibility: hidden') ||
+        style.includes('visibility:hidden') ||
+        el.getAttribute('aria-hidden') === 'true' ||
+        (el.getAttribute('class') || '').includes('hidden') ||
+        (el.getAttribute('class') || '').includes('sr-only');
+      
+      if (isHidden) return;
       
       // Extract content between this heading and the next
       let content = "";
