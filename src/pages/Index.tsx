@@ -134,8 +134,27 @@ const Index = () => {
     jsonLdScripts.forEach((script) => {
       try {
         const data = JSON.parse(script.textContent || '');
-        const type = data['@type'] || (Array.isArray(data) ? 'Multiple' : 'Unknown');
-        structuredData.push({ type: `JSON-LD: ${type}`, data });
+        
+        // Helper function to extract types from data
+        const extractTypes = (obj: any): void => {
+          if (Array.isArray(obj)) {
+            // Handle arrays of structured data items
+            obj.forEach(item => extractTypes(item));
+          } else if (obj && typeof obj === 'object') {
+            // Handle @graph property (common in structured data)
+            if (obj['@graph'] && Array.isArray(obj['@graph'])) {
+              obj['@graph'].forEach((item: any) => extractTypes(item));
+            } else if (obj['@type']) {
+              // Handle single or multiple types
+              const types = Array.isArray(obj['@type']) ? obj['@type'] : [obj['@type']];
+              types.forEach((type: string) => {
+                structuredData.push({ type: `JSON-LD: ${type}`, data: obj });
+              });
+            }
+          }
+        };
+        
+        extractTypes(data);
       } catch (e) {
         console.error('Failed to parse JSON-LD:', e);
       }
