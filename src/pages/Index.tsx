@@ -131,24 +131,29 @@ const Index = () => {
 
     // Parse JSON-LD
     const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
-    jsonLdScripts.forEach((script) => {
+    console.log('Found JSON-LD scripts:', jsonLdScripts.length);
+    
+    jsonLdScripts.forEach((script, scriptIndex) => {
       try {
         const data = JSON.parse(script.textContent || '');
+        console.log(`Processing script ${scriptIndex}:`, data);
         
-        // Helper function to extract types from data
-        const extractTypes = (obj: any): void => {
+        // Helper function to extract types from data (only top-level items)
+        const extractTypes = (obj: any, depth: number = 0): void => {
           if (Array.isArray(obj)) {
             // Handle arrays of structured data items
-            obj.forEach(item => extractTypes(item));
+            obj.forEach(item => extractTypes(item, depth));
           } else if (obj && typeof obj === 'object') {
             // Handle @graph property (common in structured data)
-            if (obj['@graph'] && Array.isArray(obj['@graph'])) {
-              obj['@graph'].forEach((item: any) => extractTypes(item));
+            if (obj['@graph'] && Array.isArray(obj['@graph']) && depth === 0) {
+              console.log('Found @graph with items:', obj['@graph'].length);
+              obj['@graph'].forEach((item: any) => extractTypes(item, depth + 1));
             } else if (obj['@type']) {
               // Handle single or multiple types
               const types = Array.isArray(obj['@type']) ? obj['@type'] : [obj['@type']];
               types.forEach((type: string) => {
                 const typeLabel = `JSON-LD: ${type}`;
+                console.log('Found type:', typeLabel, 'Already in map:', typeMap.has(typeLabel));
                 // Only store the first occurrence of each type
                 if (!typeMap.has(typeLabel)) {
                   typeMap.set(typeLabel, obj);
@@ -163,6 +168,8 @@ const Index = () => {
         console.error('Failed to parse JSON-LD:', e);
       }
     });
+
+    console.log('Final typeMap size:', typeMap.size, 'Types:', Array.from(typeMap.keys()));
 
     // Convert Map to array of StructuredDataItem
     const structuredData: StructuredDataItem[] = Array.from(typeMap.entries()).map(([type, data]) => ({
