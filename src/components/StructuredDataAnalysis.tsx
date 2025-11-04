@@ -49,13 +49,21 @@ export const StructuredDataAnalysis = ({ structuredData, url }: StructuredDataAn
 
   const missingRecommendations = [];
   
-  if (!hasOrganization) missingRecommendations.push('Organization');
+  // Context-aware recommendations based on URL
+  const urlPath = new URL(url).pathname.toLowerCase();
+  const isHomePage = urlPath === '/' || urlPath === '';
+  const isContactPage = urlPath.includes('contact');
+  const isAboutPage = urlPath.includes('over') || urlPath.includes('about');
+  const isProductPage = urlPath.includes('product') || urlPath.includes('shop');
+  const isBlogPage = urlPath.includes('blog') || urlPath.includes('artikel');
+  
+  // Organization: only suggest for homepage, contact, or about pages
+  if (!hasOrganization && (isHomePage || isContactPage || isAboutPage)) {
+    missingRecommendations.push('Organization');
+  }
+  
   if (!hasWebsite) missingRecommendations.push('WebSite (met sitelinks searchbox)');
   if (!hasBreadcrumb) missingRecommendations.push('BreadcrumbList');
-  
-  // Context-aware recommendations based on URL
-  const isProductPage = url.toLowerCase().includes('product') || url.toLowerCase().includes('shop');
-  const isBlogPage = url.toLowerCase().includes('blog') || url.toLowerCase().includes('artikel');
   
   if (isProductPage && !hasProduct) {
     missingRecommendations.push('Product schema (voor productpagina)');
