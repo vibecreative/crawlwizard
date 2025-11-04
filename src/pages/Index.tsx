@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { AnalysisResults } from "@/components/AnalysisResults";
+import { FaqSuggestions } from "@/components/FaqSuggestions";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface HeadingInfo {
   level: number;
@@ -13,6 +16,11 @@ interface HeadingInfo {
 interface StructuredDataItem {
   type: string;
   data: any;
+}
+
+interface FaqItem {
+  question: string;
+  answer: string;
 }
 
 interface AnalysisData {
@@ -28,10 +36,12 @@ interface AnalysisData {
   };
   structuredData: StructuredDataItem[];
   html: string;
+  faqs?: FaqItem[];
 }
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
 
   const parseHeadings = (html: string): HeadingInfo[] => {
@@ -231,6 +241,9 @@ const Index = () => {
       setAnalysisData(data);
       toast.success("Analyse voltooid!");
       
+      // Generate FAQs automatically
+      generateFaqs(html, data);
+      
       // Scroll to results
       setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -240,6 +253,28 @@ const Index = () => {
       toast.error("Er is een fout opgetreden bij het analyseren van de URL");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateFaqs = async (html: string, currentData: AnalysisData) => {
+    setIsGeneratingFaqs(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-faqs', {
+        body: { html }
+      });
+
+      if (error) throw error;
+
+      setAnalysisData({
+        ...currentData,
+        faqs: data.faqs
+      });
+      toast.success("FAQ suggesties gegenereerd!");
+    } catch (error) {
+      console.error('FAQ generatie fout:', error);
+      toast.error("Fout bij het genereren van FAQ's");
+    } finally {
+      setIsGeneratingFaqs(false);
     }
   };
 
@@ -256,8 +291,21 @@ const Index = () => {
         </div>
 
         {analysisData && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
             <AnalysisResults data={analysisData} onReset={handleReset} />
+            
+            {isGeneratingFaqs && (
+              <Card className="p-6">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                  <p className="text-muted-foreground">FAQ's genereren...</p>
+                </div>
+              </Card>
+            )}
+            
+            {analysisData.faqs && analysisData.faqs.length > 0 && (
+              <FaqSuggestions faqs={analysisData.faqs} />
+            )}
           </div>
         )}
 
