@@ -38,11 +38,20 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'openai/gpt-5-mini',
         messages: [
           {
             role: 'system',
-            content: 'Je bent een SEO expert die FAQ-schema\'s maakt. Genereer 10 relevante vragen en antwoorden op basis van de pagina content. Antwoord ALLEEN met een JSON array in dit formaat: [{"question": "...", "answer": "..."}]. Geen extra tekst, alleen de JSON array. Schrijf in het Nederlands.'
+            content: `Je bent een SEO expert die FAQ-schema's maakt geoptimaliseerd voor featured snippets en LLM's.
+
+EISEN:
+- Vragen: Natuurlijke taal, 8-15 woorden, mix van wat/hoe/waarom/welke/wanneer
+- Antwoorden: Direct antwoord (25-50 woorden) + uitbreiding (50-100 woorden) met concrete feiten
+- Diversiteit: 3x basis info, 3x diepgaand/technisch, 2x vergelijkingen, 2x praktisch
+- Taal: B1-niveau, conversational, long-tail keywords, context-independent
+- Doel: Featured snippets, LLM-optimalisatie, usability
+
+Genereer 10 FAQ items in dit formaat. Schrijf in het Nederlands.`
           },
           {
             role: 'user',
