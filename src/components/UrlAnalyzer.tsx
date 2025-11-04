@@ -36,7 +36,7 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
           SEO Analyse Tool
         </h1>
         <p className="text-lg text-muted-foreground">
-          Analyseer de technische SEO structuur van elke website
+          Analyseer de technische SEO structuur van elke webpagina
         </p>
       </div>
 
