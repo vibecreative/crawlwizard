@@ -46,12 +46,15 @@ serve(async (req) => {
 
 EISEN:
 - Vragen: Natuurlijke taal, 8-15 woorden, mix van wat/hoe/waarom/welke/wanneer
-- Antwoorden: Direct antwoord (25-50 woorden) + uitbreiding (50-100 woorden) met concrete feiten
+- Antwoorden: 75-150 woorden met concrete feiten, begin direct met het antwoord
 - Diversiteit: 3x basis info, 3x diepgaand/technisch, 2x vergelijkingen, 2x praktisch
 - Taal: B1-niveau, conversational, long-tail keywords, context-independent
 - Doel: Featured snippets, LLM-optimalisatie, usability
 
-BELANGRIJK: Schrijf antwoorden als één doorlopende tekst ZONDER labels zoals "Kort antwoord:" of "Uitbreiding:". Begin direct met het antwoord.
+CRITICAL: Antwoorden MOETEN beginnen met de eerste woorden van het eigenlijke antwoord. GEEN labels, GEEN "Direct antwoord:", GEEN "Kort antwoord:", GEEN "Uitbreiding:". Schrijf één natuurlijke alinea zonder onderverdeling.
+
+Voorbeeld GOED: "SEO staat voor Search Engine Optimization. Het omvat alle technieken..."
+Voorbeeld FOUT: "Direct antwoord: SEO staat voor..."
 
 Genereer 10 FAQ items. Schrijf in het Nederlands.`
           },
