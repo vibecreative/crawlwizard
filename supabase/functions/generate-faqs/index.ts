@@ -51,7 +51,9 @@ EISEN:
 - Taal: B1-niveau, conversational, long-tail keywords, context-independent
 - Doel: Featured snippets, LLM-optimalisatie, usability
 
-Genereer 10 FAQ items in dit formaat. Schrijf in het Nederlands.`
+BELANGRIJK: Schrijf antwoorden als één doorlopende tekst ZONDER labels zoals "Kort antwoord:" of "Uitbreiding:". Begin direct met het antwoord.
+
+Genereer 10 FAQ items. Schrijf in het Nederlands.`
           },
           {
             role: 'user',
