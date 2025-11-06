@@ -7,6 +7,7 @@ import { HeadingStructureScore } from "./HeadingStructureScore";
 import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
 import { JsonLdGenerator } from "./JsonLdGenerator";
 import { FaqSuggestions } from "./FaqSuggestions";
+import { KeywordAnalysis } from "./KeywordAnalysis";
 
 interface HeadingInfo {
   level: number;
@@ -25,6 +26,13 @@ interface FaqItem {
   answer: string;
 }
 
+interface KeywordScore {
+  keyword: string;
+  density: number;
+  count: number;
+  relevance: number;
+}
+
 interface AnalysisData {
   url: string;
   screenshot?: string;
@@ -39,6 +47,7 @@ interface AnalysisData {
   structuredData: StructuredDataItem[];
   html: string;
   faqs?: FaqItem[];
+  keywords?: KeywordScore[];
 }
 
 interface AnalysisResultsProps {
@@ -362,6 +371,11 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
 
       {/* Structured Data Analysis */}
       <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
+
+      {/* Keyword Analysis */}
+      {data.keywords && data.keywords.length > 0 && (
+        <KeywordAnalysis keywords={data.keywords} />
+      )}
 
       {/* FAQ Suggestions */}
       {data.faqs && data.faqs.length > 0 && (

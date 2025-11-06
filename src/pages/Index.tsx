@@ -22,6 +22,13 @@ interface FaqItem {
   answer: string;
 }
 
+interface KeywordScore {
+  keyword: string;
+  density: number;
+  count: number;
+  relevance: number;
+}
+
 interface AnalysisData {
   url: string;
   screenshot?: string;
@@ -36,6 +43,7 @@ interface AnalysisData {
   structuredData: StructuredDataItem[];
   html: string;
   faqs?: FaqItem[];
+  keywords?: KeywordScore[];
 }
 
 const Index = () => {
@@ -206,7 +214,54 @@ const Index = () => {
     return structuredData;
   };
 
-  const analyzeUrl = async (url: string) => {
+  const analyzeKeywords = (html: string, keywords: string[]): KeywordScore[] => {
+    if (keywords.length === 0) return [];
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const bodyText = doc.body.textContent?.toLowerCase() || '';
+    const words = bodyText.split(/\s+/).filter(w => w.length > 0);
+    const totalWords = words.length;
+
+    return keywords.map(keyword => {
+      const keywordLower = keyword.toLowerCase();
+      const regex = new RegExp(`\\b${keywordLower}\\b`, 'gi');
+      const matches = bodyText.match(regex) || [];
+      const count = matches.length;
+      const density = totalWords > 0 ? (count / totalWords) * 100 : 0;
+
+      // Simple relevance calculation based on proximity to headings and important content
+      let relevanceScore = 0;
+      const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      headings.forEach(heading => {
+        if (heading.textContent?.toLowerCase().includes(keywordLower)) {
+          relevanceScore += 20;
+        }
+      });
+
+      const title = doc.querySelector('title');
+      if (title?.textContent?.toLowerCase().includes(keywordLower)) {
+        relevanceScore += 25;
+      }
+
+      const metaDesc = doc.querySelector('meta[name="description"]');
+      if (metaDesc?.getAttribute('content')?.toLowerCase().includes(keywordLower)) {
+        relevanceScore += 15;
+      }
+
+      // Add points based on frequency (but cap it to avoid over-rewarding)
+      relevanceScore += Math.min(count * 2, 40);
+
+      return {
+        keyword,
+        density,
+        count,
+        relevance: Math.min(relevanceScore, 100)
+      };
+    });
+  };
+
+  const analyzeUrl = async (url: string, keywords: string[] = []) => {
     setIsLoading(true);
     setAnalysisData(null);
 
@@ -223,6 +278,7 @@ const Index = () => {
       const headings = parseHeadings(html);
       const meta = parseMeta(html);
       const structuredData = parseStructuredData(html);
+      const keywordScores = analyzeKeywords(html, keywords);
 
       // For screenshot, we would normally use a service like Puppeteer or a screenshot API
       // For now, we'll note that this needs to be implemented with a backend service
@@ -235,6 +291,7 @@ const Index = () => {
         meta,
         structuredData,
         html,
+        keywords: keywordScores,
       };
 
       setAnalysisData(data);

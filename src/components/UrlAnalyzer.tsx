@@ -5,12 +5,13 @@ import { Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface UrlAnalyzerProps {
-  onAnalyze: (url: string) => void;
+  onAnalyze: (url: string, keywords: string[]) => void;
   isLoading: boolean;
 }
 
 export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
   const [url, setUrl] = useState("");
+  const [keywords, setKeywords] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +24,11 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
     // Basic URL validation
     try {
       new URL(url.startsWith('http') ? url : `https://${url}`);
-      onAnalyze(url.startsWith('http') ? url : `https://${url}`);
+      const keywordList = keywords
+        .split(',')
+        .map(k => k.trim())
+        .filter(k => k.length > 0);
+      onAnalyze(url.startsWith('http') ? url : `https://${url}`, keywordList);
     } catch {
       toast.error("Ongeldige URL. Controleer het formaat.");
     }
@@ -40,7 +45,7 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="relative">
+      <form onSubmit={handleSubmit} className="relative space-y-3">
         <div className="flex gap-3 p-2 rounded-2xl bg-card shadow-soft border border-border/50">
           <div className="relative flex-1">
             <Input
@@ -70,6 +75,17 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
               </>
             )}
           </Button>
+        </div>
+        
+        <div className="rounded-2xl bg-card shadow-soft border border-border/50 p-2">
+          <Input
+            type="text"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+            placeholder="Zoektermen (optioneel, gescheiden door komma's)"
+            className="h-12 px-6 border-0 bg-transparent focus-visible:ring-0"
+            disabled={isLoading}
+          />
         </div>
       </form>
     </div>
