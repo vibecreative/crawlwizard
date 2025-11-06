@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { AnalysisResults } from "@/components/AnalysisResults";
-import { FaqSuggestions } from "@/components/FaqSuggestions";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -301,10 +300,6 @@ const Index = () => {
                   <p className="text-muted-foreground">FAQ's genereren...</p>
                 </div>
               </Card>
-            )}
-            
-            {analysisData.faqs && analysisData.faqs.length > 0 && (
-              <FaqSuggestions faqs={analysisData.faqs} />
             )}
           </div>
         )}

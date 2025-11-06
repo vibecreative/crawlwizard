@@ -6,6 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Code2, Copy, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 interface JsonLdGeneratorProps {
   url: string;
   meta: {
@@ -16,19 +21,21 @@ interface JsonLdGeneratorProps {
     ogImage?: string;
   };
   headings: Array<{ level: number; text: string }>;
+  faqs?: FaqItem[];
 }
 
-export const JsonLdGenerator = ({ url, meta, headings }: JsonLdGeneratorProps) => {
+export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorProps) => {
   const [copied, setCopied] = useState(false);
   const [selectedSchemas, setSelectedSchemas] = useState({
     website: true,
     organization: false,
     breadcrumb: false,
     article: false,
+    faqPage: false,
   });
 
   const allSelected = selectedSchemas.website && selectedSchemas.organization && 
-                      selectedSchemas.breadcrumb && selectedSchemas.article;
+                      selectedSchemas.breadcrumb && selectedSchemas.article && selectedSchemas.faqPage;
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedSchemas({
@@ -36,6 +43,7 @@ export const JsonLdGenerator = ({ url, meta, headings }: JsonLdGeneratorProps) =
       organization: checked,
       breadcrumb: checked,
       article: checked,
+      faqPage: checked,
     });
   };
 
@@ -138,6 +146,23 @@ export const JsonLdGenerator = ({ url, meta, headings }: JsonLdGeneratorProps) =
     };
   };
 
+  const generateFaqPageSchema = () => {
+    if (!faqs || faqs.length === 0) return null;
+    
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    };
+  };
+
   const generateJsonLd = () => {
     const schemas: any[] = [];
     
@@ -145,6 +170,10 @@ export const JsonLdGenerator = ({ url, meta, headings }: JsonLdGeneratorProps) =
     if (selectedSchemas.organization) schemas.push(generateOrganizationSchema());
     if (selectedSchemas.breadcrumb) schemas.push(generateBreadcrumbSchema());
     if (selectedSchemas.article) schemas.push(generateArticleSchema());
+    if (selectedSchemas.faqPage) {
+      const faqSchema = generateFaqPageSchema();
+      if (faqSchema) schemas.push(faqSchema);
+    }
 
     if (schemas.length === 0) return "";
 
@@ -249,6 +278,24 @@ ${JSON.stringify(jsonLdContent, null, 2)}
             <div className="font-medium">Article Schema</div>
             <div className="text-xs text-muted-foreground">
               Voor artikelen, blog posts en nieuwsberichten
+            </div>
+          </div>
+        </label>
+
+        <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors cursor-pointer">
+          <Checkbox
+            checked={selectedSchemas.faqPage}
+            onCheckedChange={(checked) =>
+              setSelectedSchemas(prev => ({ ...prev, faqPage: checked as boolean }))
+            }
+            disabled={!faqs || faqs.length === 0}
+          />
+          <div className="flex-1">
+            <div className="font-medium">FAQPage Schema</div>
+            <div className="text-xs text-muted-foreground">
+              {faqs && faqs.length > 0 
+                ? `Voor veelgestelde vragen (${faqs.length} FAQ's beschikbaar)` 
+                : "Geen FAQ's beschikbaar"}
             </div>
           </div>
         </label>

@@ -6,6 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { HeadingStructureScore } from "./HeadingStructureScore";
 import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
 import { JsonLdGenerator } from "./JsonLdGenerator";
+import { FaqSuggestions } from "./FaqSuggestions";
 
 interface HeadingInfo {
   level: number;
@@ -17,6 +18,11 @@ interface HeadingInfo {
 interface StructuredDataItem {
   type: string;
   data: any;
+}
+
+interface FaqItem {
+  question: string;
+  answer: string;
 }
 
 interface AnalysisData {
@@ -32,6 +38,7 @@ interface AnalysisData {
   };
   structuredData: StructuredDataItem[];
   html: string;
+  faqs?: FaqItem[];
 }
 
 interface AnalysisResultsProps {
@@ -356,8 +363,13 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
       {/* Structured Data Analysis */}
       <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
 
+      {/* FAQ Suggestions */}
+      {data.faqs && data.faqs.length > 0 && (
+        <FaqSuggestions faqs={data.faqs} />
+      )}
+
       {/* JSON-LD Generator */}
-      <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} />
+      <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
 
       {/* Placeholder Cards for DR/UR and Keywords */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
