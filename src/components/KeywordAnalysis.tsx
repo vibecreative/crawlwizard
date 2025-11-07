@@ -1,12 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { AlertCircle, TrendingUp, TrendingDown, CheckCircle, Lightbulb } from "lucide-react";
 
 interface KeywordScore {
   keyword: string;
   density: number;
   count: number;
   relevance: number;
+  suggestions?: string[];
 }
 
 interface KeywordAnalysisProps {
@@ -20,7 +21,7 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
 
   const getDensityStatus = (density: number) => {
     if (density > 3) return { label: "Te hoog (keyword stuffing)", color: "destructive", icon: TrendingUp };
-    if (density >= 1 && density <= 3) return { label: "Optimaal", color: "default", icon: Minus };
+    if (density >= 1 && density <= 3) return { label: "Optimaal", color: "default", icon: CheckCircle };
     return { label: "Te laag", color: "secondary", icon: TrendingDown };
   };
 
@@ -87,6 +88,20 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
                   </p>
                 </div>
               </div>
+
+              {kw.suggestions && kw.suggestions.length > 0 && (
+                <div className="mt-4 p-3 rounded-lg bg-muted/30 border border-border/50">
+                  <div className="flex items-start gap-2 mb-2">
+                    <Lightbulb className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <h4 className="font-medium text-sm">Contentvoorstellen</h4>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-1.5 ml-6">
+                    {kw.suggestions.map((suggestion, idx) => (
+                      <li key={idx} className="list-disc">{suggestion}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           );
         })}

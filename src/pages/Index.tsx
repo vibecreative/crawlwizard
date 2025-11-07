@@ -27,6 +27,7 @@ interface KeywordScore {
   density: number;
   count: number;
   relevance: number;
+  suggestions?: string[];
 }
 
 interface AnalysisData {
@@ -230,33 +231,60 @@ const Index = () => {
       const count = matches.length;
       const density = totalWords > 0 ? (count / totalWords) * 100 : 0;
 
-      // Simple relevance calculation based on proximity to headings and important content
-      let relevanceScore = 0;
-      const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      headings.forEach(heading => {
-        if (heading.textContent?.toLowerCase().includes(keywordLower)) {
-          relevanceScore += 20;
-        }
-      });
-
+      // Check presence in key locations
       const title = doc.querySelector('title');
-      if (title?.textContent?.toLowerCase().includes(keywordLower)) {
-        relevanceScore += 25;
-      }
+      const inTitle = title?.textContent?.toLowerCase().includes(keywordLower) || false;
 
       const metaDesc = doc.querySelector('meta[name="description"]');
-      if (metaDesc?.getAttribute('content')?.toLowerCase().includes(keywordLower)) {
-        relevanceScore += 15;
+      const inMetaDesc = metaDesc?.getAttribute('content')?.toLowerCase().includes(keywordLower) || false;
+
+      const h1Elements = doc.querySelectorAll('h1');
+      const inH1 = Array.from(h1Elements).some(h => h.textContent?.toLowerCase().includes(keywordLower));
+
+      const h2Elements = doc.querySelectorAll('h2');
+      const inH2 = Array.from(h2Elements).some(h => h.textContent?.toLowerCase().includes(keywordLower));
+
+      // Calculate relevance score
+      let relevanceScore = 0;
+      if (inTitle) relevanceScore += 25;
+      if (inMetaDesc) relevanceScore += 15;
+      if (inH1) relevanceScore += 20;
+      if (inH2) relevanceScore += 10;
+      relevanceScore += Math.min(count * 2, 30);
+
+      // Generate suggestions based on analysis
+      const suggestions: string[] = [];
+      
+      if (!inTitle) {
+        suggestions.push(`Voeg "${keyword}" toe aan de title tag voor betere vindbaarheid`);
+      }
+      
+      if (!inMetaDesc) {
+        suggestions.push(`Voeg "${keyword}" toe aan de meta description`);
+      }
+      
+      if (!inH1) {
+        suggestions.push(`Gebruik "${keyword}" in minimaal één H1 heading`);
+      }
+      
+      if (density > 3) {
+        suggestions.push(`Verlaag de keyword density (nu ${density.toFixed(2)}%) om keyword stuffing te voorkomen`);
+      } else if (density < 1 && count > 0) {
+        suggestions.push(`Overweeg "${keyword}" vaker te gebruiken in de content (huidige density: ${density.toFixed(2)}%)`);
+      } else if (count === 0) {
+        suggestions.push(`Dit keyword komt niet voor op de pagina. Voeg relevante content toe met "${keyword}"`);
       }
 
-      // Add points based on frequency (but cap it to avoid over-rewarding)
-      relevanceScore += Math.min(count * 2, 40);
+      if (!inH2 && count > 0) {
+        suggestions.push(`Versterk de structuur door "${keyword}" ook in H2 headings te gebruiken`);
+      }
 
       return {
         keyword,
         density,
         count,
-        relevance: Math.min(relevanceScore, 100)
+        relevance: Math.min(relevanceScore, 100),
+        suggestions: suggestions.length > 0 ? suggestions : undefined
       };
     });
   };
