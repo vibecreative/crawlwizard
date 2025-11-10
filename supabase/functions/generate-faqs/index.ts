@@ -44,12 +44,32 @@ serve(async (req) => {
             role: 'system',
             content: `Je bent een SEO en AI-zoekgedrag expert die FAQ-schema's maakt geoptimaliseerd voor LLM's en featured snippets.
 
-PERSPECTIEF: 
-Genereer FAQ's vanuit het perspectief van wat bezoekers aan AI-assistenten (zoals ChatGPT, Gemini, Perplexity) zouden vragen tijdens hun zoektocht naar informatie over het hoofdonderwerp. Denk aan:
-- Wat wil iemand weten VOORDAT ze contact opnemen of een aankoop doen?
-- Welke vergelijkingen, afwegingen en overwegingen maken ze?
-- Welke problemen proberen ze op te lossen?
-- Welke twijfels of zorgen hebben ze?
+KRITISCH BELANGRIJK - HET ZOEKPROCES:
+Je genereert FAQ's die mensen aan AI-assistenten (ChatGPT, Gemini, Perplexity) stellen TIJDENS hun oriëntatiefase, VOORDAT ze een specifieke leverancier of pagina bezoeken. Het zijn vragen van iemand die:
+- Nog geen specifieke oplossing of product heeft gekozen
+- Aan het onderzoeken is wat de beste optie is
+- Verschillende alternatieven aan het overwegen is
+- Twijfelt tussen verschillende oplossingen
+- Zich afvraagt of dit überhaupt de juiste oplossing is
+
+VERBODEN: Vragen over specifieke producten, merken, modellen of features die alleen op deze pagina staan. De vragen moeten ALGEMEEN zijn over het hoofdonderwerp/de productcategorie.
+
+VOORBEELDEN VAN HET VERSCHIL:
+❌ FOUT (te specifiek naar pagina): "Wat zijn de voordelen van het DRS-systeem van Meclean?"
+✅ GOED (algemeen zoekgedrag): "Wat is het verschil tussen een enkele en dubbele borstel bij veegmachines?"
+
+❌ FOUT: "Welke garantie geeft Meclean op hun veegmachines?"
+✅ GOED: "Hoe lang gaat een professionele veegmachine gemiddeld mee?"
+
+❌ FOUT: "Wat kost de BUSTER 800S?"
+✅ GOED: "Wat zijn de gemiddelde kosten van een industriële veegmachine?"
+
+PERSPECTIEF - WAT VRAAGT DE ZOEKER:
+- "Is dit de juiste oplossing voor mijn probleem?"
+- "Wat zijn de alternatieven en wanneer kies ik waarvoor?"
+- "Welke veelvoorkomende fouten moet ik vermijden?"
+- "Waar moet ik op letten bij het kiezen?"
+- "Wat zijn de voor- en nadelen van verschillende opties?"
 
 EISEN:
 - Vragen: Natuurlijke conversational taal zoals mensen aan AI stellen, 8-15 woorden, mix van wat/hoe/waarom/welke/wanneer/is het/kun je
