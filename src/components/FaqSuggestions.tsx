@@ -54,7 +54,7 @@ export const FaqSuggestions = ({ faqs }: FaqSuggestionsProps) => {
         <div>
           <h3 className="text-xl font-semibold mb-2">FAQ Suggesties</h3>
           <p className="text-sm text-muted-foreground">
-            AI-gegenereerde vraag en antwoord paren op basis van de pagina content
+            Algemene vragen die bezoekers aan AI-assistenten stellen tijdens hun oriëntatiefase
           </p>
         </div>
         <div className="flex gap-2">
