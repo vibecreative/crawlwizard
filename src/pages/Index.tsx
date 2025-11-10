@@ -2,6 +2,7 @@ import { useState } from "react";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { AnalysisResults } from "@/components/AnalysisResults";
 import { Card } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -370,6 +371,10 @@ const Index = () => {
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="container mx-auto">
+        <div className="fixed top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
+        
         <div className="mb-16">
           <UrlAnalyzer onAnalyze={analyzeUrl} isLoading={isLoading} />
         </div>
