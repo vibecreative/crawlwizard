@@ -42,25 +42,32 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `Je bent een SEO expert die FAQ-schema's maakt geoptimaliseerd voor featured snippets en LLM's.
+            content: `Je bent een SEO en AI-zoekgedrag expert die FAQ-schema's maakt geoptimaliseerd voor LLM's en featured snippets.
+
+PERSPECTIEF: 
+Genereer FAQ's vanuit het perspectief van wat bezoekers aan AI-assistenten (zoals ChatGPT, Gemini, Perplexity) zouden vragen tijdens hun zoektocht naar informatie over het hoofdonderwerp. Denk aan:
+- Wat wil iemand weten VOORDAT ze contact opnemen of een aankoop doen?
+- Welke vergelijkingen, afwegingen en overwegingen maken ze?
+- Welke problemen proberen ze op te lossen?
+- Welke twijfels of zorgen hebben ze?
 
 EISEN:
-- Vragen: Natuurlijke taal, 8-15 woorden, mix van wat/hoe/waarom/welke/wanneer
-- Antwoorden: 75-150 woorden met concrete feiten, begin direct met het antwoord
-- Diversiteit: 3x basis info, 3x diepgaand/technisch, 2x vergelijkingen, 2x praktisch
-- Taal: B1-niveau, conversational, long-tail keywords, context-independent
-- Doel: Featured snippets, LLM-optimalisatie, usability
+- Vragen: Natuurlijke conversational taal zoals mensen aan AI stellen, 8-15 woorden, mix van wat/hoe/waarom/welke/wanneer/is het/kun je
+- Antwoorden: 75-150 woorden met concrete, praktische informatie die de zoekintentie beantwoordt
+- Diversiteit: 3x basisinformatie, 2x vergelijkingen/alternatieven, 2x praktische toepassing, 2x veelvoorkomende problemen/zorgen, 1x kosten/waarde
+- Taal: B1-niveau, conversational, natuurlijk, alsof je met een persoon praat
+- Doel: LLM-optimalisatie, AI-zoekopdrachten, featured snippets, directe antwoorden
 
 CRITICAL: Antwoorden MOETEN beginnen met de eerste woorden van het eigenlijke antwoord. GEEN labels, GEEN "Direct antwoord:", GEEN "Kort antwoord:", GEEN "Uitbreiding:". Schrijf één natuurlijke alinea zonder onderverdeling.
 
-Voorbeeld GOED: "SEO staat voor Search Engine Optimization. Het omvat alle technieken..."
-Voorbeeld FOUT: "Direct antwoord: SEO staat voor..."
+Voorbeeld GOED: "Een schrobmachine is ideaal voor grote oppervlakten vanaf ongeveer 200m2. Voor kleinere ruimtes is een dweilsysteem vaak efficiënter en goedkoper..."
+Voorbeeld FOUT: "Direct antwoord: Een schrobmachine is ideaal..."
 
 Genereer 10 FAQ items. Schrijf in het Nederlands.`
           },
           {
             role: 'user',
-            content: `Genereer 10 relevante FAQ items op basis van deze pagina content:\n\n${limitedContent}`
+            content: `Analyseer deze pagina en identificeer het hoofdonderwerp. Genereer vervolgens 10 FAQ items die bezoekers aan AI-assistenten zouden kunnen stellen tijdens hun zoektocht naar dit onderwerp:\n\n${limitedContent}`
           }
         ],
         tools: [
