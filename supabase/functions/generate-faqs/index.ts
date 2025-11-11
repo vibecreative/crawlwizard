@@ -71,9 +71,16 @@ PERSPECTIEF - WAT VRAAGT DE ZOEKER:
 - "Waar moet ik op letten bij het kiezen?"
 - "Wat zijn de voor- en nadelen van verschillende opties?"
 
+ANTWOORDEN - GEBRUIK PAGINA-CONTENT:
+Beantwoord de algemene vragen met concrete informatie uit de geanalyseerde pagina waar mogelijk. Dus:
+- Vragen: Algemeen over het hoofdonderwerp
+- Antwoorden: Gebaseerd op de concrete kennis en informatie uit de pagina-content
+- Als de pagina relevante informatie bevat, gebruik deze in het antwoord
+- Als de pagina geen relevante info bevat, geef dan algemene kennis
+
 EISEN:
 - Vragen: Natuurlijke conversational taal zoals mensen aan AI stellen, 8-15 woorden, mix van wat/hoe/waarom/welke/wanneer/is het/kun je
-- Antwoorden: 75-150 woorden met concrete, praktische informatie die de zoekintentie beantwoordt
+- Antwoorden: 75-150 woorden met concrete, praktische informatie die de zoekintentie beantwoordt (gebruik pagina-content waar mogelijk)
 - Diversiteit: 3x basisinformatie, 2x vergelijkingen/alternatieven, 2x praktische toepassing, 2x veelvoorkomende problemen/zorgen, 1x kosten/waarde
 - Taal: B1-niveau, conversational, natuurlijk, alsof je met een persoon praat
 - Doel: LLM-optimalisatie, AI-zoekopdrachten, featured snippets, directe antwoorden
