@@ -1,8 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Copy, Download } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Copy, Download, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FaqItem {
   question: string;
@@ -11,9 +14,19 @@ interface FaqItem {
 
 interface FaqSuggestionsProps {
   faqs: FaqItem[];
+  websiteUrl?: string;
+  pageContent?: string;
 }
 
-export const FaqSuggestions = ({ faqs }: FaqSuggestionsProps) => {
+interface AnalysisResult {
+  score: number;
+  explanation: string;
+  category: "high" | "medium" | "low";
+}
+
+export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "" }: FaqSuggestionsProps) => {
+  const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const generateJsonLd = () => {
     return {
       "@context": "https://schema.org",
@@ -48,6 +61,76 @@ export const FaqSuggestions = ({ faqs }: FaqSuggestionsProps) => {
     toast.success('FAQ Schema gedownload');
   };
 
+  const analyzeRelevance = async () => {
+    if (!websiteUrl || !pageContent) {
+      toast.error('Website URL en content zijn vereist voor analyse');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    const results = new Map<number, AnalysisResult>();
+
+    try {
+      // Analyze each FAQ sequentially to avoid rate limits
+      for (let i = 0; i < faqs.length; i++) {
+        const faq = faqs[i];
+        
+        const { data, error } = await supabase.functions.invoke('analyze-faq-relevance', {
+          body: {
+            question: faq.question,
+            websiteUrl,
+            pageContent
+          }
+        });
+
+        if (error) {
+          console.error(`Error analyzing FAQ ${i}:`, error);
+          toast.error(`Fout bij analyseren van vraag ${i + 1}`);
+          continue;
+        }
+
+        if (data) {
+          results.set(i, data);
+        }
+
+        // Update UI after each analysis
+        setAnalysisResults(new Map(results));
+        
+        // Small delay to avoid rate limiting
+        if (i < faqs.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      toast.success('AI Search Readiness analyse voltooid!');
+    } catch (error) {
+      console.error('Error during analysis:', error);
+      toast.error('Er ging iets mis tijdens de analyse');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const getScoreBadge = (analysis: AnalysisResult) => {
+    const variants: Record<string, "default" | "secondary" | "destructive"> = {
+      high: "default",
+      medium: "secondary",
+      low: "destructive"
+    };
+
+    const labels = {
+      high: "Hoog relevant",
+      medium: "Gemiddeld relevant",
+      low: "Laag relevant"
+    };
+
+    return (
+      <Badge variant={variants[analysis.category]} className="ml-2">
+        {labels[analysis.category]} ({analysis.score})
+      </Badge>
+    );
+  };
+
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -58,6 +141,24 @@ export const FaqSuggestions = ({ faqs }: FaqSuggestionsProps) => {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={analyzeRelevance}
+            disabled={isAnalyzing || !websiteUrl}
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Analyseren...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Search Readiness
+              </>
+            )}
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -78,34 +179,47 @@ export const FaqSuggestions = ({ faqs }: FaqSuggestionsProps) => {
       </div>
 
       <Accordion type="single" collapsible className="w-full">
-        {faqs.map((faq, index) => (
-          <AccordionItem key={index} value={`faq-${index}`}>
-            <AccordionTrigger className="text-left">
-              <span className="font-medium">{faq.question}</span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <p className="text-muted-foreground">{faq.answer}</p>
-              <div className="flex gap-2 mt-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(faq.question, 'Vraag')}
-                >
-                  <Copy className="w-3 h-3 mr-2" />
-                  Kopieer vraag
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(faq.answer, 'Antwoord')}
-                >
-                  <Copy className="w-3 h-3 mr-2" />
-                  Kopieer antwoord
-                </Button>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+        {faqs.map((faq, index) => {
+          const analysis = analysisResults.get(index);
+          
+          return (
+            <AccordionItem key={index} value={`faq-${index}`}>
+              <AccordionTrigger className="text-left">
+                <div className="flex items-center flex-wrap gap-2">
+                  <span className="font-medium">{faq.question}</span>
+                  {analysis && getScoreBadge(analysis)}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                {analysis && (
+                  <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm font-medium mb-1">AI Search Readiness Analyse:</p>
+                    <p className="text-sm text-muted-foreground">{analysis.explanation}</p>
+                  </div>
+                )}
+                <p className="text-muted-foreground">{faq.answer}</p>
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(faq.question, 'Vraag')}
+                  >
+                    <Copy className="w-3 h-3 mr-2" />
+                    Kopieer vraag
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(faq.answer, 'Antwoord')}
+                  >
+                    <Copy className="w-3 h-3 mr-2" />
+                    Kopieer antwoord
+                  </Button>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
       </Accordion>
 
       <div className="mt-6 p-4 bg-muted/50 rounded-lg">
