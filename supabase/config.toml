@@ -2,3 +2,6 @@ project_id = "dlmijahsuhnrtnvjhazd"
 
 [functions.generate-faqs]
 verify_jwt = false
+
+[functions.analyze-faq-relevance]
+verify_jwt = false

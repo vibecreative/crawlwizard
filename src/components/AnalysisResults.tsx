@@ -379,7 +379,11 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
 
       {/* FAQ Suggestions */}
       {data.faqs && data.faqs.length > 0 && (
-        <FaqSuggestions faqs={data.faqs} />
+        <FaqSuggestions 
+          faqs={data.faqs} 
+          websiteUrl={data.url}
+          pageContent={data.html}
+        />
       )}
 
       {/* JSON-LD Generator */}
