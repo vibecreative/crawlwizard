@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.analyze-faq-relevance]
 verify_jwt = false
+
+[functions.regenerate-faq]
+verify_jwt = false

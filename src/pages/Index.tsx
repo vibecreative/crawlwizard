@@ -368,6 +368,15 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleFaqsUpdate = (updatedFaqs: FaqItem[]) => {
+    if (analysisData) {
+      setAnalysisData({
+        ...analysisData,
+        faqs: updatedFaqs
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="container mx-auto">
@@ -381,7 +390,11 @@ const Index = () => {
 
         {analysisData && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
-            <AnalysisResults data={analysisData} onReset={handleReset} />
+            <AnalysisResults 
+              data={analysisData} 
+              onReset={handleReset}
+              onFaqsUpdate={handleFaqsUpdate}
+            />
             
             {isGeneratingFaqs && (
               <Card className="p-6">

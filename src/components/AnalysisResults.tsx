@@ -53,9 +53,10 @@ interface AnalysisData {
 interface AnalysisResultsProps {
   data: AnalysisData;
   onReset: () => void;
+  onFaqsUpdate?: (updatedFaqs: FaqItem[]) => void;
 }
 
-export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
+export const AnalysisResults = ({ data, onReset, onFaqsUpdate }: AnalysisResultsProps) => {
   const getHeadingColor = (level: number) => {
     const colors = {
       1: "bg-heading-h1",
@@ -383,6 +384,7 @@ export const AnalysisResults = ({ data, onReset }: AnalysisResultsProps) => {
           faqs={data.faqs} 
           websiteUrl={data.url}
           pageContent={data.html}
+          onFaqsUpdate={onFaqsUpdate}
         />
       )}
 
