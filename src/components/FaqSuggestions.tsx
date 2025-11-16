@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download, Sparkles, Loader2 } from "lucide-react";
+import { Copy, Download, Sparkles, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ interface FaqSuggestionsProps {
   faqs: FaqItem[];
   websiteUrl?: string;
   pageContent?: string;
+  onFaqsUpdate?: (updatedFaqs: FaqItem[]) => void;
 }
 
 interface AnalysisResult {
@@ -24,9 +25,10 @@ interface AnalysisResult {
   category: "high" | "medium" | "low";
 }
 
-export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "" }: FaqSuggestionsProps) => {
+export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqsUpdate }: FaqSuggestionsProps) => {
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const generateJsonLd = () => {
     return {
       "@context": "https://schema.org",
@@ -131,6 +133,50 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "" }: FaqS
     );
   };
 
+  const regenerateFaq = async (index: number) => {
+    if (!websiteUrl || !pageContent) {
+      toast.error('Website URL en content zijn vereist voor regeneratie');
+      return;
+    }
+
+    const analysis = analysisResults.get(index);
+    if (!analysis) {
+      toast.error('Voer eerst een AI Search Readiness analyse uit');
+      return;
+    }
+
+    setRegeneratingIndex(index);
+    try {
+      const { data, error } = await supabase.functions.invoke('regenerate-faq', {
+        body: {
+          html: pageContent,
+          previousQuestion: faqs[index].question,
+          analysisExplanation: analysis.explanation
+        }
+      });
+
+      if (error) throw error;
+
+      if (data && onFaqsUpdate) {
+        const updatedFaqs = [...faqs];
+        updatedFaqs[index] = data;
+        onFaqsUpdate(updatedFaqs);
+        
+        // Clear analysis result for this FAQ so it can be re-analyzed
+        const newResults = new Map(analysisResults);
+        newResults.delete(index);
+        setAnalysisResults(newResults);
+        
+        toast.success('Vraag geregenereerd! Voer opnieuw een analyse uit om de nieuwe score te zien.');
+      }
+    } catch (error) {
+      console.error('Error regenerating FAQ:', error);
+      toast.error('Fout bij het regenereren van de vraag');
+    } finally {
+      setRegeneratingIndex(null);
+    }
+  };
+
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -193,8 +239,32 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "" }: FaqS
               <AccordionContent>
                 {analysis && (
                   <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-                    <p className="text-sm font-medium mb-1">AI Search Readiness Analyse:</p>
-                    <p className="text-sm text-muted-foreground">{analysis.explanation}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium mb-1">AI Search Readiness Analyse:</p>
+                        <p className="text-sm text-muted-foreground">{analysis.explanation}</p>
+                      </div>
+                      {analysis.score < 50 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => regenerateFaq(index)}
+                          disabled={regeneratingIndex === index}
+                        >
+                          {regeneratingIndex === index ? (
+                            <>
+                              <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                              Bezig...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="w-3 h-3 mr-2" />
+                              Regenereer
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
                 <p className="text-muted-foreground">{faq.answer}</p>
