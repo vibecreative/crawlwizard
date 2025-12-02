@@ -290,20 +290,52 @@ const Index = () => {
     });
   };
 
+  const fetchWithRetry = async (url: string, maxRetries: number = 3): Promise<string> => {
+    const corsProxies = [
+      (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+      (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      (u: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    ];
+
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      for (const proxyFn of corsProxies) {
+        try {
+          const proxyUrl = proxyFn(url);
+          console.log(`Poging ${attempt + 1}, proxy: ${proxyUrl.split('?')[0]}`);
+          
+          const response = await fetch(proxyUrl, {
+            signal: AbortSignal.timeout(15000), // 15 second timeout
+          });
+          
+          if (response.ok) {
+            const html = await response.text();
+            if (html && html.length > 100) {
+              return html;
+            }
+          }
+        } catch (error) {
+          console.warn(`Proxy mislukt:`, error);
+          lastError = error as Error;
+        }
+      }
+      
+      // Wait before retrying all proxies
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    throw lastError || new Error('Kon de website niet ophalen na meerdere pogingen');
+  };
+
   const analyzeUrl = async (url: string, keywords: string[] = []) => {
     setIsLoading(true);
     setAnalysisData(null);
 
     try {
-      // Use a CORS proxy for fetching the website
-      const corsProxy = 'https://api.allorigins.win/raw?url=';
-      const response = await fetch(corsProxy + encodeURIComponent(url));
-      
-      if (!response.ok) {
-        throw new Error('Kon de website niet ophalen');
-      }
-
-      const html = await response.text();
+      const html = await fetchWithRetry(url);
       const headings = parseHeadings(html);
       const meta = parseMeta(html);
       const structuredData = parseStructuredData(html);
@@ -335,7 +367,7 @@ const Index = () => {
       }, 100);
     } catch (error) {
       console.error('Analyse fout:', error);
-      toast.error("Er is een fout opgetreden bij het analyseren van de URL");
+      toast.error("Er is een fout opgetreden bij het analyseren van de URL. Probeer het opnieuw.");
     } finally {
       setIsLoading(false);
     }
