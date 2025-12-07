@@ -8,6 +8,7 @@ import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
 import { JsonLdGenerator } from "./JsonLdGenerator";
 import { FaqSuggestions } from "./FaqSuggestions";
 import { KeywordAnalysis } from "./KeywordAnalysis";
+import { KeywordPlacementAdvice } from "./KeywordPlacementAdvice";
 
 interface HeadingInfo {
   level: number;
@@ -33,6 +34,16 @@ interface KeywordScore {
   relevance: number;
 }
 
+interface KeywordPlacementAnalysis {
+  keyword: string;
+  inUrl: boolean;
+  inH1: boolean;
+  inIntroText: boolean;
+  url: string;
+  h1Text?: string;
+  introText?: string;
+}
+
 interface AnalysisData {
   url: string;
   screenshot?: string;
@@ -48,6 +59,7 @@ interface AnalysisData {
   html: string;
   faqs?: FaqItem[];
   keywords?: KeywordScore[];
+  keywordPlacement?: KeywordPlacementAnalysis;
 }
 
 interface AnalysisResultsProps {
@@ -372,6 +384,11 @@ export const AnalysisResults = ({ data, onReset, onFaqsUpdate }: AnalysisResults
 
       {/* Structured Data Analysis */}
       <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
+
+      {/* Keyword Placement Advice - Show prominently when a primary keyword was analyzed */}
+      {data.keywordPlacement && (
+        <KeywordPlacementAdvice analysis={data.keywordPlacement} />
+      )}
 
       {/* Keyword Analysis */}
       {data.keywords && data.keywords.length > 0 && (

@@ -31,6 +31,16 @@ interface KeywordScore {
   suggestions?: string[];
 }
 
+interface KeywordPlacementAnalysis {
+  keyword: string;
+  inUrl: boolean;
+  inH1: boolean;
+  inIntroText: boolean;
+  url: string;
+  h1Text?: string;
+  introText?: string;
+}
+
 interface AnalysisData {
   url: string;
   screenshot?: string;
@@ -46,6 +56,7 @@ interface AnalysisData {
   html: string;
   faqs?: FaqItem[];
   keywords?: KeywordScore[];
+  keywordPlacement?: KeywordPlacementAnalysis;
 }
 
 const Index = () => {
@@ -290,6 +301,66 @@ const Index = () => {
     });
   };
 
+  const analyzeKeywordPlacement = (html: string, url: string, keywords: string[]): KeywordPlacementAnalysis | undefined => {
+    // Only analyze if there's at least one keyword (use the first/primary keyword)
+    if (keywords.length === 0) return undefined;
+
+    const primaryKeyword = keywords[0].toLowerCase();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Check if keyword is in URL
+    const urlLower = url.toLowerCase();
+    const inUrl = urlLower.includes(primaryKeyword.replace(/\s+/g, '-')) || 
+                  urlLower.includes(primaryKeyword.replace(/\s+/g, '')) ||
+                  urlLower.includes(primaryKeyword);
+
+    // Get H1 text
+    const h1Element = doc.querySelector('h1');
+    const h1Text = h1Element?.textContent?.trim() || '';
+    const inH1 = h1Text.toLowerCase().includes(primaryKeyword);
+
+    // Get intro text (first paragraph-like content after H1)
+    let introText = '';
+    if (h1Element) {
+      // Find the next sibling elements after H1
+      let sibling = h1Element.nextElementSibling;
+      const introTexts: string[] = [];
+      let elementsChecked = 0;
+      
+      while (sibling && elementsChecked < 10) {
+        // Stop if we hit another heading
+        if (sibling.matches('h1, h2, h3, h4, h5, h6')) break;
+        
+        // Check for paragraph or div with text content
+        if (sibling.matches('p, div')) {
+          const text = sibling.textContent?.trim() || '';
+          if (text.length > 20) { // Only include meaningful text
+            introTexts.push(text);
+            if (introTexts.join(' ').length > 200) break; // Limit intro text length
+          }
+        }
+        
+        sibling = sibling.nextElementSibling;
+        elementsChecked++;
+      }
+      
+      introText = introTexts.join(' ').substring(0, 500);
+    }
+    
+    const inIntroText = introText.toLowerCase().includes(primaryKeyword);
+
+    return {
+      keyword: keywords[0],
+      inUrl,
+      inH1,
+      inIntroText,
+      url,
+      h1Text: h1Text || undefined,
+      introText: introText || undefined,
+    };
+  };
+
   const fetchWithRetry = async (url: string, maxRetries: number = 3): Promise<string> => {
     const corsProxies = [
       (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
@@ -340,6 +411,7 @@ const Index = () => {
       const meta = parseMeta(html);
       const structuredData = parseStructuredData(html);
       const keywordScores = analyzeKeywords(html, keywords);
+      const keywordPlacement = analyzeKeywordPlacement(html, url, keywords);
 
       // For screenshot, we would normally use a service like Puppeteer or a screenshot API
       // For now, we'll note that this needs to be implemented with a backend service
@@ -353,6 +425,7 @@ const Index = () => {
         structuredData,
         html,
         keywords: keywordScores,
+        keywordPlacement,
       };
 
       setAnalysisData(data);
