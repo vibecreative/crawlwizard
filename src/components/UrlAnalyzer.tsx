@@ -5,13 +5,14 @@ import { Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface UrlAnalyzerProps {
-  onAnalyze: (url: string, keywords: string[]) => void;
+  onAnalyze: (url: string, primaryKeyword: string, secondaryKeywords: string[]) => void;
   isLoading: boolean;
 }
 
 export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
   const [url, setUrl] = useState("");
-  const [keywords, setKeywords] = useState("");
+  const [primaryKeyword, setPrimaryKeyword] = useState("");
+  const [secondaryKeywords, setSecondaryKeywords] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,11 +25,15 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
     // Basic URL validation
     try {
       new URL(url.startsWith('http') ? url : `https://${url}`);
-      const keywordList = keywords
+      const secondaryKeywordList = secondaryKeywords
         .split(',')
         .map(k => k.trim())
         .filter(k => k.length > 0);
-      onAnalyze(url.startsWith('http') ? url : `https://${url}`, keywordList);
+      onAnalyze(
+        url.startsWith('http') ? url : `https://${url}`,
+        primaryKeyword.trim(),
+        secondaryKeywordList
+      );
     } catch {
       toast.error("Ongeldige URL. Controleer het formaat.");
     }
@@ -80,9 +85,20 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
         <div className="rounded-2xl bg-card shadow-soft border border-border/50 p-2">
           <Input
             type="text"
-            value={keywords}
-            onChange={(e) => setKeywords(e.target.value)}
-            placeholder="Zoektermen (optioneel, gescheiden door komma's)"
+            value={primaryKeyword}
+            onChange={(e) => setPrimaryKeyword(e.target.value)}
+            placeholder="Primaire zoekterm voor deze pagina (optioneel)"
+            className="h-12 px-6 border-0 bg-transparent focus-visible:ring-0"
+            disabled={isLoading}
+          />
+        </div>
+        
+        <div className="rounded-2xl bg-card shadow-soft border border-border/50 p-2">
+          <Input
+            type="text"
+            value={secondaryKeywords}
+            onChange={(e) => setSecondaryKeywords(e.target.value)}
+            placeholder="Overige zoektermen voor deze pagina (optioneel, gescheiden door komma's)"
             className="h-12 px-6 border-0 bg-transparent focus-visible:ring-0"
             disabled={isLoading}
           />
