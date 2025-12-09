@@ -301,24 +301,24 @@ const Index = () => {
     });
   };
 
-  const analyzeKeywordPlacement = (html: string, url: string, keywords: string[]): KeywordPlacementAnalysis | undefined => {
-    // Only analyze if there's at least one keyword (use the first/primary keyword)
-    if (keywords.length === 0) return undefined;
+  const analyzeKeywordPlacement = (html: string, url: string, primaryKeyword: string): KeywordPlacementAnalysis | undefined => {
+    // Only analyze if there's a primary keyword
+    if (!primaryKeyword) return undefined;
 
-    const primaryKeyword = keywords[0].toLowerCase();
+    const primaryKeywordLower = primaryKeyword.toLowerCase();
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
     // Check if keyword is in URL
     const urlLower = url.toLowerCase();
-    const inUrl = urlLower.includes(primaryKeyword.replace(/\s+/g, '-')) || 
-                  urlLower.includes(primaryKeyword.replace(/\s+/g, '')) ||
-                  urlLower.includes(primaryKeyword);
+    const inUrl = urlLower.includes(primaryKeywordLower.replace(/\s+/g, '-')) || 
+                  urlLower.includes(primaryKeywordLower.replace(/\s+/g, '')) ||
+                  urlLower.includes(primaryKeywordLower);
 
     // Get H1 text
     const h1Element = doc.querySelector('h1');
     const h1Text = h1Element?.textContent?.trim() || '';
-    const inH1 = h1Text.toLowerCase().includes(primaryKeyword);
+    const inH1 = h1Text.toLowerCase().includes(primaryKeywordLower);
 
     // Get intro text (first paragraph-like content after H1)
     let introText = '';
@@ -348,10 +348,10 @@ const Index = () => {
       introText = introTexts.join(' ').substring(0, 500);
     }
     
-    const inIntroText = introText.toLowerCase().includes(primaryKeyword);
+    const inIntroText = introText.toLowerCase().includes(primaryKeywordLower);
 
     return {
-      keyword: keywords[0],
+      keyword: primaryKeyword,
       inUrl,
       inH1,
       inIntroText,
@@ -401,7 +401,7 @@ const Index = () => {
     throw lastError || new Error('Kon de website niet ophalen na meerdere pogingen');
   };
 
-  const analyzeUrl = async (url: string, keywords: string[] = []) => {
+  const analyzeUrl = async (url: string, primaryKeyword: string = '', secondaryKeywords: string[] = []) => {
     setIsLoading(true);
     setAnalysisData(null);
 
@@ -410,8 +410,15 @@ const Index = () => {
       const headings = parseHeadings(html);
       const meta = parseMeta(html);
       const structuredData = parseStructuredData(html);
-      const keywordScores = analyzeKeywords(html, keywords);
-      const keywordPlacement = analyzeKeywordPlacement(html, url, keywords);
+      
+      // For keyword analysis, combine primary and secondary keywords
+      const allKeywords = primaryKeyword 
+        ? [primaryKeyword, ...secondaryKeywords] 
+        : secondaryKeywords;
+      const keywordScores = analyzeKeywords(html, allKeywords);
+      
+      // For keyword placement, only use primary keyword
+      const keywordPlacement = analyzeKeywordPlacement(html, url, primaryKeyword);
 
       // For screenshot, we would normally use a service like Puppeteer or a screenshot API
       // For now, we'll note that this needs to be implemented with a backend service
