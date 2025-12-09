@@ -111,10 +111,12 @@ const Index = () => {
         // Skip if element is a heading
         if (element.matches('h1, h2, h3, h4, h5, h6')) break;
         
-        // Only include visible text content from paragraph-like elements
-        if (element.matches('p, li, td, th')) {
+      // Only include visible text content from paragraph-like elements
+        // Include div and span as many modern websites use these for intro text
+        if (element.matches('p, li, td, th, div, span')) {
           const elementText = element.textContent?.trim() || '';
-          if (elementText && !contentElements.includes(elementText)) {
+          // Only add meaningful text that isn't already captured (avoid nested duplicates)
+          if (elementText && elementText.length > 10 && !contentElements.some(existing => existing.includes(elementText) || elementText.includes(existing))) {
             contentElements.push(elementText);
           }
         }
@@ -301,43 +303,92 @@ const Index = () => {
     });
   };
 
+  // Normalize text for fuzzy keyword matching (remove Dutch stopwords, normalize spacing)
+  const normalizeForMatching = (text: string): string => {
+    const stopwords = ['in', 'de', 'het', 'een', 'van', 'en', 'op', 'te', 'voor', 'met', 'naar', 'aan', 'om', 'bij'];
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .split(/\s+/)
+      .filter(word => !stopwords.includes(word))
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  // Check if keyword matches text with fuzzy matching
+  const fuzzyKeywordMatch = (text: string, keyword: string): boolean => {
+    const normalizedText = normalizeForMatching(text);
+    const normalizedKeyword = normalizeForMatching(keyword);
+    
+    // Exact match after normalization
+    if (normalizedText.includes(normalizedKeyword)) return true;
+    
+    // Check if all keyword parts are present (handles compound word variations like "marketing bureau" vs "marketingbureau")
+    const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
+    const textWords = normalizedText.split(' ');
+    
+    // Check for compound variations (e.g., "marketingbureau" should match "marketing bureau")
+    const compoundKeyword = keywordParts.join('');
+    if (normalizedText.replace(/\s/g, '').includes(compoundKeyword)) return true;
+    
+    // Check if text contains compound version of any adjacent keyword pairs
+    for (let i = 0; i < keywordParts.length - 1; i++) {
+      const compound = keywordParts[i] + keywordParts[i + 1];
+      if (textWords.some(w => w.includes(compound) || compound.includes(w))) {
+        // Verify other parts are also present
+        const remainingParts = [...keywordParts.slice(0, i), ...keywordParts.slice(i + 2)];
+        if (remainingParts.every(part => textWords.some(w => w.includes(part) || part.includes(w)))) {
+          return true;
+        }
+      }
+    }
+    
+    // All keyword parts should be present in the text
+    return keywordParts.every(part => 
+      textWords.some(word => word.includes(part) || part.includes(word))
+    );
+  };
+
   const analyzeKeywordPlacement = (html: string, url: string, primaryKeyword: string): KeywordPlacementAnalysis | undefined => {
     // Only analyze if there's a primary keyword
     if (!primaryKeyword) return undefined;
 
-    const primaryKeywordLower = primaryKeyword.toLowerCase();
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    // Check if keyword is in URL
+    // Check if keyword is in URL (URLs typically have hyphens or no spaces)
     const urlLower = url.toLowerCase();
-    const inUrl = urlLower.includes(primaryKeywordLower.replace(/\s+/g, '-')) || 
-                  urlLower.includes(primaryKeywordLower.replace(/\s+/g, '')) ||
-                  urlLower.includes(primaryKeywordLower);
+    const keywordForUrl = primaryKeyword.toLowerCase().replace(/\s+/g, '-');
+    const keywordNoSpaces = primaryKeyword.toLowerCase().replace(/\s+/g, '');
+    const inUrl = urlLower.includes(keywordForUrl) || 
+                  urlLower.includes(keywordNoSpaces) ||
+                  fuzzyKeywordMatch(urlLower.replace(/-/g, ' '), primaryKeyword);
 
     // Get H1 text
     const h1Element = doc.querySelector('h1');
     const h1Text = h1Element?.textContent?.trim() || '';
-    const inH1 = h1Text.toLowerCase().includes(primaryKeywordLower);
+    const inH1 = fuzzyKeywordMatch(h1Text, primaryKeyword);
 
     // Get intro text (first paragraph-like content after H1)
+    // Use a more comprehensive search to find content below H1
     let introText = '';
     if (h1Element) {
-      // Find the next sibling elements after H1
-      let sibling = h1Element.nextElementSibling;
       const introTexts: string[] = [];
+      
+      // Method 1: Direct siblings
+      let sibling = h1Element.nextElementSibling;
       let elementsChecked = 0;
       
-      while (sibling && elementsChecked < 10) {
-        // Stop if we hit another heading
+      while (sibling && elementsChecked < 15) {
         if (sibling.matches('h1, h2, h3, h4, h5, h6')) break;
         
-        // Check for paragraph or div with text content
-        if (sibling.matches('p, div')) {
+        // Include more element types for modern websites
+        if (sibling.matches('p, div, span, section, article')) {
           const text = sibling.textContent?.trim() || '';
-          if (text.length > 20) { // Only include meaningful text
+          if (text.length > 20) {
             introTexts.push(text);
-            if (introTexts.join(' ').length > 200) break; // Limit intro text length
+            if (introTexts.join(' ').length > 300) break;
           }
         }
         
@@ -345,10 +396,28 @@ const Index = () => {
         elementsChecked++;
       }
       
+      // Method 2: If no direct siblings found, check parent container's children
+      if (introTexts.length === 0 && h1Element.parentElement) {
+        const parent = h1Element.parentElement;
+        const children = Array.from(parent.children);
+        const h1Index = children.indexOf(h1Element);
+        
+        for (let i = h1Index + 1; i < Math.min(h1Index + 10, children.length); i++) {
+          const child = children[i];
+          if (child.matches('h1, h2, h3, h4, h5, h6')) break;
+          
+          const text = child.textContent?.trim() || '';
+          if (text.length > 20) {
+            introTexts.push(text);
+            if (introTexts.join(' ').length > 300) break;
+          }
+        }
+      }
+      
       introText = introTexts.join(' ').substring(0, 500);
     }
     
-    const inIntroText = introText.toLowerCase().includes(primaryKeywordLower);
+    const inIntroText = introText.length > 0 && fuzzyKeywordMatch(introText, primaryKeyword);
 
     return {
       keyword: primaryKeyword,
