@@ -105,19 +105,46 @@ const Index = () => {
       
       // Collect text content from elements between this heading and the next
       const contentElements: string[] = [];
+      const seenTexts = new Set<string>();
+      
       for (let i = headingIndex + 1; i < (nextHeadingIndex || allElements.length); i++) {
         const element = allElements[i];
         
         // Skip if element is a heading
         if (element.matches('h1, h2, h3, h4, h5, h6')) break;
         
-      // Only include visible text content from paragraph-like elements
-        // Include div and span as many modern websites use these for intro text
-        if (element.matches('p, li, td, th, div, span')) {
-          const elementText = element.textContent?.trim() || '';
-          // Only add meaningful text that isn't already captured (avoid nested duplicates)
-          if (elementText && elementText.length > 10 && !contentElements.some(existing => existing.includes(elementText) || elementText.includes(existing))) {
-            contentElements.push(elementText);
+        // Skip nested elements (only process leaf-like content)
+        const isLeafElement = !element.querySelector('p, div, span, li, td, th');
+        
+        // Only include visible text content from paragraph-like elements
+        if (element.matches('p, li, td, th') || (element.matches('div, span') && isLeafElement)) {
+          // Get only direct text content to avoid duplication
+          let elementText = '';
+          
+          // For leaf elements, get all text content
+          if (isLeafElement) {
+            elementText = element.textContent?.trim() || '';
+          } else {
+            // For elements with children, only get direct text nodes
+            const directText = Array.from(element.childNodes)
+              .filter(node => node.nodeType === Node.TEXT_NODE)
+              .map(node => node.textContent?.trim() || '')
+              .filter(t => t.length > 0)
+              .join(' ');
+            elementText = directText;
+          }
+          
+          // Only add meaningful text that we haven't seen before
+          if (elementText && elementText.length > 10 && !seenTexts.has(elementText)) {
+            // Check for substantial overlap with existing content
+            const hasOverlap = contentElements.some(existing => 
+              existing.includes(elementText) || elementText.includes(existing)
+            );
+            
+            if (!hasOverlap) {
+              contentElements.push(elementText);
+              seenTexts.add(elementText);
+            }
           }
         }
       }
@@ -328,25 +355,36 @@ const Index = () => {
     const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
     const textWords = normalizedText.split(' ');
     
+    // Remove spaces from text to check for compound words (e.g., "marketingbureau" in text)
+    const textWithoutSpaces = normalizedText.replace(/\s/g, '');
+    const keywordWithoutSpaces = normalizedKeyword.replace(/\s/g, '');
+    
     // Check for compound variations (e.g., "marketingbureau" should match "marketing bureau")
-    const compoundKeyword = keywordParts.join('');
-    if (normalizedText.replace(/\s/g, '').includes(compoundKeyword)) return true;
+    if (textWithoutSpaces.includes(keywordWithoutSpaces)) return true;
     
     // Check if text contains compound version of any adjacent keyword pairs
     for (let i = 0; i < keywordParts.length - 1; i++) {
       const compound = keywordParts[i] + keywordParts[i + 1];
-      if (textWords.some(w => w.includes(compound) || compound.includes(w))) {
+      // Check in both the word list AND the continuous text (for compound words)
+      const compoundInText = textWords.some(w => w.includes(compound)) || textWithoutSpaces.includes(compound);
+      
+      if (compoundInText) {
         // Verify other parts are also present
         const remainingParts = [...keywordParts.slice(0, i), ...keywordParts.slice(i + 2)];
-        if (remainingParts.every(part => textWords.some(w => w.includes(part) || part.includes(w)))) {
+        const allRemainingPresent = remainingParts.every(part => 
+          textWords.some(w => w.includes(part) || part.includes(w)) ||
+          textWithoutSpaces.includes(part)
+        );
+        if (allRemainingPresent) {
           return true;
         }
       }
     }
     
-    // All keyword parts should be present in the text
+    // All keyword parts should be present in the text (in words or as compounds)
     return keywordParts.every(part => 
-      textWords.some(word => word.includes(part) || part.includes(word))
+      textWords.some(word => word.includes(part) || part.includes(word)) ||
+      textWithoutSpaces.includes(part)
     );
   };
 
