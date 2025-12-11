@@ -348,14 +348,20 @@ const Index = () => {
     const normalizedText = normalizeForMatching(text);
     const normalizedKeyword = normalizeForMatching(keyword);
     
+    console.log('Fuzzy match:', { normalizedText: normalizedText.substring(0, 150), normalizedKeyword });
+    
     // Exact match after normalization
     if (normalizedText.includes(normalizedKeyword)) {
+      console.log('Match: exact');
       return true;
     }
     
     const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
     const textWords = normalizedText.split(' ');
     const textWithoutSpaces = normalizedText.replace(/\s/g, '');
+    
+    console.log('Keyword parts:', keywordParts);
+    console.log('Text words:', textWords.slice(0, 20));
     
     // Helper: check if a keyword part is found in text (as word, part of word, or in compound)
     const partFoundInText = (part: string): boolean => {
@@ -372,7 +378,10 @@ const Index = () => {
     
     for (let i = 0; i < keywordParts.length - 1; i++) {
       const compound = keywordParts[i] + keywordParts[i + 1];
-      if (textWords.some(w => w.includes(compound)) || textWithoutSpaces.includes(compound)) {
+      const foundInWords = textWords.some(w => w.includes(compound));
+      const foundInContinuous = textWithoutSpaces.includes(compound);
+      console.log(`Compound "${compound}":`, { foundInWords, foundInContinuous });
+      if (foundInWords || foundInContinuous) {
         compoundPartsFound.add(i);
         compoundPartsFound.add(i + 1);
       }
@@ -380,10 +389,16 @@ const Index = () => {
     
     // Check if all keyword parts are accounted for (either as compound or individual)
     const allPartsPresent = keywordParts.every((part, idx) => {
-      if (compoundPartsFound.has(idx)) return true;
-      return partFoundInText(part);
+      if (compoundPartsFound.has(idx)) {
+        console.log(`Part "${part}" found via compound`);
+        return true;
+      }
+      const found = partFoundInText(part);
+      console.log(`Part "${part}" found individually:`, found);
+      return found;
     });
     
+    console.log('All parts present:', allPartsPresent);
     return allPartsPresent;
   };
 
@@ -454,7 +469,11 @@ const Index = () => {
       introText = introTexts.join(' ').substring(0, 500);
     }
     
+    console.log('Keyword placement - Intro text extracted:', introText.substring(0, 200));
+    console.log('Keyword placement - Primary keyword:', primaryKeyword);
+    
     const inIntroText = introText.length > 0 && fuzzyKeywordMatch(introText, primaryKeyword);
+    console.log('Keyword placement - inIntroText result:', inIntroText);
 
     return {
       keyword: primaryKeyword,
