@@ -348,8 +348,18 @@ const Index = () => {
     const normalizedText = normalizeForMatching(text);
     const normalizedKeyword = normalizeForMatching(keyword);
     
+    console.log('Fuzzy match check:', { 
+      originalText: text.substring(0, 100), 
+      originalKeyword: keyword,
+      normalizedText: normalizedText.substring(0, 100), 
+      normalizedKeyword 
+    });
+    
     // Exact match after normalization
-    if (normalizedText.includes(normalizedKeyword)) return true;
+    if (normalizedText.includes(normalizedKeyword)) {
+      console.log('Match found: exact normalized match');
+      return true;
+    }
     
     // Check if all keyword parts are present (handles compound word variations like "marketing bureau" vs "marketingbureau")
     const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
@@ -359,14 +369,21 @@ const Index = () => {
     const textWithoutSpaces = normalizedText.replace(/\s/g, '');
     const keywordWithoutSpaces = normalizedKeyword.replace(/\s/g, '');
     
+    console.log('Compound check:', { textWithoutSpaces: textWithoutSpaces.substring(0, 50), keywordWithoutSpaces });
+    
     // Check for compound variations (e.g., "marketingbureau" should match "marketing bureau")
-    if (textWithoutSpaces.includes(keywordWithoutSpaces)) return true;
+    if (textWithoutSpaces.includes(keywordWithoutSpaces)) {
+      console.log('Match found: compound match');
+      return true;
+    }
     
     // Check if text contains compound version of any adjacent keyword pairs
     for (let i = 0; i < keywordParts.length - 1; i++) {
       const compound = keywordParts[i] + keywordParts[i + 1];
       // Check in both the word list AND the continuous text (for compound words)
       const compoundInText = textWords.some(w => w.includes(compound)) || textWithoutSpaces.includes(compound);
+      
+      console.log(`Checking compound "${compound}":`, { compoundInText });
       
       if (compoundInText) {
         // Verify other parts are also present
@@ -375,17 +392,22 @@ const Index = () => {
           textWords.some(w => w.includes(part) || part.includes(w)) ||
           textWithoutSpaces.includes(part)
         );
+        console.log('Remaining parts check:', { remainingParts, allRemainingPresent });
         if (allRemainingPresent) {
+          console.log('Match found: compound + remaining parts');
           return true;
         }
       }
     }
     
     // All keyword parts should be present in the text (in words or as compounds)
-    return keywordParts.every(part => 
+    const allPartsPresent = keywordParts.every(part => 
       textWords.some(word => word.includes(part) || part.includes(word)) ||
       textWithoutSpaces.includes(part)
     );
+    
+    console.log('All parts check:', { keywordParts, allPartsPresent });
+    return allPartsPresent;
   };
 
   const analyzeKeywordPlacement = (html: string, url: string, primaryKeyword: string): KeywordPlacementAnalysis | undefined => {
