@@ -227,12 +227,26 @@ export const AnalysisResults = ({ data, onReset, onFaqsUpdate }: AnalysisResults
                 if (group.children.length === 1 && group.children[0].level === 1) {
                   const h1 = group.children[0];
                   return (
-                    <div key={`h1-${groupIdx}`} className="flex items-start gap-3 p-3 rounded-lg bg-primary/10 border-2 border-primary/30">
-                      <Badge className={`${getHeadingColor(1)} text-white shrink-0`}>
-                        H1
-                      </Badge>
-                      <p className="text-sm flex-1 font-semibold">{h1.text}</p>
-                    </div>
+                    <Collapsible key={`h1-${groupIdx}`}>
+                      <CollapsibleTrigger className="w-full">
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/10 border-2 border-primary/30 hover:bg-primary/15 transition-colors group">
+                          <Badge className={`${getHeadingColor(1)} text-white shrink-0`}>
+                            H1
+                          </Badge>
+                          <p className="text-sm flex-1 font-semibold text-left">{h1.text}</p>
+                          {h1.content && (
+                            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                          )}
+                        </div>
+                      </CollapsibleTrigger>
+                      {h1.content && (
+                        <CollapsibleContent className="mt-2">
+                          <div className="text-xs text-muted-foreground p-3 rounded-md bg-background/50 whitespace-pre-wrap ml-2 border-l-2 border-primary/30">
+                            {h1.content}
+                          </div>
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
                   );
                 }
                 
