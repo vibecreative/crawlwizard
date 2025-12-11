@@ -348,65 +348,42 @@ const Index = () => {
     const normalizedText = normalizeForMatching(text);
     const normalizedKeyword = normalizeForMatching(keyword);
     
-    console.log('Fuzzy match check:', { 
-      originalText: text.substring(0, 100), 
-      originalKeyword: keyword,
-      normalizedText: normalizedText.substring(0, 100), 
-      normalizedKeyword 
-    });
-    
     // Exact match after normalization
     if (normalizedText.includes(normalizedKeyword)) {
-      console.log('Match found: exact normalized match');
       return true;
     }
     
-    // Check if all keyword parts are present (handles compound word variations like "marketing bureau" vs "marketingbureau")
     const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
     const textWords = normalizedText.split(' ');
-    
-    // Remove spaces from text to check for compound words (e.g., "marketingbureau" in text)
     const textWithoutSpaces = normalizedText.replace(/\s/g, '');
-    const keywordWithoutSpaces = normalizedKeyword.replace(/\s/g, '');
     
-    console.log('Compound check:', { textWithoutSpaces: textWithoutSpaces.substring(0, 50), keywordWithoutSpaces });
+    // Helper: check if a keyword part is found in text (as word, part of word, or in compound)
+    const partFoundInText = (part: string): boolean => {
+      // Direct word match or substring of a word
+      if (textWords.some(word => word.includes(part) || part.includes(word))) return true;
+      // Found in continuous text (handles compounds)
+      if (textWithoutSpaces.includes(part)) return true;
+      return false;
+    };
     
-    // Check for compound variations (e.g., "marketingbureau" should match "marketing bureau")
-    if (textWithoutSpaces.includes(keywordWithoutSpaces)) {
-      console.log('Match found: compound match');
-      return true;
-    }
+    // Check if adjacent keyword parts form a compound that exists in text
+    // e.g., "marketing" + "bureau" -> "marketingbureau"
+    const compoundPartsFound: Set<number> = new Set();
     
-    // Check if text contains compound version of any adjacent keyword pairs
     for (let i = 0; i < keywordParts.length - 1; i++) {
       const compound = keywordParts[i] + keywordParts[i + 1];
-      // Check in both the word list AND the continuous text (for compound words)
-      const compoundInText = textWords.some(w => w.includes(compound)) || textWithoutSpaces.includes(compound);
-      
-      console.log(`Checking compound "${compound}":`, { compoundInText });
-      
-      if (compoundInText) {
-        // Verify other parts are also present
-        const remainingParts = [...keywordParts.slice(0, i), ...keywordParts.slice(i + 2)];
-        const allRemainingPresent = remainingParts.every(part => 
-          textWords.some(w => w.includes(part) || part.includes(w)) ||
-          textWithoutSpaces.includes(part)
-        );
-        console.log('Remaining parts check:', { remainingParts, allRemainingPresent });
-        if (allRemainingPresent) {
-          console.log('Match found: compound + remaining parts');
-          return true;
-        }
+      if (textWords.some(w => w.includes(compound)) || textWithoutSpaces.includes(compound)) {
+        compoundPartsFound.add(i);
+        compoundPartsFound.add(i + 1);
       }
     }
     
-    // All keyword parts should be present in the text (in words or as compounds)
-    const allPartsPresent = keywordParts.every(part => 
-      textWords.some(word => word.includes(part) || part.includes(word)) ||
-      textWithoutSpaces.includes(part)
-    );
+    // Check if all keyword parts are accounted for (either as compound or individual)
+    const allPartsPresent = keywordParts.every((part, idx) => {
+      if (compoundPartsFound.has(idx)) return true;
+      return partFoundInText(part);
+    });
     
-    console.log('All parts check:', { keywordParts, allPartsPresent });
     return allPartsPresent;
   };
 
