@@ -353,62 +353,29 @@ const Index = () => {
       return true;
     }
     
+    // Also check without spaces (compound word match)
+    const textWithoutSpaces = normalizedText.replace(/\s/g, '');
+    const keywordWithoutSpaces = normalizedKeyword.replace(/\s/g, '');
+    if (textWithoutSpaces.includes(keywordWithoutSpaces)) {
+      return true;
+    }
+    
     const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
     const textWords = normalizedText.split(' ');
-    const textWithoutSpaces = normalizedText.replace(/\s/g, '');
     
-    // Track which keyword parts have been matched
-    const matchedParts: Set<number> = new Set();
+    if (keywordParts.length === 0) return false;
     
-    // Strategy 1: Check if adjacent keyword parts form a compound in text
-    // e.g., keyword "marketing bureau" matches text word "marketingbureau"
-    for (let i = 0; i < keywordParts.length - 1; i++) {
-      const compound = keywordParts[i] + keywordParts[i + 1];
-      if (textWords.some(w => w.includes(compound)) || textWithoutSpaces.includes(compound)) {
-        matchedParts.add(i);
-        matchedParts.add(i + 1);
-      }
-    }
-    
-    // Strategy 2: Check if a text word contains multiple consecutive keyword parts
-    // e.g., text word "marketingbureau" contains keyword parts "marketing" and "bureau"
-    for (const textWord of textWords) {
-      if (textWord.length < 6) continue; // Skip short words
-      
-      for (let i = 0; i < keywordParts.length - 1; i++) {
-        if (matchedParts.has(i) && matchedParts.has(i + 1)) continue;
-        
-        const part1 = keywordParts[i];
-        const part2 = keywordParts[i + 1];
-        
-        // Check if both parts appear in this word (in order)
-        const idx1 = textWord.indexOf(part1);
-        const idx2 = textWord.indexOf(part2);
-        
-        if (idx1 !== -1 && idx2 !== -1 && idx1 < idx2) {
-          matchedParts.add(i);
-          matchedParts.add(i + 1);
-        }
-      }
-    }
-    
-    // Strategy 3: Check remaining parts individually
-    for (let i = 0; i < keywordParts.length; i++) {
-      if (matchedParts.has(i)) continue;
-      
-      const part = keywordParts[i];
-      
-      // Check if part exists in any text word
-      const foundInWord = textWords.some(word => word.includes(part) || part.includes(word));
+    // For each keyword part, check if it appears anywhere in the text
+    // (either as a standalone word, part of a word, or in the continuous text)
+    const allPartsFound = keywordParts.every(part => {
+      // Check if part is found in any text word (including as substring)
+      const foundInWord = textWords.some(word => word.includes(part));
+      // Check if part is found in continuous text
       const foundInContinuous = textWithoutSpaces.includes(part);
-      
-      if (foundInWord || foundInContinuous) {
-        matchedParts.add(i);
-      }
-    }
+      return foundInWord || foundInContinuous;
+    });
     
-    // All keyword parts must be matched
-    return matchedParts.size === keywordParts.length;
+    return allPartsFound;
   };
 
   const analyzeKeywordPlacement = (html: string, url: string, primaryKeyword: string): KeywordPlacementAnalysis | undefined => {
