@@ -14,7 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_pages: {
+        Row: {
+          analysis_data: Json | null
+          created_at: string
+          error_message: string | null
+          has_h1: boolean | null
+          has_meta_description: boolean | null
+          has_structured_data: boolean | null
+          heading_issues: number | null
+          id: string
+          keyword_issues: number | null
+          meta_description: string | null
+          project_id: string
+          seo_score: number | null
+          status: string
+          structured_data_issues: number | null
+          title: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          analysis_data?: Json | null
+          created_at?: string
+          error_message?: string | null
+          has_h1?: boolean | null
+          has_meta_description?: boolean | null
+          has_structured_data?: boolean | null
+          heading_issues?: number | null
+          id?: string
+          keyword_issues?: number | null
+          meta_description?: string | null
+          project_id: string
+          seo_score?: number | null
+          status?: string
+          structured_data_issues?: number | null
+          title?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          analysis_data?: Json | null
+          created_at?: string
+          error_message?: string | null
+          has_h1?: boolean | null
+          has_meta_description?: boolean | null
+          has_structured_data?: boolean | null
+          heading_issues?: number | null
+          id?: string
+          keyword_issues?: number | null
+          meta_description?: string | null
+          project_id?: string
+          seo_score?: number | null
+          status?: string
+          structured_data_issues?: number | null
+          title?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_pages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          analyzed_pages: number | null
+          base_url: string
+          created_at: string
+          id: string
+          name: string
+          status: string
+          total_pages: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analyzed_pages?: number | null
+          base_url: string
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analyzed_pages?: number | null
+          base_url?: string
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          total_pages?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
