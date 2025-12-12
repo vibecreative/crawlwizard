@@ -348,11 +348,8 @@ const Index = () => {
     const normalizedText = normalizeForMatching(text);
     const normalizedKeyword = normalizeForMatching(keyword);
     
-    console.log('Fuzzy match:', { normalizedText: normalizedText.substring(0, 150), normalizedKeyword });
-    
     // Exact match after normalization
     if (normalizedText.includes(normalizedKeyword)) {
-      console.log('Match: exact');
       return true;
     }
     
@@ -360,46 +357,58 @@ const Index = () => {
     const textWords = normalizedText.split(' ');
     const textWithoutSpaces = normalizedText.replace(/\s/g, '');
     
-    console.log('Keyword parts:', keywordParts);
-    console.log('Text words:', textWords.slice(0, 20));
+    // Track which keyword parts have been matched
+    const matchedParts: Set<number> = new Set();
     
-    // Helper: check if a keyword part is found in text (as word, part of word, or in compound)
-    const partFoundInText = (part: string): boolean => {
-      // Direct word match or substring of a word
-      if (textWords.some(word => word.includes(part) || part.includes(word))) return true;
-      // Found in continuous text (handles compounds)
-      if (textWithoutSpaces.includes(part)) return true;
-      return false;
-    };
-    
-    // Check if adjacent keyword parts form a compound that exists in text
-    // e.g., "marketing" + "bureau" -> "marketingbureau"
-    const compoundPartsFound: Set<number> = new Set();
-    
+    // Strategy 1: Check if adjacent keyword parts form a compound in text
+    // e.g., keyword "marketing bureau" matches text word "marketingbureau"
     for (let i = 0; i < keywordParts.length - 1; i++) {
       const compound = keywordParts[i] + keywordParts[i + 1];
-      const foundInWords = textWords.some(w => w.includes(compound));
-      const foundInContinuous = textWithoutSpaces.includes(compound);
-      console.log(`Compound "${compound}":`, { foundInWords, foundInContinuous });
-      if (foundInWords || foundInContinuous) {
-        compoundPartsFound.add(i);
-        compoundPartsFound.add(i + 1);
+      if (textWords.some(w => w.includes(compound)) || textWithoutSpaces.includes(compound)) {
+        matchedParts.add(i);
+        matchedParts.add(i + 1);
       }
     }
     
-    // Check if all keyword parts are accounted for (either as compound or individual)
-    const allPartsPresent = keywordParts.every((part, idx) => {
-      if (compoundPartsFound.has(idx)) {
-        console.log(`Part "${part}" found via compound`);
-        return true;
+    // Strategy 2: Check if a text word contains multiple consecutive keyword parts
+    // e.g., text word "marketingbureau" contains keyword parts "marketing" and "bureau"
+    for (const textWord of textWords) {
+      if (textWord.length < 6) continue; // Skip short words
+      
+      for (let i = 0; i < keywordParts.length - 1; i++) {
+        if (matchedParts.has(i) && matchedParts.has(i + 1)) continue;
+        
+        const part1 = keywordParts[i];
+        const part2 = keywordParts[i + 1];
+        
+        // Check if both parts appear in this word (in order)
+        const idx1 = textWord.indexOf(part1);
+        const idx2 = textWord.indexOf(part2);
+        
+        if (idx1 !== -1 && idx2 !== -1 && idx1 < idx2) {
+          matchedParts.add(i);
+          matchedParts.add(i + 1);
+        }
       }
-      const found = partFoundInText(part);
-      console.log(`Part "${part}" found individually:`, found);
-      return found;
-    });
+    }
     
-    console.log('All parts present:', allPartsPresent);
-    return allPartsPresent;
+    // Strategy 3: Check remaining parts individually
+    for (let i = 0; i < keywordParts.length; i++) {
+      if (matchedParts.has(i)) continue;
+      
+      const part = keywordParts[i];
+      
+      // Check if part exists in any text word
+      const foundInWord = textWords.some(word => word.includes(part) || part.includes(word));
+      const foundInContinuous = textWithoutSpaces.includes(part);
+      
+      if (foundInWord || foundInContinuous) {
+        matchedParts.add(i);
+      }
+    }
+    
+    // All keyword parts must be matched
+    return matchedParts.size === keywordParts.length;
   };
 
   const analyzeKeywordPlacement = (html: string, url: string, primaryKeyword: string): KeywordPlacementAnalysis | undefined => {
@@ -469,11 +478,7 @@ const Index = () => {
       introText = introTexts.join(' ').substring(0, 500);
     }
     
-    console.log('Keyword placement - Intro text extracted:', introText.substring(0, 200));
-    console.log('Keyword placement - Primary keyword:', primaryKeyword);
-    
     const inIntroText = introText.length > 0 && fuzzyKeywordMatch(introText, primaryKeyword);
-    console.log('Keyword placement - inIntroText result:', inIntroText);
 
     return {
       keyword: primaryKeyword,
