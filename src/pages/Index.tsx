@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
+import { WebsiteAnalyzer } from "@/components/WebsiteAnalyzer";
+import { SitemapUrlList } from "@/components/SitemapUrlList";
 import { AnalysisResults } from "@/components/AnalysisResults";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { SitemapUrl } from "@/lib/api/sitemap";
+import { FileText, Globe } from "lucide-react";
 
 interface HeadingInfo {
   level: number;
@@ -63,13 +68,18 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  
+  // Website analysis state
+  const [discoveredUrls, setDiscoveredUrls] = useState<SitemapUrl[]>([]);
+  const [websiteBaseUrl, setWebsiteBaseUrl] = useState<string>("");
+  const [isAnalyzingWebsite, setIsAnalyzingWebsite] = useState(false);
+  const [analyzedPagesCount, setAnalyzedPagesCount] = useState(0);
 
   const parseHeadings = (html: string): HeadingInfo[] => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     const headings: HeadingInfo[] = [];
 
-    // Get all heading elements and all body elements
     const headingElements = Array.from(doc.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     const allElements = Array.from(doc.body.querySelectorAll('*'));
     
@@ -78,10 +88,8 @@ const Index = () => {
       const level = parseInt(tagName.substring(1));
       const text = el.textContent?.trim() || '';
       
-      // Skip empty headings
       if (!text) return;
       
-      // Skip hidden elements
       const style = el.getAttribute('style') || '';
       const isHidden = 
         el.getAttribute('hide') === 'true' ||
@@ -95,7 +103,6 @@ const Index = () => {
       
       if (isHidden) return;
       
-      // Extract content between this heading and the next
       let content = "";
       const headingIndex = allElements.indexOf(el);
       const nextHeadingIndex = headingElements
@@ -103,29 +110,22 @@ const Index = () => {
         .map(h => allElements.indexOf(h))
         .find(idx => idx > headingIndex);
       
-      // Collect text content from elements between this heading and the next
       const contentElements: string[] = [];
       const seenTexts = new Set<string>();
       
       for (let i = headingIndex + 1; i < (nextHeadingIndex || allElements.length); i++) {
         const element = allElements[i];
         
-        // Skip if element is a heading
         if (element.matches('h1, h2, h3, h4, h5, h6')) break;
         
-        // Skip nested elements (only process leaf-like content)
         const isLeafElement = !element.querySelector('p, div, span, li, td, th');
         
-        // Only include visible text content from paragraph-like elements
         if (element.matches('p, li, td, th') || (element.matches('div, span') && isLeafElement)) {
-          // Get only direct text content to avoid duplication
           let elementText = '';
           
-          // For leaf elements, get all text content
           if (isLeafElement) {
             elementText = element.textContent?.trim() || '';
           } else {
-            // For elements with children, only get direct text nodes
             const directText = Array.from(element.childNodes)
               .filter(node => node.nodeType === Node.TEXT_NODE)
               .map(node => node.textContent?.trim() || '')
@@ -134,9 +134,7 @@ const Index = () => {
             elementText = directText;
           }
           
-          // Only add meaningful text that we haven't seen before
           if (elementText && elementText.length > 10 && !seenTexts.has(elementText)) {
-            // Check for substantial overlap with existing content
             const hasOverlap = contentElements.some(existing => 
               existing.includes(elementText) || elementText.includes(existing)
             );
@@ -186,34 +184,24 @@ const Index = () => {
   const parseStructuredData = (html: string): StructuredDataItem[] => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const typeMap = new Map<string, any>(); // Use Map to store unique types with their data
+    const typeMap = new Map<string, any>();
 
-    // Parse JSON-LD
     const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
-    console.log('Found JSON-LD scripts:', jsonLdScripts.length);
     
-    jsonLdScripts.forEach((script, scriptIndex) => {
+    jsonLdScripts.forEach((script) => {
       try {
         const data = JSON.parse(script.textContent || '');
-        console.log(`Processing script ${scriptIndex}:`, data);
         
-        // Helper function to extract types from data (only top-level items)
         const extractTypes = (obj: any, depth: number = 0): void => {
           if (Array.isArray(obj)) {
-            // Handle arrays of structured data items
             obj.forEach(item => extractTypes(item, depth));
           } else if (obj && typeof obj === 'object') {
-            // Handle @graph property (common in structured data)
             if (obj['@graph'] && Array.isArray(obj['@graph']) && depth === 0) {
-              console.log('Found @graph with items:', obj['@graph'].length);
               obj['@graph'].forEach((item: any) => extractTypes(item, depth + 1));
             } else if (obj['@type']) {
-              // Handle single or multiple types
               const types = Array.isArray(obj['@type']) ? obj['@type'] : [obj['@type']];
               types.forEach((type: string) => {
                 const typeLabel = `JSON-LD: ${type}`;
-                console.log('Found type:', typeLabel, 'Already in map:', typeMap.has(typeLabel));
-                // Only store the first occurrence of each type
                 if (!typeMap.has(typeLabel)) {
                   typeMap.set(typeLabel, obj);
                 }
@@ -228,15 +216,11 @@ const Index = () => {
       }
     });
 
-    console.log('Final typeMap size:', typeMap.size, 'Types:', Array.from(typeMap.keys()));
-
-    // Convert Map to array of StructuredDataItem
     const structuredData: StructuredDataItem[] = Array.from(typeMap.entries()).map(([type, data]) => ({
       type,
       data
     }));
 
-    // Check for common microdata types
     const itemScopes = doc.querySelectorAll('[itemscope]');
     const microdataTypes = new Set<string>();
     itemScopes.forEach((element) => {
@@ -272,7 +256,6 @@ const Index = () => {
       const count = matches.length;
       const density = totalWords > 0 ? (count / totalWords) * 100 : 0;
 
-      // Check presence in key locations
       const title = doc.querySelector('title');
       const inTitle = title?.textContent?.toLowerCase().includes(keywordLower) || false;
 
@@ -285,7 +268,6 @@ const Index = () => {
       const h2Elements = doc.querySelectorAll('h2');
       const inH2 = Array.from(h2Elements).some(h => h.textContent?.toLowerCase().includes(keywordLower));
 
-      // Calculate relevance score
       let relevanceScore = 0;
       if (inTitle) relevanceScore += 25;
       if (inMetaDesc) relevanceScore += 15;
@@ -293,7 +275,6 @@ const Index = () => {
       if (inH2) relevanceScore += 10;
       relevanceScore += Math.min(count * 2, 30);
 
-      // Generate suggestions based on analysis
       const suggestions: string[] = [];
       
       if (!inTitle) {
@@ -330,12 +311,11 @@ const Index = () => {
     });
   };
 
-  // Normalize text for fuzzy keyword matching (remove Dutch stopwords, normalize spacing)
   const normalizeForMatching = (text: string): string => {
     const stopwords = ['in', 'de', 'het', 'een', 'van', 'en', 'op', 'te', 'voor', 'met', 'naar', 'aan', 'om', 'bij'];
     return text
       .toLowerCase()
-      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .replace(/[^\w\s]/g, '')
       .split(/\s+/)
       .filter(word => !stopwords.includes(word))
       .join(' ')
@@ -343,17 +323,14 @@ const Index = () => {
       .trim();
   };
 
-  // Check if keyword matches text with fuzzy matching
   const fuzzyKeywordMatch = (text: string, keyword: string): boolean => {
     const normalizedText = normalizeForMatching(text);
     const normalizedKeyword = normalizeForMatching(keyword);
     
-    // Exact match after normalization
     if (normalizedText.includes(normalizedKeyword)) {
       return true;
     }
     
-    // Also check without spaces (compound word match)
     const textWithoutSpaces = normalizedText.replace(/\s/g, '');
     const keywordWithoutSpaces = normalizedKeyword.replace(/\s/g, '');
     if (textWithoutSpaces.includes(keywordWithoutSpaces)) {
@@ -365,12 +342,8 @@ const Index = () => {
     
     if (keywordParts.length === 0) return false;
     
-    // For each keyword part, check if it appears anywhere in the text
-    // (either as a standalone word, part of a word, or in the continuous text)
     const allPartsFound = keywordParts.every(part => {
-      // Check if part is found in any text word (including as substring)
       const foundInWord = textWords.some(word => word.includes(part));
-      // Check if part is found in continuous text
       const foundInContinuous = textWithoutSpaces.includes(part);
       return foundInWord || foundInContinuous;
     });
@@ -379,13 +352,11 @@ const Index = () => {
   };
 
   const analyzeKeywordPlacement = (html: string, url: string, primaryKeyword: string): KeywordPlacementAnalysis | undefined => {
-    // Only analyze if there's a primary keyword
     if (!primaryKeyword) return undefined;
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    // Check if keyword is in URL (URLs typically have hyphens or no spaces)
     const urlLower = url.toLowerCase();
     const keywordForUrl = primaryKeyword.toLowerCase().replace(/\s+/g, '-');
     const keywordNoSpaces = primaryKeyword.toLowerCase().replace(/\s+/g, '');
@@ -393,25 +364,20 @@ const Index = () => {
                   urlLower.includes(keywordNoSpaces) ||
                   fuzzyKeywordMatch(urlLower.replace(/-/g, ' '), primaryKeyword);
 
-    // Get H1 text
     const h1Element = doc.querySelector('h1');
     const h1Text = h1Element?.textContent?.trim() || '';
     const inH1 = fuzzyKeywordMatch(h1Text, primaryKeyword);
 
-    // Get intro text (first paragraph-like content after H1)
-    // Use a more comprehensive search to find content below H1
     let introText = '';
     if (h1Element) {
       const introTexts: string[] = [];
       
-      // Method 1: Direct siblings
       let sibling = h1Element.nextElementSibling;
       let elementsChecked = 0;
       
       while (sibling && elementsChecked < 15) {
         if (sibling.matches('h1, h2, h3, h4, h5, h6')) break;
         
-        // Include more element types for modern websites
         if (sibling.matches('p, div, span, section, article')) {
           const text = sibling.textContent?.trim() || '';
           if (text.length > 20) {
@@ -424,7 +390,6 @@ const Index = () => {
         elementsChecked++;
       }
       
-      // Method 2: If no direct siblings found, check parent container's children
       if (introTexts.length === 0 && h1Element.parentElement) {
         const parent = h1Element.parentElement;
         const children = Array.from(parent.children);
@@ -474,7 +439,7 @@ const Index = () => {
           console.log(`Poging ${attempt + 1}, proxy: ${proxyUrl.split('?')[0]}`);
           
           const response = await fetch(proxyUrl, {
-            signal: AbortSignal.timeout(15000), // 15 second timeout
+            signal: AbortSignal.timeout(15000),
           });
           
           if (response.ok) {
@@ -489,7 +454,6 @@ const Index = () => {
         }
       }
       
-      // Wait before retrying all proxies
       if (attempt < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
@@ -508,17 +472,13 @@ const Index = () => {
       const meta = parseMeta(html);
       const structuredData = parseStructuredData(html);
       
-      // For keyword analysis, combine primary and secondary keywords
       const allKeywords = primaryKeyword 
         ? [primaryKeyword, ...secondaryKeywords] 
         : secondaryKeywords;
       const keywordScores = analyzeKeywords(html, allKeywords);
       
-      // For keyword placement, only use primary keyword
       const keywordPlacement = analyzeKeywordPlacement(html, url, primaryKeyword);
 
-      // For screenshot, we would normally use a service like Puppeteer or a screenshot API
-      // For now, we'll note that this needs to be implemented with a backend service
       const screenshotPlaceholder = undefined;
 
       const data: AnalysisData = {
@@ -535,10 +495,8 @@ const Index = () => {
       setAnalysisData(data);
       toast.success("Analyse voltooid!");
       
-      // Generate FAQs automatically
       generateFaqs(html, data);
       
-      // Scroll to results
       setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }, 100);
@@ -586,6 +544,38 @@ const Index = () => {
     }
   };
 
+  const handleUrlsDiscovered = (baseUrl: string, urls: SitemapUrl[]) => {
+    setWebsiteBaseUrl(baseUrl);
+    setDiscoveredUrls(urls);
+  };
+
+  const handleAnalyzeSelectedUrls = async (urls: string[]) => {
+    setIsAnalyzingWebsite(true);
+    setAnalyzedPagesCount(0);
+    
+    toast.info(`Start analyse van ${urls.length} pagina's...`);
+    
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      try {
+        console.log(`Analyzing page ${i + 1}/${urls.length}: ${url}`);
+        // TODO: Store results in database for project dashboard
+        await fetchWithRetry(url);
+        setAnalyzedPagesCount(i + 1);
+      } catch (error) {
+        console.error(`Failed to analyze ${url}:`, error);
+      }
+      
+      // Small delay between requests
+      if (i < urls.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+    
+    toast.success(`${urls.length} pagina's geanalyseerd!`);
+    setIsAnalyzingWebsite(false);
+  };
+
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="container mx-auto">
@@ -594,7 +584,41 @@ const Index = () => {
         </div>
         
         <div className="mb-16">
-          <UrlAnalyzer onAnalyze={analyzeUrl} isLoading={isLoading} />
+          <Tabs defaultValue="single" className="w-full max-w-4xl mx-auto">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="single" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Enkele pagina
+              </TabsTrigger>
+              <TabsTrigger value="website" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Volledige website
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="single">
+              <UrlAnalyzer onAnalyze={analyzeUrl} isLoading={isLoading} />
+            </TabsContent>
+            
+            <TabsContent value="website">
+              <WebsiteAnalyzer 
+                onUrlsDiscovered={handleUrlsDiscovered} 
+                isLoading={isAnalyzingWebsite} 
+              />
+              
+              {discoveredUrls.length > 0 && (
+                <div className="mt-8">
+                  <SitemapUrlList
+                    baseUrl={websiteBaseUrl}
+                    urls={discoveredUrls}
+                    onAnalyzeSelected={handleAnalyzeSelectedUrls}
+                    isAnalyzing={isAnalyzingWebsite}
+                    analyzedCount={analyzedPagesCount}
+                  />
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
 
         {analysisData && (
@@ -616,7 +640,7 @@ const Index = () => {
           </div>
         )}
 
-        {!analysisData && !isLoading && (
+        {!analysisData && !isLoading && discoveredUrls.length === 0 && (
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-primary mb-6 shadow-glow">
               <svg 
@@ -635,7 +659,7 @@ const Index = () => {
             </div>
             <h2 className="text-2xl font-semibold mb-3">Klaar om te beginnen?</h2>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Voer een URL in om de technische SEO structuur te analyseren en inzicht te krijgen in heading hierarchie, meta data en meer.
+              Kies hierboven voor een enkele pagina analyse of ontdek alle pagina's van een website via sitemap.xml.
             </p>
           </div>
         )}
