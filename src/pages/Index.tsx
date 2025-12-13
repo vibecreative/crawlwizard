@@ -2,6 +2,7 @@ import { useState } from "react";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { WebsiteAnalyzer } from "@/components/WebsiteAnalyzer";
 import { SitemapUrlList } from "@/components/SitemapUrlList";
+import { WebsiteAnalysisResults, PageAnalysisResult } from "@/components/WebsiteAnalysisResults";
 import { AnalysisResults } from "@/components/AnalysisResults";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -74,6 +75,8 @@ const Index = () => {
   const [websiteBaseUrl, setWebsiteBaseUrl] = useState<string>("");
   const [isAnalyzingWebsite, setIsAnalyzingWebsite] = useState(false);
   const [analyzedPagesCount, setAnalyzedPagesCount] = useState(0);
+  const [websiteResults, setWebsiteResults] = useState<PageAnalysisResult[]>([]);
+  const [showWebsiteResults, setShowWebsiteResults] = useState(false);
 
   const parseHeadings = (html: string): HeadingInfo[] => {
     const parser = new DOMParser();
@@ -549,22 +552,87 @@ const Index = () => {
     setDiscoveredUrls(urls);
   };
 
+  const calculateSeoScore = (
+    hasH1: boolean, 
+    hasMetaDesc: boolean, 
+    hasStructuredData: boolean, 
+    headingIssues: number
+  ): number => {
+    let score = 0;
+    if (hasH1) score += 25;
+    if (hasMetaDesc) score += 25;
+    if (hasStructuredData) score += 25;
+    score += Math.max(0, 25 - (headingIssues * 5));
+    return Math.max(0, Math.min(100, score));
+  };
+
+  const analyzePageForWebsite = (html: string, url: string): PageAnalysisResult => {
+    const headings = parseHeadings(html);
+    const meta = parseMeta(html);
+    const structuredData = parseStructuredData(html);
+    
+    const hasH1 = headings.some(h => h.level === 1);
+    const hasMetaDescription = !!meta.description;
+    const hasStructuredData = structuredData.length > 0;
+    
+    // Calculate heading issues
+    let headingIssues = 0;
+    const h1Count = headings.filter(h => h.level === 1).length;
+    if (h1Count === 0) headingIssues++;
+    if (h1Count > 1) headingIssues++;
+    
+    // Check for skipped levels
+    const levels = headings.map(h => h.level).sort((a, b) => a - b);
+    for (let i = 1; i < levels.length; i++) {
+      if (levels[i] - levels[i-1] > 1) headingIssues++;
+    }
+    
+    const seoScore = calculateSeoScore(hasH1, hasMetaDescription, hasStructuredData, headingIssues);
+    
+    return {
+      url,
+      title: meta.title,
+      status: 'success',
+      seoScore,
+      hasH1,
+      hasMetaDescription,
+      hasStructuredData,
+      headingIssues,
+    };
+  };
+
   const handleAnalyzeSelectedUrls = async (urls: string[]) => {
     setIsAnalyzingWebsite(true);
     setAnalyzedPagesCount(0);
+    setWebsiteResults([]);
+    setShowWebsiteResults(false);
     
     toast.info(`Start analyse van ${urls.length} pagina's...`);
+    
+    const results: PageAnalysisResult[] = [];
     
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       try {
         console.log(`Analyzing page ${i + 1}/${urls.length}: ${url}`);
-        // TODO: Store results in database for project dashboard
-        await fetchWithRetry(url);
-        setAnalyzedPagesCount(i + 1);
+        const html = await fetchWithRetry(url);
+        const result = analyzePageForWebsite(html, url);
+        results.push(result);
       } catch (error) {
         console.error(`Failed to analyze ${url}:`, error);
+        results.push({
+          url,
+          status: 'error',
+          errorMessage: 'Kon pagina niet ophalen',
+          hasH1: false,
+          hasMetaDescription: false,
+          hasStructuredData: false,
+          headingIssues: 0,
+        });
       }
+      
+      setAnalyzedPagesCount(i + 1);
+      setWebsiteResults([...results]);
       
       // Small delay between requests
       if (i < urls.length - 1) {
@@ -574,6 +642,12 @@ const Index = () => {
     
     toast.success(`${urls.length} pagina's geanalyseerd!`);
     setIsAnalyzingWebsite(false);
+    setShowWebsiteResults(true);
+  };
+
+  const handleViewPageDetails = async (url: string) => {
+    // Analyze single page in detail
+    await analyzeUrl(url);
   };
 
   return (
@@ -606,7 +680,7 @@ const Index = () => {
                 isLoading={isAnalyzingWebsite} 
               />
               
-              {discoveredUrls.length > 0 && (
+              {discoveredUrls.length > 0 && !showWebsiteResults && (
                 <div className="mt-8">
                   <SitemapUrlList
                     baseUrl={websiteBaseUrl}
@@ -614,6 +688,15 @@ const Index = () => {
                     onAnalyzeSelected={handleAnalyzeSelectedUrls}
                     isAnalyzing={isAnalyzingWebsite}
                     analyzedCount={analyzedPagesCount}
+                  />
+                </div>
+              )}
+              
+              {(showWebsiteResults || (isAnalyzingWebsite && websiteResults.length > 0)) && (
+                <div className="mt-8">
+                  <WebsiteAnalysisResults 
+                    results={websiteResults}
+                    onViewDetails={handleViewPageDetails}
                   />
                 </div>
               )}
