@@ -7,10 +7,12 @@ import { AnalysisResults } from "@/components/AnalysisResults";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { SitemapUrl } from "@/lib/api/sitemap";
-import { FileText, Globe } from "lucide-react";
+import { FileText, Globe, LogOut } from "lucide-react";
 
 interface HeadingInfo {
   level: number;
@@ -650,10 +652,23 @@ const Index = () => {
     await analyzeUrl(url);
   };
 
+  const { signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Uitgelogd");
+  };
+
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="container mx-auto">
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <span className="text-sm text-muted-foreground hidden sm:inline">
+            {user?.email}
+          </span>
+          <Button variant="ghost" size="icon" onClick={handleSignOut} title="Uitloggen">
+            <LogOut className="h-4 w-4" />
+          </Button>
           <ThemeToggle />
         </div>
         
