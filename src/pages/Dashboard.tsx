@@ -248,7 +248,7 @@ const Dashboard = () => {
               <RefreshCw className="h-4 w-4 mr-2" />
               Vernieuwen
             </Button>
-            <Button size="sm" onClick={() => navigate("/")}>
+            <Button size="sm" onClick={() => navigate("/analyze")}>
               <Plus className="h-4 w-4 mr-2" />
               Nieuwe Analyse
             </Button>
@@ -280,7 +280,7 @@ const Dashboard = () => {
               <p className="text-muted-foreground mb-6">
                 Start je eerste website analyse om projecten aan te maken.
               </p>
-              <Button onClick={() => navigate("/")}>
+              <Button onClick={() => navigate("/analyze")}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nieuwe Analyse Starten
               </Button>
