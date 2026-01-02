@@ -19,7 +19,8 @@ import {
   LogOut,
   ExternalLink,
   RefreshCw,
-  Trash2
+  Trash2,
+  Eye
 } from "lucide-react";
 
 interface ProjectPage {
@@ -32,6 +33,7 @@ interface ProjectPage {
   has_structured_data: boolean;
   heading_issues: number;
   status: string;
+  analysis_data: any | null;
 }
 
 interface Project {
@@ -412,6 +414,16 @@ const Dashboard = () => {
                                       {page.seo_score ?? "-"}
                                     </span>
                                   </div>
+                                  {/* View Details Button */}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-xs"
+                                    onClick={() => navigate(`/page/${page.id}`)}
+                                  >
+                                    <Eye className="h-3 w-3 mr-1" />
+                                    Details
+                                  </Button>
                                   {/* External Link */}
                                   <Button
                                     variant="ghost"
