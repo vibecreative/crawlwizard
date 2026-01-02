@@ -77,9 +77,9 @@ export const WebsiteAnalyzer = ({ onUrlsDiscovered, isLoading }: WebsiteAnalyzer
                 Sitemap ophalen...
               </>
             ) : (
-              <>
+            <>
                 <Globe className="mr-2 h-5 w-5" />
-                Ontdek pagina's
+                Analyseer website
               </>
             )}
           </Button>
