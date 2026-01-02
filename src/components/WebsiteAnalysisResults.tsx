@@ -24,6 +24,7 @@ export interface PageAnalysisResult {
   hasMetaDescription: boolean;
   hasStructuredData: boolean;
   headingIssues: number;
+  analysisData?: any; // Full analysis data for detailed view
 }
 
 interface WebsiteAnalysisResultsProps {

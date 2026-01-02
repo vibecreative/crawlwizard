@@ -588,7 +588,7 @@ const Index = () => {
     
     const hasH1 = headings.some(h => h.level === 1);
     const hasMetaDescription = !!meta.description;
-    const hasStructuredData = structuredData.length > 0;
+    const hasStructuredDataFlag = structuredData.length > 0;
     
     // Calculate heading issues
     let headingIssues = 0;
@@ -602,7 +602,16 @@ const Index = () => {
       if (levels[i] - levels[i-1] > 1) headingIssues++;
     }
     
-    const seoScore = calculateSeoScore(hasH1, hasMetaDescription, hasStructuredData, headingIssues);
+    const seoScore = calculateSeoScore(hasH1, hasMetaDescription, hasStructuredDataFlag, headingIssues);
+    
+    // Create full analysis data for storage
+    const analysisData: AnalysisData = {
+      url,
+      headings,
+      meta,
+      structuredData,
+      html: '', // Don't store full HTML to save space
+    };
     
     return {
       url,
@@ -611,8 +620,9 @@ const Index = () => {
       seoScore,
       hasH1,
       hasMetaDescription,
-      hasStructuredData,
+      hasStructuredData: hasStructuredDataFlag,
       headingIssues,
+      analysisData,
     };
   };
 
@@ -706,6 +716,7 @@ const Index = () => {
         has_structured_data: result.hasStructuredData,
         heading_issues: result.headingIssues,
         error_message: result.errorMessage || null,
+        analysis_data: result.analysisData || null,
       }));
       
       const { error: pagesError } = await supabase
