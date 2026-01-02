@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { WebsiteAnalyzer } from "@/components/WebsiteAnalyzer";
 import { SitemapUrlList } from "@/components/SitemapUrlList";
@@ -12,7 +13,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { SitemapUrl } from "@/lib/api/sitemap";
-import { FileText, Globe, LogOut } from "lucide-react";
+import { FileText, Globe, LogOut, Save, Loader2 } from "lucide-react";
 
 interface HeadingInfo {
   level: number;
@@ -68,6 +69,7 @@ interface AnalysisData {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
@@ -79,6 +81,7 @@ const Index = () => {
   const [analyzedPagesCount, setAnalyzedPagesCount] = useState(0);
   const [websiteResults, setWebsiteResults] = useState<PageAnalysisResult[]>([]);
   const [showWebsiteResults, setShowWebsiteResults] = useState(false);
+  const [isSavingProject, setIsSavingProject] = useState(false);
 
   const parseHeadings = (html: string): HeadingInfo[] => {
     const parser = new DOMParser();
@@ -659,6 +662,62 @@ const Index = () => {
     toast.success("Uitgelogd");
   };
 
+  const handleSaveProject = async () => {
+    if (!user || websiteResults.length === 0) return;
+    
+    setIsSavingProject(true);
+    
+    try {
+      // Extract project name from URL
+      const urlObj = new URL(websiteBaseUrl);
+      const projectName = urlObj.hostname;
+      
+      // Create project
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          user_id: user.id,
+          name: projectName,
+          base_url: websiteBaseUrl,
+          total_pages: websiteResults.length,
+          analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
+          status: 'completed'
+        })
+        .select()
+        .single();
+      
+      if (projectError) throw projectError;
+      
+      // Create project pages
+      const pagesToInsert = websiteResults.map(result => ({
+        project_id: project.id,
+        url: result.url,
+        title: result.title || null,
+        status: result.status,
+        seo_score: result.seoScore || null,
+        has_h1: result.hasH1,
+        has_meta_description: result.hasMetaDescription,
+        has_structured_data: result.hasStructuredData,
+        heading_issues: result.headingIssues,
+        error_message: result.errorMessage || null,
+      }));
+      
+      const { error: pagesError } = await supabase
+        .from('project_pages')
+        .insert(pagesToInsert);
+      
+      if (pagesError) throw pagesError;
+      
+      toast.success("Project opgeslagen!");
+      navigate('/');
+    } catch (error) {
+      console.error('Error saving project:', error);
+      toast.error("Fout bij opslaan van project");
+    } finally {
+      setIsSavingProject(false);
+    }
+  };
+
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="container mx-auto">
@@ -708,11 +767,34 @@ const Index = () => {
               )}
               
               {(showWebsiteResults || (isAnalyzingWebsite && websiteResults.length > 0)) && (
-                <div className="mt-8">
+                <div className="mt-8 space-y-4">
                   <WebsiteAnalysisResults 
                     results={websiteResults}
                     onViewDetails={handleViewPageDetails}
                   />
+                  
+                  {showWebsiteResults && websiteResults.length > 0 && (
+                    <div className="flex justify-center">
+                      <Button 
+                        onClick={handleSaveProject}
+                        disabled={isSavingProject}
+                        className="gradient-primary"
+                        size="lg"
+                      >
+                        {isSavingProject ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Project opslaan...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Project opslaan
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
