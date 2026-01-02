@@ -13,7 +13,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { SitemapUrl } from "@/lib/api/sitemap";
-import { FileText, Globe, LogOut, Save, Loader2 } from "lucide-react";
+import { FileText, Globe, LogOut, Save, Loader2, FolderOpen } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface HeadingInfo {
   level: number;
@@ -82,6 +84,7 @@ const Index = () => {
   const [websiteResults, setWebsiteResults] = useState<PageAnalysisResult[]>([]);
   const [showWebsiteResults, setShowWebsiteResults] = useState(false);
   const [isSavingProject, setIsSavingProject] = useState(false);
+  const [projectName, setProjectName] = useState<string>("");
 
   const parseHeadings = (html: string): HeadingInfo[] => {
     const parser = new DOMParser();
@@ -555,6 +558,13 @@ const Index = () => {
   const handleUrlsDiscovered = (baseUrl: string, urls: SitemapUrl[]) => {
     setWebsiteBaseUrl(baseUrl);
     setDiscoveredUrls(urls);
+    // Set default project name from hostname
+    try {
+      const urlObj = new URL(baseUrl);
+      setProjectName(urlObj.hostname);
+    } catch {
+      setProjectName(baseUrl);
+    }
   };
 
   const calculateSeoScore = (
@@ -663,21 +673,17 @@ const Index = () => {
   };
 
   const handleSaveProject = async () => {
-    if (!user || websiteResults.length === 0) return;
+    if (!user || websiteResults.length === 0 || !projectName.trim()) return;
     
     setIsSavingProject(true);
     
     try {
-      // Extract project name from URL
-      const urlObj = new URL(websiteBaseUrl);
-      const projectName = urlObj.hostname;
-      
       // Create project
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
           user_id: user.id,
-          name: projectName,
+          name: projectName.trim(),
           base_url: websiteBaseUrl,
           total_pages: websiteResults.length,
           analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
@@ -688,12 +694,12 @@ const Index = () => {
       
       if (projectError) throw projectError;
       
-      // Create project pages
+      // Create project pages - map status to valid database values
       const pagesToInsert = websiteResults.map(result => ({
         project_id: project.id,
         url: result.url,
         title: result.title || null,
-        status: result.status,
+        status: result.status === 'success' ? 'completed' : result.status === 'error' ? 'failed' : result.status,
         seo_score: result.seoScore || null,
         has_h1: result.hasH1,
         has_meta_description: result.hasMetaDescription,
@@ -774,10 +780,25 @@ const Index = () => {
                   />
                   
                   {showWebsiteResults && websiteResults.length > 0 && (
-                    <div className="flex justify-center">
+                    <div className="flex flex-col items-center gap-4 p-6 border rounded-lg bg-card">
+                      <div className="flex items-center gap-2 text-lg font-medium">
+                        <FolderOpen className="h-5 w-5 text-primary" />
+                        Project opslaan
+                      </div>
+                      <div className="w-full max-w-md space-y-2">
+                        <Label htmlFor="projectName">Projectnaam</Label>
+                        <Input
+                          id="projectName"
+                          type="text"
+                          placeholder="Voer een projectnaam in..."
+                          value={projectName}
+                          onChange={(e) => setProjectName(e.target.value)}
+                          className="text-center"
+                        />
+                      </div>
                       <Button 
                         onClick={handleSaveProject}
-                        disabled={isSavingProject}
+                        disabled={isSavingProject || !projectName.trim()}
                         className="gradient-primary"
                         size="lg"
                       >
