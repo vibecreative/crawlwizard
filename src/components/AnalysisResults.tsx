@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw, ChevronDown } from "lucide-react";
+import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw, ChevronDown, RefreshCw, Loader2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { HeadingStructureScore } from "./HeadingStructureScore";
 import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
@@ -66,9 +66,11 @@ interface AnalysisResultsProps {
   data: AnalysisData;
   onReset: () => void;
   onFaqsUpdate?: (updatedFaqs: FaqItem[]) => void;
+  onReanalyze?: () => void;
+  isReanalyzing?: boolean;
 }
 
-export const AnalysisResults = ({ data, onReset, onFaqsUpdate }: AnalysisResultsProps) => {
+export const AnalysisResults = ({ data, onReset, onFaqsUpdate, onReanalyze, isReanalyzing }: AnalysisResultsProps) => {
   const getHeadingColor = (level: number) => {
     const colors = {
       1: "bg-heading-h1",
@@ -107,14 +109,37 @@ export const AnalysisResults = ({ data, onReset, onFaqsUpdate }: AnalysisResults
             </a>
           </div>
         </div>
-        <Button 
-          onClick={onReset}
-          variant="outline"
-          className="gap-2"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Nieuwe analyse
-        </Button>
+        <div className="flex gap-2">
+          {onReanalyze && (
+            <Button 
+              onClick={onReanalyze}
+              disabled={isReanalyzing}
+              className="gap-2 gradient-primary"
+            >
+              {isReanalyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyseren...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  Pagina opnieuw analyseren
+                </>
+              )}
+            </Button>
+          )}
+          {!onReanalyze && (
+            <Button 
+              onClick={onReset}
+              variant="outline"
+              className="gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Nieuwe analyse
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Heading Structure Score - Prominent at top */}
