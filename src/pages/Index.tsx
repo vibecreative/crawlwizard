@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { WebsiteAnalyzer } from "@/components/WebsiteAnalyzer";
@@ -85,6 +85,7 @@ const Index = () => {
   const [showWebsiteResults, setShowWebsiteResults] = useState(false);
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
+  const shouldStopAnalysisRef = useRef(false);
 
   const parseHeadings = (html: string): HeadingInfo[] => {
     const parser = new DOMParser();
@@ -631,12 +632,20 @@ const Index = () => {
     setAnalyzedPagesCount(0);
     setWebsiteResults([]);
     setShowWebsiteResults(false);
+    shouldStopAnalysisRef.current = false;
     
     toast.info(`Start analyse van ${urls.length} pagina's...`);
     
     const results: PageAnalysisResult[] = [];
+    let wasStopped = false;
     
     for (let i = 0; i < urls.length; i++) {
+      // Check if analysis should be stopped
+      if (shouldStopAnalysisRef.current) {
+        wasStopped = true;
+        break;
+      }
+      
       const url = urls[i];
       try {
         console.log(`Analyzing page ${i + 1}/${urls.length}: ${url}`);
@@ -665,9 +674,19 @@ const Index = () => {
       }
     }
     
-    toast.success(`${urls.length} pagina's geanalyseerd!`);
+    if (wasStopped) {
+      toast.info(`Analyse gestopt na ${results.length} pagina's`);
+    } else {
+      toast.success(`${urls.length} pagina's geanalyseerd!`);
+    }
     setIsAnalyzingWebsite(false);
     setShowWebsiteResults(true);
+    shouldStopAnalysisRef.current = false;
+  };
+
+  const handleStopAnalysis = () => {
+    shouldStopAnalysisRef.current = true;
+    toast.info("Analyse wordt gestopt...");
   };
 
   const handleViewPageDetails = async (url: string) => {
@@ -777,6 +796,7 @@ const Index = () => {
                     baseUrl={websiteBaseUrl}
                     urls={discoveredUrls}
                     onAnalyzeSelected={handleAnalyzeSelectedUrls}
+                    onStopAnalysis={handleStopAnalysis}
                     isAnalyzing={isAnalyzingWebsite}
                     analyzedCount={analyzedPagesCount}
                   />

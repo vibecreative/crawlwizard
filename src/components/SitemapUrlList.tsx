@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Play, CheckSquare, Square, Loader2, ExternalLink } from "lucide-react";
+import { Play, CheckSquare, Square, Loader2, ExternalLink, StopCircle } from "lucide-react";
 import { SitemapUrl } from "@/lib/api/sitemap";
 
 interface SitemapUrlListProps {
   baseUrl: string;
   urls: SitemapUrl[];
   onAnalyzeSelected: (urls: string[]) => void;
+  onStopAnalysis?: () => void;
   isAnalyzing: boolean;
   analyzedCount: number;
 }
@@ -19,6 +20,7 @@ export const SitemapUrlList = ({
   baseUrl, 
   urls, 
   onAnalyzeSelected, 
+  onStopAnalysis,
   isAnalyzing,
   analyzedCount 
 }: SitemapUrlListProps) => {
@@ -100,6 +102,15 @@ export const SitemapUrlList = ({
               </>
             )}
           </Button>
+          {isAnalyzing && onStopAnalysis && (
+            <Button
+              onClick={onStopAnalysis}
+              variant="destructive"
+            >
+              <StopCircle className="mr-2 h-4 w-4" />
+              Stop analyse
+            </Button>
+          )}
         </div>
       </div>
 

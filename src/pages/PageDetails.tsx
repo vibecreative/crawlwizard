@@ -71,7 +71,7 @@ const PageDetails = () => {
   };
 
   const handleBack = () => {
-    navigate("/dashboard");
+    navigate("/");
   };
 
   if (isLoading) {
