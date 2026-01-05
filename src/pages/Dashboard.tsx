@@ -60,6 +60,36 @@ const Dashboard = () => {
     fetchProjects();
   }, []);
 
+  // Fetch all project pages for average score calculation
+  useEffect(() => {
+    const fetchAllProjectPages = async () => {
+      if (projects.length === 0) return;
+      
+      const projectsNeedingPages = projects.filter(p => !p.pages);
+      if (projectsNeedingPages.length === 0) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("project_pages")
+          .select("*")
+          .in("project_id", projectsNeedingPages.map(p => p.id));
+
+        if (error) throw error;
+
+        if (data) {
+          setProjects(prev => prev.map(p => {
+            const projectPages = data.filter(page => page.project_id === p.id);
+            return projectPages.length > 0 ? { ...p, pages: projectPages } : p;
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching all project pages:", error);
+      }
+    };
+
+    fetchAllProjectPages();
+  }, [projects.length]);
+
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase
@@ -378,7 +408,10 @@ const Dashboard = () => {
                                 key={page.id}
                                 className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                               >
-                                <div className="flex-1 min-w-0 mr-4">
+                              <div 
+                                  className="flex-1 min-w-0 mr-4 cursor-pointer hover:text-primary transition-colors"
+                                  onClick={() => navigate(`/page/${page.id}`)}
+                                >
                                   <p className="text-sm font-medium truncate">
                                     {page.title || new URL(page.url).pathname || "/"}
                                   </p>
