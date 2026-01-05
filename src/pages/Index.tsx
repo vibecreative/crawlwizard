@@ -745,7 +745,7 @@ const Index = () => {
       if (pagesError) throw pagesError;
       
       toast.success("Project opgeslagen!");
-      navigate('/');
+      navigate('/dashboard');
     } catch (error) {
       console.error('Error saving project:', error);
       toast.error("Fout bij opslaan van project");
