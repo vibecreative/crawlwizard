@@ -5,20 +5,85 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Maximum content sizes
+const MAX_CONTENT_SIZE = 100000; // 100KB
+const MAX_QUESTION_LENGTH = 500;
+const MAX_URL_LENGTH = 2048;
+
+// Validate URL format
+function validateUrl(url: string): boolean {
+  const urlRegex = /^https?:\/\/[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(:[0-9]+)?(\/.*)?$/;
+  return urlRegex.test(url);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { question, websiteUrl, pageContent } = await req.json();
+    const body = await req.json();
+    const { question, websiteUrl, pageContent } = body;
+    
+    // Input validation for question
+    if (!question || typeof question !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'question must be a non-empty string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (question.length > MAX_QUESTION_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `question too long. Maximum ${MAX_QUESTION_LENGTH} characters.` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Input validation for websiteUrl
+    if (!websiteUrl || typeof websiteUrl !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'websiteUrl must be a non-empty string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (websiteUrl.length > MAX_URL_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `websiteUrl too long. Maximum ${MAX_URL_LENGTH} characters.` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!validateUrl(websiteUrl)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid websiteUrl format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Input validation for pageContent
+    if (!pageContent || typeof pageContent !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'pageContent must be a non-empty string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (pageContent.length > MAX_CONTENT_SIZE) {
+      return new Response(
+        JSON.stringify({ error: `pageContent too large. Maximum size is 100KB.` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Analyzing FAQ relevance for question:', question);
+    console.log('Analyzing FAQ relevance for question:', question.substring(0, 100));
 
     // Limit page content to avoid token limits
     const limitedContent = pageContent.substring(0, 5000);

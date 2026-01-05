@@ -5,13 +5,40 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Maximum content size (100KB)
+const MAX_CONTENT_SIZE = 100000;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { html } = await req.json();
+    const body = await req.json();
+    const { html } = body;
+    
+    // Input validation
+    if (!html) {
+      return new Response(
+        JSON.stringify({ error: 'HTML content is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (typeof html !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'HTML must be a string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (html.length > MAX_CONTENT_SIZE) {
+      return new Response(
+        JSON.stringify({ error: 'Content too large. Maximum size is 100KB.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {

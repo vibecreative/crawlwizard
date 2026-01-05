@@ -9,6 +9,53 @@ interface SitemapUrl {
   priority?: string;
 }
 
+// Validate URL format and block internal/private networks (SSRF protection)
+function validateUrl(url: string): { valid: boolean; error?: string } {
+  // Basic URL format validation
+  const urlRegex = /^https?:\/\/[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(:[0-9]+)?(\/.*)?$/;
+  if (!urlRegex.test(url)) {
+    return { valid: false, error: 'Invalid URL format' };
+  }
+
+  // Block internal/private IPs and localhost (SSRF protection)
+  const blockedPatterns = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '10.',
+    '172.16.',
+    '172.17.',
+    '172.18.',
+    '172.19.',
+    '172.20.',
+    '172.21.',
+    '172.22.',
+    '172.23.',
+    '172.24.',
+    '172.25.',
+    '172.26.',
+    '172.27.',
+    '172.28.',
+    '172.29.',
+    '172.30.',
+    '172.31.',
+    '192.168.',
+    '169.254.',
+    '[::1]',
+    'fc00:',
+    'fe80:',
+  ];
+
+  const lowerUrl = url.toLowerCase();
+  for (const pattern of blockedPatterns) {
+    if (lowerUrl.includes(pattern)) {
+      return { valid: false, error: 'Invalid URL: internal addresses not allowed' };
+    }
+  }
+
+  return { valid: true };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -24,6 +71,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Validate baseUrl type and length
+    if (typeof baseUrl !== 'string' || baseUrl.length > 2048) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid URL: must be a string under 2048 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log('Parsing sitemap for:', baseUrl);
 
     // Normalize the base URL
@@ -34,6 +89,15 @@ Deno.serve(async (req) => {
 
     // Remove trailing slashes
     normalizedUrl = normalizedUrl.replace(/\/+$/, '');
+
+    // Validate the normalized URL
+    const urlValidation = validateUrl(normalizedUrl);
+    if (!urlValidation.valid) {
+      return new Response(
+        JSON.stringify({ success: false, error: urlValidation.error }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Common sitemap locations to try
     const sitemapPaths = [
@@ -96,18 +160,25 @@ Deno.serve(async (req) => {
           
           if (sitemapMatch && sitemapMatch[1]) {
             const robotsSitemapUrl = sitemapMatch[1].trim();
-            console.log('Found sitemap in robots.txt:', robotsSitemapUrl);
             
-            const sitemapResponse = await fetch(robotsSitemapUrl, {
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
-                'Accept': 'application/xml, text/xml, */*',
-              },
-            });
+            // Validate the sitemap URL from robots.txt
+            const robotsUrlValidation = validateUrl(robotsSitemapUrl);
+            if (robotsUrlValidation.valid) {
+              console.log('Found sitemap in robots.txt:', robotsSitemapUrl);
+              
+              const sitemapResponse = await fetch(robotsSitemapUrl, {
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
+                  'Accept': 'application/xml, text/xml, */*',
+                },
+              });
 
-            if (sitemapResponse.ok) {
-              sitemapContent = await sitemapResponse.text();
-              successfulPath = robotsSitemapUrl;
+              if (sitemapResponse.ok) {
+                sitemapContent = await sitemapResponse.text();
+                successfulPath = robotsSitemapUrl;
+              }
+            } else {
+              console.log('Invalid sitemap URL in robots.txt:', robotsSitemapUrl);
             }
           }
         }
@@ -140,10 +211,14 @@ Deno.serve(async (req) => {
       const subSitemapUrls: string[] = [];
       
       while ((match = sitemapRegex.exec(sitemapContent)) !== null) {
-        subSitemapUrls.push(match[1].trim());
+        const subUrl = match[1].trim();
+        // Validate each sub-sitemap URL
+        if (validateUrl(subUrl).valid) {
+          subSitemapUrls.push(subUrl);
+        }
       }
 
-      console.log(`Found ${subSitemapUrls.length} sub-sitemaps`);
+      console.log(`Found ${subSitemapUrls.length} valid sub-sitemaps`);
 
       // Fetch and parse each sub-sitemap (limit to first 5 to avoid timeout)
       for (const subUrl of subSitemapUrls.slice(0, 5)) {
