@@ -5,13 +5,71 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Maximum content size (100KB)
+const MAX_CONTENT_SIZE = 100000;
+const MAX_TEXT_LENGTH = 1000;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { html, previousQuestion, analysisExplanation } = await req.json();
+    const body = await req.json();
+    const { html, previousQuestion, analysisExplanation } = body;
+    
+    // Input validation for html
+    if (!html) {
+      return new Response(
+        JSON.stringify({ error: 'HTML content is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (typeof html !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'HTML must be a string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (html.length > MAX_CONTENT_SIZE) {
+      return new Response(
+        JSON.stringify({ error: 'Content too large. Maximum size is 100KB.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Input validation for previousQuestion
+    if (!previousQuestion || typeof previousQuestion !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'previousQuestion must be a non-empty string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (previousQuestion.length > MAX_TEXT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: 'previousQuestion too long. Maximum 1000 characters.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Input validation for analysisExplanation
+    if (!analysisExplanation || typeof analysisExplanation !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'analysisExplanation must be a non-empty string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (analysisExplanation.length > MAX_TEXT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: 'analysisExplanation too long. Maximum 1000 characters.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
@@ -46,7 +104,7 @@ serve(async (req) => {
 
 BELANGRIJKE CONTEXT:
 Een eerder gegenereerde vraag scoorde LAAG op AI Search Readiness. De reden was:
-"${analysisExplanation}"
+"${analysisExplanation.substring(0, 500)}"
 
 Jouw taak: Genereer 1 BETERE vraag die WEL hoog scoort, door:
 1. De vraag algemener te maken over de productcategorie (niet specifiek over deze pagina)
@@ -67,9 +125,9 @@ Genereer 1 FAQ item. Schrijf in het Nederlands.`
           },
           {
             role: 'user',
-            content: `Eerder gegenereerde vraag met lage score: "${previousQuestion}"
+            content: `Eerder gegenereerde vraag met lage score: "${previousQuestion.substring(0, 500)}"
 
-Reden van lage score: ${analysisExplanation}
+Reden van lage score: ${analysisExplanation.substring(0, 500)}
 
 Analyseer deze pagina en genereer 1 betere, meer relevante vraag waar de pagina-content een sterk antwoord op kan geven:
 
