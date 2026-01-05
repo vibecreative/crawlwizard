@@ -99,7 +99,7 @@ const PageDetails = () => {
   };
 
   const handleBack = () => {
-    navigate("/");
+    navigate("/dashboard");
   };
 
   const fetchWithRetry = async (url: string, maxRetries: number = 3): Promise<string> => {
