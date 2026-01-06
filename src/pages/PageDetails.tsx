@@ -7,7 +7,7 @@ import { AnalysisResults } from "@/components/AnalysisResults";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, Globe, AlertCircle } from "lucide-react";
+import { ArrowLeft, Globe, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface HeadingInfo {
@@ -58,6 +58,7 @@ const PageDetails = () => {
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isReanalyzing, setIsReanalyzing] = useState(false);
+  const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -388,6 +389,83 @@ const PageDetails = () => {
     }
   };
 
+  const handleGenerateFaqs = async () => {
+    if (!pageData?.analysis_data?.html) {
+      toast.error("Geen HTML content beschikbaar om FAQs te genereren");
+      return;
+    }
+
+    setIsGeneratingFaqs(true);
+
+    try {
+      toast.info("FAQs worden gegenereerd...");
+
+      const { data, error } = await supabase.functions.invoke('generate-faqs', {
+        body: { html: pageData.analysis_data.html }
+      });
+
+      if (error) throw error;
+
+      if (data && data.faqs) {
+        // Update analysis data with FAQs
+        const updatedAnalysisData = {
+          ...pageData.analysis_data,
+          faqs: data.faqs
+        };
+
+        // Update database
+        const { error: updateError } = await supabase
+          .from('project_pages')
+          .update({
+            analysis_data: JSON.parse(JSON.stringify(updatedAnalysisData)),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', pageData.id);
+
+        if (updateError) throw updateError;
+
+        // Update local state
+        setPageData({
+          ...pageData,
+          analysis_data: updatedAnalysisData,
+        });
+
+        toast.success(`${data.faqs.length} FAQ suggesties gegenereerd!`);
+      }
+    } catch (err: any) {
+      console.error("Error generating FAQs:", err);
+      toast.error("Fout bij genereren FAQs: " + (err.message || "Onbekende fout"));
+    } finally {
+      setIsGeneratingFaqs(false);
+    }
+  };
+
+  const handleFaqsUpdate = async (updatedFaqs: any[]) => {
+    if (!pageData) return;
+
+    try {
+      const updatedAnalysisData = {
+        ...pageData.analysis_data,
+        faqs: updatedFaqs
+      };
+
+      await supabase
+        .from('project_pages')
+        .update({
+          analysis_data: JSON.parse(JSON.stringify(updatedAnalysisData)),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', pageData.id);
+
+      setPageData({
+        ...pageData,
+        analysis_data: updatedAnalysisData,
+      });
+    } catch (err) {
+      console.error("Error updating FAQs:", err);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -487,16 +565,40 @@ const PageDetails = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Button variant="ghost" onClick={handleBack} className="mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Terug naar {projectData?.name || "Dashboard"}
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" onClick={handleBack}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Terug naar {projectData?.name || "Dashboard"}
+          </Button>
+          
+          {/* Show Generate FAQs button if no FAQs exist */}
+          {(!pageData.analysis_data.faqs || pageData.analysis_data.faqs.length === 0) && pageData.analysis_data.html && (
+            <Button
+              onClick={handleGenerateFaqs}
+              disabled={isGeneratingFaqs}
+              className="gap-2"
+            >
+              {isGeneratingFaqs ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  FAQs genereren...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Genereer FAQ Suggesties
+                </>
+              )}
+            </Button>
+          )}
+        </div>
 
         <AnalysisResults 
           data={pageData.analysis_data}
           onReset={handleBack}
           onReanalyze={handleReanalyze}
           isReanalyzing={isReanalyzing}
+          onFaqsUpdate={handleFaqsUpdate}
         />
       </main>
     </div>
