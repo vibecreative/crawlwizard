@@ -18,7 +18,6 @@ import {
   CheckCircle2, 
   LogOut,
   ExternalLink,
-  RefreshCw,
   Trash2,
   Eye
 } from "lucide-react";
@@ -275,16 +274,10 @@ const Dashboard = () => {
         {/* Actions */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold">Mijn Projecten</h2>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={fetchProjects}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Vernieuwen
-            </Button>
-            <Button size="sm" onClick={() => navigate("/analyze")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nieuwe Analyse
-            </Button>
-          </div>
+          <Button size="sm" onClick={() => navigate("/analyze")}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nieuwe Analyse
+          </Button>
         </div>
 
         {/* Projects List */}
