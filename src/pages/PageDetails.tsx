@@ -390,18 +390,27 @@ const PageDetails = () => {
   };
 
   const handleGenerateFaqs = async () => {
-    if (!pageData?.analysis_data?.html) {
-      toast.error("Geen HTML content beschikbaar om FAQs te genereren");
-      return;
-    }
+    if (!pageData) return;
 
     setIsGeneratingFaqs(true);
 
     try {
+      let htmlContent = pageData.analysis_data?.html;
+
+      // If no HTML is stored, fetch it on-demand
+      if (!htmlContent) {
+        toast.info("HTML wordt opgehaald...");
+        htmlContent = await fetchWithRetry(pageData.url);
+        
+        if (!htmlContent) {
+          throw new Error("Kon de pagina-inhoud niet ophalen");
+        }
+      }
+
       toast.info("FAQs worden gegenereerd...");
 
       const { data, error } = await supabase.functions.invoke('generate-faqs', {
-        body: { html: pageData.analysis_data.html }
+        body: { html: htmlContent }
       });
 
       if (error) throw error;
@@ -572,7 +581,7 @@ const PageDetails = () => {
           </Button>
           
           {/* Show Generate FAQs button if no FAQs exist */}
-          {(!pageData.analysis_data.faqs || pageData.analysis_data.faqs.length === 0) && pageData.analysis_data.html && (
+          {(!pageData.analysis_data.faqs || pageData.analysis_data.faqs.length === 0) && (
             <Button
               onClick={handleGenerateFaqs}
               disabled={isGeneratingFaqs}
