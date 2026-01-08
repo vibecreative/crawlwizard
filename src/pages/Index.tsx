@@ -133,18 +133,8 @@ const Index = () => {
         const isLeafElement = !element.querySelector('p, div, span, li, td, th');
         
         if (element.matches('p, li, td, th') || (element.matches('div, span') && isLeafElement)) {
-          let elementText = '';
-          
-          if (isLeafElement) {
-            elementText = element.textContent?.trim() || '';
-          } else {
-            const directText = Array.from(element.childNodes)
-              .filter(node => node.nodeType === Node.TEXT_NODE)
-              .map(node => node.textContent?.trim() || '')
-              .filter(t => t.length > 0)
-              .join(' ');
-            elementText = directText;
-          }
+          // Always use full textContent to include text from inline elements like <a>, <strong>, <em>
+          const elementText = element.textContent?.trim() || '';
           
           if (elementText && elementText.length > 10 && !seenTexts.has(elementText)) {
             const hasOverlap = contentElements.some(existing => 
