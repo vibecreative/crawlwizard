@@ -179,30 +179,27 @@ const PageDetails = () => {
       
       for (let i = headingIndex + 1; i < (nextHeadingIndex || allElements.length); i++) {
         const element = allElements[i];
-        
+
         if (element.matches('h1, h2, h3, h4, h5, h6')) break;
-        
-        const isLeafElement = !element.querySelector('p, div, span, li, td, th');
-        
-        if (element.matches('p, li, td, th') || (element.matches('div, span') && isLeafElement)) {
-          let elementText = '';
-          
-          if (isLeafElement) {
-            elementText = element.textContent?.trim() || '';
-          } else {
-            const directText = Array.from(element.childNodes)
-              .filter(node => node.nodeType === Node.TEXT_NODE)
-              .map(node => node.textContent?.trim() || '')
-              .filter(t => t.length > 0)
-              .join(' ');
-            elementText = directText;
-          }
-          
+
+        // Skip containers that contain (next) headings, otherwise their textContent includes later sections.
+        if (element.querySelector('h1, h2, h3, h4, h5, h6')) continue;
+
+        const isLeafElement = !element.querySelector(
+          'p, div, span, li, td, th, a, button, h1, h2, h3, h4, h5, h6'
+        );
+
+        if (
+          element.matches('p, li, td, th, a, button') ||
+          (element.matches('div, span') && isLeafElement)
+        ) {
+          const elementText = element.textContent?.trim() || '';
+
           if (elementText && elementText.length > 10 && !seenTexts.has(elementText)) {
-            const hasOverlap = contentElements.some(existing => 
-              existing.includes(elementText) || elementText.includes(existing)
+            const hasOverlap = contentElements.some(
+              (existing) => existing.includes(elementText) || elementText.includes(existing)
             );
-            
+
             if (!hasOverlap) {
               contentElements.push(elementText);
               seenTexts.add(elementText);
