@@ -136,8 +136,11 @@ const Index = () => {
           // Always use full textContent to include text from inline elements like <a>, <strong>, <em>
           const elementText = element.textContent?.trim() || '';
           
-          // Skip if this text matches any heading text (prevents next heading from appearing in content)
-          const isHeadingText = headingElements.some(h => h.textContent?.trim() === elementText);
+          // Skip if this text matches or contains any heading text (prevents next heading from appearing in content)
+          const isHeadingText = headingElements.some(h => {
+            const headingText = h.textContent?.trim() || '';
+            return headingText && (elementText === headingText || elementText.includes(headingText));
+          });
           
           if (elementText && elementText.length > 10 && !seenTexts.has(elementText) && !isHeadingText) {
             const hasOverlap = contentElements.some(existing => 
