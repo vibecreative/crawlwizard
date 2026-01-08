@@ -134,15 +134,27 @@ const Index = () => {
         
         if (element.matches('p, li, td, th') || (element.matches('div, span') && isLeafElement)) {
           // Always use full textContent to include text from inline elements like <a>, <strong>, <em>
-          const elementText = element.textContent?.trim() || '';
+          let elementText = element.textContent?.trim() || '';
           
-          // Skip if this text matches or contains any heading text (prevents next heading from appearing in content)
-          const isHeadingText = headingElements.some(h => {
+          // Check if this element's text exactly matches a heading - skip entirely
+          const isExactHeadingMatch = headingElements.some(h => {
             const headingText = h.textContent?.trim() || '';
-            return headingText && (elementText === headingText || elementText.includes(headingText));
+            return headingText && elementText === headingText;
           });
           
-          if (elementText && elementText.length > 10 && !seenTexts.has(elementText) && !isHeadingText) {
+          if (isExactHeadingMatch) continue;
+          
+          // Remove any heading texts that appear within this element's text
+          // This handles cases where container elements include multiple headings
+          headingElements.forEach(h => {
+            const headingText = h.textContent?.trim() || '';
+            if (headingText && elementText.includes(headingText)) {
+              // Remove the heading text and clean up extra whitespace
+              elementText = elementText.replace(headingText, '').replace(/\s{2,}/g, ' ').trim();
+            }
+          });
+          
+          if (elementText && elementText.length > 10 && !seenTexts.has(elementText) && elementText) {
             const hasOverlap = contentElements.some(existing => 
               existing.includes(elementText) || elementText.includes(existing)
             );
