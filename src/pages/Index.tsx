@@ -127,38 +127,28 @@ const Index = () => {
       
       for (let i = headingIndex + 1; i < (nextHeadingIndex || allElements.length); i++) {
         const element = allElements[i];
-        
+
         if (element.matches('h1, h2, h3, h4, h5, h6')) break;
-        
-        const isLeafElement = !element.querySelector('p, div, span, li, td, th');
-        
-        if (element.matches('p, li, td, th') || (element.matches('div, span') && isLeafElement)) {
-          // Always use full textContent to include text from inline elements like <a>, <strong>, <em>
-          let elementText = element.textContent?.trim() || '';
-          
-          // Check if this element's text exactly matches a heading - skip entirely
-          const isExactHeadingMatch = headingElements.some(h => {
-            const headingText = h.textContent?.trim() || '';
-            return headingText && elementText === headingText;
-          });
-          
-          if (isExactHeadingMatch) continue;
-          
-          // Remove any heading texts that appear within this element's text
-          // This handles cases where container elements include multiple headings
-          headingElements.forEach(h => {
-            const headingText = h.textContent?.trim() || '';
-            if (headingText && elementText.includes(headingText)) {
-              // Remove the heading text and clean up extra whitespace
-              elementText = elementText.replace(headingText, '').replace(/\s{2,}/g, ' ').trim();
-            }
-          });
-          
-          if (elementText && elementText.length > 10 && !seenTexts.has(elementText) && elementText) {
-            const hasOverlap = contentElements.some(existing => 
-              existing.includes(elementText) || elementText.includes(existing)
+
+        // If a container includes a (next) heading, its textContent will “swallow” that next section.
+        // We skip those containers and rely on their inner elements instead.
+        if (element.querySelector('h1, h2, h3, h4, h5, h6')) continue;
+
+        const isLeafElement = !element.querySelector(
+          'p, div, span, li, td, th, a, button, h1, h2, h3, h4, h5, h6'
+        );
+
+        if (
+          element.matches('p, li, td, th, a, button') ||
+          (element.matches('div, span') && isLeafElement)
+        ) {
+          const elementText = element.textContent?.trim() || '';
+
+          if (elementText && elementText.length > 10 && !seenTexts.has(elementText)) {
+            const hasOverlap = contentElements.some(
+              (existing) => existing.includes(elementText) || elementText.includes(existing)
             );
-            
+
             if (!hasOverlap) {
               contentElements.push(elementText);
               seenTexts.add(elementText);
