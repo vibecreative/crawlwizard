@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Maximum content size (100KB)
-const MAX_CONTENT_SIZE = 100000;
+// Maximum HTML size we'll process (we truncate beyond this to keep requests stable)
+const MAX_CONTENT_SIZE = 1_000_000; // 1MB
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -62,11 +62,12 @@ serve(async (req) => {
       );
     }
 
-    if (html.length > MAX_CONTENT_SIZE) {
-      return new Response(
-        JSON.stringify({ error: 'Content too large. Maximum size is 100KB.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    let htmlToProcess = html;
+    if (htmlToProcess.length > MAX_CONTENT_SIZE) {
+      console.warn(
+        `HTML too large (${htmlToProcess.length} chars). Truncating to ${MAX_CONTENT_SIZE}.`
       );
+      htmlToProcess = htmlToProcess.slice(0, MAX_CONTENT_SIZE);
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -76,7 +77,7 @@ serve(async (req) => {
     }
 
     // Simple text extraction - remove HTML tags and limit length
-    const textContent = html
+    const textContent = htmlToProcess
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
       .replace(/<[^>]+>/g, ' ')

@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 // Maximum content sizes
-const MAX_CONTENT_SIZE = 100000; // 100KB
+const MAX_CONTENT_SIZE = 1_000_000; // 1MB
 const MAX_QUESTION_LENGTH = 500;
 const MAX_URL_LENGTH = 2048;
 
@@ -100,11 +100,12 @@ serve(async (req) => {
       );
     }
 
-    if (pageContent.length > MAX_CONTENT_SIZE) {
-      return new Response(
-        JSON.stringify({ error: `pageContent too large. Maximum size is 100KB.` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    let pageContentToProcess = pageContent;
+    if (pageContentToProcess.length > MAX_CONTENT_SIZE) {
+      console.warn(
+        `pageContent too large (${pageContentToProcess.length} chars). Truncating to ${MAX_CONTENT_SIZE}.`
       );
+      pageContentToProcess = pageContentToProcess.slice(0, MAX_CONTENT_SIZE);
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -116,7 +117,7 @@ serve(async (req) => {
     console.log('Analyzing FAQ relevance for question:', question.substring(0, 100));
 
     // Limit page content to avoid token limits
-    const limitedContent = pageContent.substring(0, 5000);
+    const limitedContent = pageContentToProcess.substring(0, 5000);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
