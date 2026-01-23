@@ -187,6 +187,8 @@ const PageDetails = () => {
     const doc = parser.parseFromString(html, 'text/html');
     const headings: HeadingInfo[] = [];
 
+    const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     const headingElements = Array.from(doc.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     const allElements = Array.from(doc.body.querySelectorAll('*'));
     
@@ -237,15 +239,22 @@ const PageDetails = () => {
           (element.matches('div, span') && isLeafElement)
         ) {
           const elementText = element.textContent?.trim() || '';
+          if (!elementText || elementText.length <= 10) continue;
 
-          if (elementText && elementText.length > 10 && !seenTexts.has(elementText)) {
+          // Some sites repeat the heading text as the first line inside the first content block.
+          // Remove that prefix so the "underlying text" doesn't duplicate the heading.
+          const headingPrefixRe = new RegExp(`^\\s*${escapeRegExp(text)}\\s*`, 'i');
+          const cleanedText = elementText.replace(headingPrefixRe, '').trim();
+          if (!cleanedText || cleanedText.length <= 10) continue;
+
+          if (!seenTexts.has(cleanedText)) {
             const hasOverlap = contentElements.some(
-              (existing) => existing.includes(elementText) || elementText.includes(existing)
+              (existing) => existing.includes(cleanedText) || cleanedText.includes(existing)
             );
 
             if (!hasOverlap) {
-              contentElements.push(elementText);
-              seenTexts.add(elementText);
+              contentElements.push(cleanedText);
+              seenTexts.add(cleanedText);
             }
           }
         }
