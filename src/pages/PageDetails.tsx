@@ -110,6 +110,45 @@ const PageDetails = () => {
       (u: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
     ];
 
+    // Patterns that indicate a proxy error page rather than actual content
+    const errorPatterns = [
+      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*403\s*(Forbidden)?/i,
+      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*404\s*(Not Found)?/i,
+      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*502\s*(Bad Gateway)?/i,
+      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*503\s*(Service Unavailable)?/i,
+      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*Access Denied/i,
+      /<title>\s*Error\s*<\/title>/i,
+      /<h1>\s*403\s*(Forbidden)?\s*<\/h1>/i,
+      /<h1>\s*404\s*(Not Found)?\s*<\/h1>/i,
+      /<h1>\s*Access Denied\s*<\/h1>/i,
+    ];
+
+    const isErrorPage = (html: string): boolean => {
+      // Check for common error patterns
+      for (const pattern of errorPatterns) {
+        if (pattern.test(html)) {
+          console.warn('Detected proxy error page, trying next proxy...');
+          return true;
+        }
+      }
+      
+      // Check if the page is suspiciously short and contains error-like content
+      if (html.length < 2000) {
+        const lowerHtml = html.toLowerCase();
+        if (
+          (lowerHtml.includes('403') && lowerHtml.includes('forbidden')) ||
+          (lowerHtml.includes('404') && lowerHtml.includes('not found')) ||
+          (lowerHtml.includes('access denied')) ||
+          (lowerHtml.includes('error') && !lowerHtml.includes('<article'))
+        ) {
+          console.warn('Detected short error page, trying next proxy...');
+          return true;
+        }
+      }
+      
+      return false;
+    };
+
     let lastError: Error | null = null;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -122,8 +161,12 @@ const PageDetails = () => {
           
           if (response.ok) {
             const html = await response.text();
-            if (html && html.length > 100) {
+            // Check minimum length AND that it's not an error page
+            if (html && html.length > 100 && !isErrorPage(html)) {
               return html;
+            } else if (isErrorPage(html)) {
+              lastError = new Error('Proxy returned error page');
+              continue;
             }
           }
         } catch (error) {
