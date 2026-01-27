@@ -391,6 +391,7 @@ const Index = () => {
     if (h1Element) {
       const introTexts: string[] = [];
       
+      // Strategy 1: Direct siblings of H1
       let sibling = h1Element.nextElementSibling;
       let elementsChecked = 0;
       
@@ -409,6 +410,7 @@ const Index = () => {
         elementsChecked++;
       }
       
+      // Strategy 2: Parent's next siblings (H1 is in a container like <header>)
       if (introTexts.length === 0 && h1Element.parentElement) {
         const parent = h1Element.parentElement;
         const children = Array.from(parent.children);
@@ -422,6 +424,73 @@ const Index = () => {
           if (text.length > 20) {
             introTexts.push(text);
             if (introTexts.join(' ').length > 300) break;
+          }
+        }
+      }
+      
+      // Strategy 3: Walk up to find next section/container after H1's container
+      if (introTexts.length === 0) {
+        let container: Element | null = h1Element.parentElement;
+        while (container && introTexts.length === 0) {
+          let nextContainer = container.nextElementSibling;
+          let containerChecks = 0;
+          
+          while (nextContainer && containerChecks < 5) {
+            if (nextContainer.matches('h1, h2, h3, h4, h5, h6')) break;
+            
+            const text = nextContainer.textContent?.trim() || '';
+            if (text.length > 20) {
+              introTexts.push(text);
+              if (introTexts.join(' ').length > 300) break;
+            }
+            
+            nextContainer = nextContainer.nextElementSibling;
+            containerChecks++;
+          }
+          
+          // Move up one level if still nothing found
+          if (introTexts.length === 0 && container.parentElement && 
+              container.parentElement !== doc.body) {
+            container = container.parentElement;
+          } else {
+            break;
+          }
+        }
+      }
+      
+      // Strategy 4: Use TreeWalker for document order traversal as last resort
+      if (introTexts.length === 0) {
+        const walker = doc.createTreeWalker(
+          doc.body,
+          NodeFilter.SHOW_ELEMENT,
+          null
+        );
+        
+        // Find the H1 in the tree
+        let foundH1 = false;
+        let elementsAfterH1 = 0;
+        
+        while (walker.nextNode()) {
+          const node = walker.currentNode as Element;
+          
+          if (node === h1Element) {
+            foundH1 = true;
+            continue;
+          }
+          
+          if (foundH1) {
+            if (node.matches('h1, h2, h3, h4, h5, h6')) break;
+            
+            if (node.matches('p') && !node.closest('nav, header, footer, aside')) {
+              const text = node.textContent?.trim() || '';
+              if (text.length > 30) {
+                introTexts.push(text);
+                if (introTexts.join(' ').length > 300) break;
+              }
+            }
+            
+            elementsAfterH1++;
+            if (elementsAfterH1 > 100) break;
           }
         }
       }
