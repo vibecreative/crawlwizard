@@ -68,9 +68,19 @@ interface AnalysisResultsProps {
   onFaqsUpdate?: (updatedFaqs: FaqItem[]) => void;
   onReanalyze?: () => void;
   isReanalyzing?: boolean;
+  onGenerateFaqs?: () => Promise<void>;
+  isGeneratingFaqs?: boolean;
 }
 
-export const AnalysisResults = ({ data, onReset, onFaqsUpdate, onReanalyze, isReanalyzing }: AnalysisResultsProps) => {
+export const AnalysisResults = ({ 
+  data, 
+  onReset, 
+  onFaqsUpdate, 
+  onReanalyze, 
+  isReanalyzing,
+  onGenerateFaqs,
+  isGeneratingFaqs
+}: AnalysisResultsProps) => {
   const getHeadingColor = (level: number) => {
     const colors = {
       1: "bg-heading-h1",
@@ -434,15 +444,15 @@ export const AnalysisResults = ({ data, onReset, onFaqsUpdate, onReanalyze, isRe
         <KeywordAnalysis keywords={data.keywords} />
       )}
 
-      {/* FAQ Suggestions */}
-      {data.faqs && data.faqs.length > 0 && (
-        <FaqSuggestions 
-          faqs={data.faqs} 
-          websiteUrl={data.url}
-          pageContent={data.html}
-          onFaqsUpdate={onFaqsUpdate}
-        />
-      )}
+      {/* FAQ Suggestions - Always show to allow generation */}
+      <FaqSuggestions 
+        faqs={data.faqs || []} 
+        websiteUrl={data.url}
+        pageContent={data.html}
+        onFaqsUpdate={onFaqsUpdate}
+        onGenerateFaqs={onGenerateFaqs}
+        isGeneratingFaqs={isGeneratingFaqs}
+      />
 
       {/* JSON-LD Generator */}
       <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />

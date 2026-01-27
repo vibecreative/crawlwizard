@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download, Sparkles, Loader2, RefreshCw, Cpu, Cloud } from "lucide-react";
+import { Copy, Download, Sparkles, Loader2, RefreshCw, Cpu, Cloud, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,8 @@ interface FaqSuggestionsProps {
   websiteUrl?: string;
   pageContent?: string;
   onFaqsUpdate?: (updatedFaqs: FaqItem[]) => void;
+  onGenerateFaqs?: () => Promise<void>;
+  isGeneratingFaqs?: boolean;
 }
 
 interface AnalysisResult {
@@ -27,9 +29,17 @@ interface AnalysisResult {
   source?: "cloud" | "browser";
 }
 
-export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqsUpdate }: FaqSuggestionsProps) => {
+export const FaqSuggestions = ({ 
+  faqs, 
+  websiteUrl = "", 
+  pageContent = "", 
+  onFaqsUpdate,
+  onGenerateFaqs,
+  isGeneratingFaqs = false
+}: FaqSuggestionsProps) => {
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyzingSingleIndex, setAnalyzingSingleIndex] = useState<number | null>(null);
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const [browserAiAvailable, setBrowserAiAvailable] = useState<boolean | null>(null);
   const [useBrowserAi, setUseBrowserAi] = useState(false);
@@ -187,6 +197,51 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
     );
   };
 
+  const analyzeSingleFaq = async (index: number) => {
+    if (!websiteUrl || !pageContent) {
+      toast.error('Website URL en content zijn vereist voor analyse');
+      return;
+    }
+
+    setAnalyzingSingleIndex(index);
+    
+    try {
+      const faq = faqs[index];
+      let result: AnalysisResult | null = null;
+
+      if (useBrowserAi && browserAiAvailable) {
+        try {
+          result = await analyzeWithBrowserAi(faq);
+        } catch (browserError) {
+          console.error('Browser AI failed, falling back to cloud:', browserError);
+          result = await analyzeWithCloudAi(faq, index);
+        }
+      } else {
+        result = await analyzeWithCloudAi(faq, index);
+        
+        if (!result && browserAiAvailable) {
+          try {
+            result = await analyzeWithBrowserAi(faq);
+          } catch (fallbackError) {
+            console.error('Browser fallback also failed:', fallbackError);
+          }
+        }
+      }
+
+      if (result) {
+        const newResults = new Map(analysisResults);
+        newResults.set(index, result);
+        setAnalysisResults(newResults);
+        toast.success('Vraag geanalyseerd!');
+      }
+    } catch (error) {
+      console.error('Error analyzing single FAQ:', error);
+      toast.error('Fout bij analyseren van de vraag');
+    } finally {
+      setAnalyzingSingleIndex(null);
+    }
+  };
+
   const regenerateFaq = async (index: number) => {
     if (!websiteUrl || !pageContent) {
       toast.error('Website URL en content zijn vereist voor regeneratie');
@@ -221,7 +276,7 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
         newResults.delete(index);
         setAnalysisResults(newResults);
         
-        toast.success('Vraag geregenereerd! Voer opnieuw een analyse uit om de nieuwe score te zien.');
+        toast.success('Vraag geregenereerd! Klik op "Analyseer" om de nieuwe score te zien.');
       }
     } catch (error) {
       console.error('Error regenerating FAQ:', error);
@@ -230,6 +285,45 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
       setRegeneratingIndex(null);
     }
   };
+
+  // Show generate button if no FAQs yet
+  if (faqs.length === 0) {
+    return (
+      <Card className="p-6">
+        <div className="text-center py-8">
+          <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-xl font-semibold mb-2">FAQ Suggesties</h3>
+          <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+            Genereer AI-gestuurde FAQ suggesties op basis van de pagina-inhoud. 
+            Deze vragen zijn geoptimaliseerd voor AI-zoekmachines en featured snippets.
+          </p>
+          {onGenerateFaqs ? (
+            <Button
+              onClick={onGenerateFaqs}
+              disabled={isGeneratingFaqs}
+              className="gap-2"
+            >
+              {isGeneratingFaqs ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  FAQs genereren...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Genereer FAQ Suggesties
+                </>
+              )}
+            </Button>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              FAQ generatie is niet beschikbaar voor deze pagina.
+            </p>
+          )}
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
@@ -246,7 +340,7 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
               variant="default"
               size="sm"
               onClick={analyzeRelevance}
-              disabled={isAnalyzing || !websiteUrl}
+              disabled={isAnalyzing || !websiteUrl || analyzingSingleIndex !== null}
             >
               {isAnalyzing ? (
                 <>
@@ -256,7 +350,7 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
               ) : (
                 <>
                   {useBrowserAi ? <Cpu className="w-4 h-4 mr-2" /> : <Cloud className="w-4 h-4 mr-2" />}
-                  AI Search Readiness
+                  Analyseer Alle
                 </>
               )}
             </Button>
@@ -287,7 +381,7 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
               variant={!useBrowserAi ? "default" : "outline"}
               size="sm"
               onClick={() => setUseBrowserAi(false)}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || analyzingSingleIndex !== null}
             >
               <Cloud className="w-3 h-3 mr-2" />
               Cloud AI (Gemini)
@@ -296,7 +390,7 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
               variant={useBrowserAi ? "default" : "outline"}
               size="sm"
               onClick={() => setUseBrowserAi(true)}
-              disabled={isAnalyzing || !browserAiAvailable}
+              disabled={isAnalyzing || analyzingSingleIndex !== null || !browserAiAvailable}
               title={browserAiAvailable === false ? "Je browser ondersteunt geen WebGPU" : undefined}
             >
               <Cpu className="w-3 h-3 mr-2" />
@@ -325,6 +419,36 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
                 </div>
               </AccordionTrigger>
               <AccordionContent>
+                {/* Show analyze button if no analysis exists for this FAQ */}
+                {!analysis && (
+                  <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-dashed">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        Analyseer deze vraag om de AI Search Readiness score te bepalen
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => analyzeSingleFaq(index)}
+                        disabled={analyzingSingleIndex === index || isAnalyzing}
+                      >
+                        {analyzingSingleIndex === index ? (
+                          <>
+                            <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                            Analyseren...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="w-3 h-3 mr-2" />
+                            Analyseer
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Show analysis results with action buttons */}
                 {analysis && (
                   <div className="mb-4 p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-start justify-between gap-3">
@@ -332,29 +456,47 @@ export const FaqSuggestions = ({ faqs, websiteUrl = "", pageContent = "", onFaqs
                         <p className="text-sm font-medium mb-1">AI Search Readiness Analyse:</p>
                         <p className="text-sm text-muted-foreground">{analysis.explanation}</p>
                       </div>
-                      {analysis.score < 50 && (
+                      <div className="flex gap-2 flex-shrink-0">
+                        {/* Always show re-analyze button */}
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          onClick={() => regenerateFaq(index)}
-                          disabled={regeneratingIndex === index}
+                          onClick={() => analyzeSingleFaq(index)}
+                          disabled={analyzingSingleIndex === index || isAnalyzing}
+                          title="Opnieuw analyseren"
                         >
-                          {regeneratingIndex === index ? (
-                            <>
-                              <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-                              Bezig...
-                            </>
+                          {analyzingSingleIndex === index ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
                           ) : (
-                            <>
-                              <RefreshCw className="w-3 h-3 mr-2" />
-                              Regenereer
-                            </>
+                            <Search className="w-3 h-3" />
                           )}
                         </Button>
-                      )}
+                        {/* Show regenerate button for low/medium scores */}
+                        {analysis.score < 70 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => regenerateFaq(index)}
+                            disabled={regeneratingIndex === index}
+                          >
+                            {regeneratingIndex === index ? (
+                              <>
+                                <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                                Bezig...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="w-3 h-3 mr-2" />
+                                Regenereer
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
+                
                 <p className="text-muted-foreground">{faq.answer}</p>
                 <div className="flex gap-2 mt-4">
                   <Button

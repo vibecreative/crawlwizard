@@ -626,7 +626,7 @@ const Index = () => {
       setAnalysisData(data);
       toast.success("Analyse voltooid!");
       
-      generateFaqs(html, data);
+      // FAQs are now generated on-demand via button in FaqSuggestions component
       
       setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -639,17 +639,22 @@ const Index = () => {
     }
   };
 
-  const generateFaqs = async (html: string, currentData: AnalysisData) => {
+  const generateFaqs = async () => {
+    if (!analysisData?.html) {
+      toast.error("Geen HTML beschikbaar voor FAQ generatie");
+      return;
+    }
+    
     setIsGeneratingFaqs(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-faqs', {
-        body: { html }
+        body: { html: analysisData.html }
       });
 
       if (error) throw error;
 
       setAnalysisData({
-        ...currentData,
+        ...analysisData,
         faqs: data.faqs
       });
       toast.success("FAQ suggesties gegenereerd!");
@@ -978,16 +983,9 @@ const Index = () => {
               data={analysisData} 
               onReset={handleReset}
               onFaqsUpdate={handleFaqsUpdate}
+              onGenerateFaqs={generateFaqs}
+              isGeneratingFaqs={isGeneratingFaqs}
             />
-            
-            {isGeneratingFaqs && (
-              <Card className="p-6">
-                <div className="flex items-center justify-center gap-3">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
-                  <p className="text-muted-foreground">FAQ's genereren...</p>
-                </div>
-              </Card>
-            )}
           </div>
         )}
 

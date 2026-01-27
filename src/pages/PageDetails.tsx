@@ -628,27 +628,6 @@ const PageDetails = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Terug naar {projectData?.name || "Dashboard"}
           </Button>
-          
-          {/* Show Generate FAQs button if no FAQs exist */}
-          {(!pageData.analysis_data.faqs || pageData.analysis_data.faqs.length === 0) && (
-            <Button
-              onClick={handleGenerateFaqs}
-              disabled={isGeneratingFaqs}
-              className="gap-2"
-            >
-              {isGeneratingFaqs ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  FAQs genereren...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Genereer FAQ Suggesties
-                </>
-              )}
-            </Button>
-          )}
         </div>
 
         <AnalysisResults 
@@ -657,6 +636,8 @@ const PageDetails = () => {
           onReanalyze={handleReanalyze}
           isReanalyzing={isReanalyzing}
           onFaqsUpdate={handleFaqsUpdate}
+          onGenerateFaqs={handleGenerateFaqs}
+          isGeneratingFaqs={isGeneratingFaqs}
         />
       </main>
     </div>
