@@ -152,8 +152,8 @@ export const AnalysisResults = ({
         </div>
       </div>
 
-      {/* Heading Structure Score - Prominent at top */}
-      <HeadingStructureScore headings={data.headings} />
+      {/* SEO Score - Prominent at top */}
+      <HeadingStructureScore headings={data.headings} meta={data.meta} structuredData={data.structuredData} />
 
       {/* Visual Screenshot with Heading Markers */}
       {data.screenshot && (
