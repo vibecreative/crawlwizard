@@ -410,6 +410,9 @@ const Landing = () => {
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <a href="#features" className="hover:text-foreground transition-colors">Features</a>
               <a href="#pricing" className="hover:text-foreground transition-colors">Prijzen</a>
+              <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors">
+                Privacybeleid
+              </button>
               <button onClick={() => navigate('/auth')} className="hover:text-foreground transition-colors">
                 Inloggen
               </button>
