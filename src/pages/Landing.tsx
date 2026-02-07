@@ -189,7 +189,7 @@ const Landing = () => {
             </Button>
           </div>
           
-          {/* Trust badges */}
+          {/* Trust badges - hidden until we have active users and reviews
           <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-muted-foreground">
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-accent" />
@@ -204,6 +204,7 @@ const Landing = () => {
               <span className="text-sm">4.9/5 beoordeling</span>
             </div>
           </div>
+          */}
         </div>
       </section>
 
