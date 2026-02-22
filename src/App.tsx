@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <PageDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
               </ProtectedRoute>
             }
           />
