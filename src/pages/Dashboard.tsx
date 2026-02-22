@@ -19,7 +19,8 @@ import {
   LogOut,
   ExternalLink,
   Trash2,
-  Eye
+  Eye,
+  Shield
 } from "lucide-react";
 
 interface ProjectPage {
@@ -54,10 +55,22 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [loadingPages, setLoadingPages] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+    // Check admin role
+    if (user?.id) {
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .then(({ data }) => {
+          if (data && data.length > 0) setIsAdmin(true);
+        });
+    }
+  }, [user?.id]);
 
   // Fetch all project pages for average score calculation
   useEffect(() => {
@@ -210,6 +223,12 @@ const Dashboard = () => {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {user?.email}
             </span>
+            {isAdmin && (
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
+              </Button>
+            )}
             <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="h-4 w-4" />
