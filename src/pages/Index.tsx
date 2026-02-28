@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { WebsiteAnalyzer } from "@/components/WebsiteAnalyzer";
@@ -86,6 +86,7 @@ const Index = () => {
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
   const shouldStopAnalysisRef = useRef(false);
+  const [userPlan, setUserPlan] = useState<string>("free");
 
   const parseHeadings = (html: string): HeadingInfo[] => {
     const parser = new DOMParser();
@@ -820,6 +821,13 @@ const Index = () => {
 
   const { signOut, user } = useAuth();
 
+  useEffect(() => {
+    if (user?.id) {
+      supabase.from('profiles').select('plan').eq('id', user.id).single()
+        .then(({ data }) => { if (data) setUserPlan(data.plan); });
+    }
+  }, [user?.id]);
+
   const handleSignOut = async () => {
     await signOut();
     toast.success("Uitgelogd");
@@ -985,6 +993,7 @@ const Index = () => {
               onFaqsUpdate={handleFaqsUpdate}
               onGenerateFaqs={generateFaqs}
               isGeneratingFaqs={isGeneratingFaqs}
+              userPlan={userPlan}
             />
           </div>
         )}

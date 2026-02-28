@@ -2,11 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download, Sparkles, Loader2, RefreshCw, Cpu, Cloud, Search } from "lucide-react";
+import { Copy, Download, Sparkles, Loader2, RefreshCw, Cpu, Cloud, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { analyzeRelevanceInBrowser, checkBrowserAiSupport, BrowserAnalysisResult } from "@/lib/browserAiRelevance";
+import { ArticleGenerator } from "./ArticleGenerator";
 
 interface FaqItem {
   question: string;
@@ -20,6 +21,7 @@ interface FaqSuggestionsProps {
   onFaqsUpdate?: (updatedFaqs: FaqItem[]) => void;
   onGenerateFaqs?: () => Promise<void>;
   isGeneratingFaqs?: boolean;
+  userPlan?: string;
 }
 
 interface AnalysisResult {
@@ -35,7 +37,8 @@ export const FaqSuggestions = ({
   pageContent = "", 
   onFaqsUpdate,
   onGenerateFaqs,
-  isGeneratingFaqs = false
+  isGeneratingFaqs = false,
+  userPlan = "free"
 }: FaqSuggestionsProps) => {
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -44,6 +47,8 @@ export const FaqSuggestions = ({
   const [browserAiAvailable, setBrowserAiAvailable] = useState<boolean | null>(null);
   const [useBrowserAi, setUseBrowserAi] = useState(false);
   const [isLoadingModel, setIsLoadingModel] = useState(false);
+  const [articleOpenIndex, setArticleOpenIndex] = useState<number | null>(null);
+  const isEnterprise = userPlan === 'enterprise';
 
   useEffect(() => {
     // Check if browser supports WebGPU for local AI
@@ -498,7 +503,7 @@ export const FaqSuggestions = ({
                 )}
                 
                 <p className="text-muted-foreground">{faq.answer}</p>
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-4 flex-wrap">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -515,7 +520,37 @@ export const FaqSuggestions = ({
                     <Copy className="w-3 h-3 mr-2" />
                     Kopieer antwoord
                   </Button>
+                  {isEnterprise && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setArticleOpenIndex(articleOpenIndex === index ? null : index)}
+                    >
+                      <FileText className="w-3 h-3 mr-2" />
+                      {articleOpenIndex === index ? 'Sluit artikel' : 'Genereer artikel'}
+                    </Button>
+                  )}
+                  {!isEnterprise && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled
+                      title="Alleen beschikbaar voor Enterprise abonnees"
+                    >
+                      <FileText className="w-3 h-3 mr-2" />
+                      Genereer artikel
+                      <Badge variant="secondary" className="ml-1 text-[10px] px-1">Enterprise</Badge>
+                    </Button>
+                  )}
                 </div>
+                {articleOpenIndex === index && isEnterprise && (
+                  <ArticleGenerator
+                    question={faq.question}
+                    answer={faq.answer}
+                    pageContent={pageContent}
+                    onClose={() => setArticleOpenIndex(null)}
+                  />
+                )}
               </AccordionContent>
             </AccordionItem>
           );

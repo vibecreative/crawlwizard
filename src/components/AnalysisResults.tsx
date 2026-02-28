@@ -70,6 +70,7 @@ interface AnalysisResultsProps {
   isReanalyzing?: boolean;
   onGenerateFaqs?: () => Promise<void>;
   isGeneratingFaqs?: boolean;
+  userPlan?: string;
 }
 
 export const AnalysisResults = ({ 
@@ -79,7 +80,8 @@ export const AnalysisResults = ({
   onReanalyze, 
   isReanalyzing,
   onGenerateFaqs,
-  isGeneratingFaqs
+  isGeneratingFaqs,
+  userPlan
 }: AnalysisResultsProps) => {
   const getHeadingColor = (level: number) => {
     const colors = {
@@ -452,6 +454,7 @@ export const AnalysisResults = ({
         onFaqsUpdate={onFaqsUpdate}
         onGenerateFaqs={onGenerateFaqs}
         isGeneratingFaqs={isGeneratingFaqs}
+        userPlan={userPlan}
       />
 
       {/* JSON-LD Generator */}
