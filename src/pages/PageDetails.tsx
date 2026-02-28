@@ -60,12 +60,17 @@ const PageDetails = () => {
   const [isReanalyzing, setIsReanalyzing] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userPlan, setUserPlan] = useState<string>("free");
 
   useEffect(() => {
     if (pageId) {
       fetchPageData();
     }
-  }, [pageId]);
+    if (user?.id) {
+      supabase.from('profiles').select('plan').eq('id', user.id).single()
+        .then(({ data }) => { if (data) setUserPlan(data.plan); });
+    }
+  }, [pageId, user?.id]);
 
   const fetchPageData = async () => {
     try {
@@ -638,6 +643,7 @@ const PageDetails = () => {
           onFaqsUpdate={handleFaqsUpdate}
           onGenerateFaqs={handleGenerateFaqs}
           isGeneratingFaqs={isGeneratingFaqs}
+          userPlan={userPlan}
         />
       </main>
     </div>
