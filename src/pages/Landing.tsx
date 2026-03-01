@@ -162,13 +162,12 @@ const Landing = () => {
             Nu met AI-gedreven FAQ Generator
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Verbeter je{' '}
-            <span className="gradient-text">SEO-rankings</span>
-            {' '}met diepgaande analyse
+            Word gevonden door{' '}
+            <span className="gradient-text">zoekmachines</span>
+            {' '}én AI
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Analyseer de complete SEO-structuur van je website. Van heading-hiërarchie tot structured data – 
-            krijg actionable inzichten voor betere zoekmachine-posities.
+            Websites worden steeds vaker geciteerd door AI-tools in plaats van bezocht via een klik. Analyseer je volledige websitestructuur – van heading-hiërarchie tot structured data – en krijg actionable inzichten om die bron te zijn in Google én in ChatGPT, Perplexity en AI Overviews.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
