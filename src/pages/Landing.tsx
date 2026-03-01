@@ -24,32 +24,32 @@ const Landing = () => {
     {
       icon: Search,
       title: 'Heading Analyse',
-      description: 'Analyseer de complete heading-structuur (H1-H6) van elke pagina voor optimale SEO.'
+      description: 'Ontdek in één oogopslag of je heading-structuur klopt – de basis van elke goed geïndexeerde pagina.'
     },
     {
       icon: FileText,
       title: 'Meta & Structured Data',
-      description: 'Bekijk meta-informatie en structured data voor betere zoekmachine-zichtbaarheid.'
+      description: 'Structured data is de sleutel tot rich snippets én tot hoe AI-tools jouw content begrijpen. Wij maken het inzichtelijk.'
     },
     {
       icon: BarChart3,
       title: 'SEO Score',
-      description: 'Krijg een duidelijke SEO-score met actionable verbeterpunten per pagina.'
+      description: 'Geen vaag rapportcijfer, maar een concrete score met exacte verbeterpunten. Weet precies wat je morgen moet aanpakken.'
     },
     {
       icon: Globe,
       title: 'Website Analyse',
-      description: 'Analyseer complete websites via sitemap met tot 500 pagina\'s per scan.'
+      description: 'Scan je hele website in één keer. Tot 500 pagina\'s geanalyseerd, geen enkel probleem over het hoofd gezien.'
     },
     {
       icon: Zap,
       title: 'AI FAQ Generator',
-      description: 'Genereer relevante FAQ\'s met AI voor betere rich snippets in zoekresultaten.'
+      description: 'FAQ\'s zijn goud voor rich snippets én voor AI-antwoorden. Genereer direct relevante vragen die jouw doelgroep stelt.'
     },
     {
       icon: TrendingUp,
       title: 'Keyword Analyse',
-      description: 'Ontdek keyword-dichtheid en optimaliseer je content voor betere rankings.'
+      description: 'Schrijf je té veel of te weinig over je kernonderwerp? Wij laten het zien – per pagina, per keyword.'
     }
   ];
 
@@ -58,11 +58,12 @@ const Landing = () => {
       name: 'Free',
       price: '€0',
       period: 'voor altijd',
-      description: 'Perfect om te starten',
+      description: 'Gratis verkennen',
+      subtitle: 'Analyseer je eerste pagina\'s en ontdek wat er beter kan.',
       features: [
-        'Analyseer 1 pagina per keer',
-        'Maximaal 10 analyses',
-        'Basis SEO-score',
+        '1 pagina per analyse',
+        'Tot 10 analyses',
+        'SEO-score per pagina',
         'Heading-structuur analyse',
         'Meta-informatie overzicht'
       ],
@@ -74,15 +75,15 @@ const Landing = () => {
       name: 'Scale',
       price: '€14,95',
       period: 'per maand',
-      description: 'Voor groeiende websites',
+      description: 'Voor serieuze websites',
+      subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
       features: [
-        'Analyseer volledige websites',
-        'Tot 100 pagina\'s per website',
+        'Volledige website-analyse',
+        'Tot 100 pagina\'s per scan',
         '1 project opslaan',
         'AI FAQ Generator',
         'Keyword analyse',
-        'Structured data analyse',
-        'Projecten bewaren'
+        'Structured data analyse'
       ],
       cta: 'Start met Scale',
       popular: true,
@@ -92,10 +93,11 @@ const Landing = () => {
       name: 'Enterprise',
       price: '€35',
       period: 'per maand',
-      description: 'Voor grote websites',
+      description: 'Voor teams & bureaus',
+      subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
       features: [
-        'Alles in Scale',
-        'Tot 500 pagina\'s per website',
+        'Alles uit Scale',
+        'Tot 500 pagina\'s per scan',
         '3 projecten opslaan',
         'Prioriteit support',
         'Geavanceerde rapportages',
@@ -262,10 +264,10 @@ const Landing = () => {
           <div className="text-center mb-16">
             <Badge variant="secondary" className="mb-4">Features</Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Alles wat je nodig hebt voor SEO-succes
+              Alles wat je nodig hebt om gevonden te worden
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Van technische analyse tot AI-gedreven content suggesties – onze tool geeft je de inzichten die je nodig hebt.
+              Door zoekmachines. Door AI-tools. Door je doelgroep.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -292,10 +294,10 @@ const Landing = () => {
           <div className="text-center mb-16">
             <Badge variant="secondary" className="mb-4">Prijzen</Badge>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Kies het plan dat bij je past
+              Transparante prijzen, direct resultaat
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start gratis en upgrade wanneer je groeit. Geen verborgen kosten.
+              Begin vandaag gratis. Geen creditcard, geen verborgen kosten – wel direct inzicht.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -317,7 +319,8 @@ const Landing = () => {
                     <span className="text-4xl font-bold">{plan.price}</span>
                     <span className="text-muted-foreground ml-2">{plan.period}</span>
                   </div>
-                  <p className="text-muted-foreground mt-2">{plan.description}</p>
+                  <p className="text-muted-foreground mt-2 font-medium">{plan.description}</p>
+                  {plan.subtitle && <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>}
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col">
                   <ul className="space-y-3 flex-1">
@@ -382,19 +385,29 @@ const Landing = () => {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-3xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Klaar om je SEO te verbeteren?
+            Wordt jouw website de bron die geciteerd wordt?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Start vandaag nog gratis en ontdek hoe je website beter kan scoren in zoekmachines.
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Duizenden pagina's worden dagelijks overgeslagen door Google en AI-tools – omdat de structuur niet klopt. Analyseer jouw website gratis en ontdek wat er beter kan.
           </p>
-          <Button 
-            size="lg" 
-            onClick={() => navigate('/auth')}
-            className="gradient-primary text-primary-foreground text-lg px-8 py-6 shadow-glow"
-          >
-            Gratis account aanmaken
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/auth')}
+              className="gradient-primary text-primary-foreground text-lg px-8 py-6 shadow-glow"
+            >
+              Analyseer mijn website gratis
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-lg px-8 py-6"
+            >
+              Bekijk de prijzen
+            </Button>
+          </div>
         </div>
       </section>
 
