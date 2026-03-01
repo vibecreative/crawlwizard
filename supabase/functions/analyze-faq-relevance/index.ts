@@ -92,20 +92,16 @@ serve(async (req) => {
       );
     }
 
-    // Input validation for pageContent
-    if (!pageContent || typeof pageContent !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'pageContent must be a non-empty string' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    let pageContentToProcess = pageContent;
-    if (pageContentToProcess.length > MAX_CONTENT_SIZE) {
-      console.warn(
-        `pageContent too large (${pageContentToProcess.length} chars). Truncating to ${MAX_CONTENT_SIZE}.`
-      );
-      pageContentToProcess = pageContentToProcess.slice(0, MAX_CONTENT_SIZE);
+    // Input validation for pageContent (optional)
+    let pageContentToProcess = '';
+    if (pageContent && typeof pageContent === 'string') {
+      pageContentToProcess = pageContent;
+      if (pageContentToProcess.length > MAX_CONTENT_SIZE) {
+        console.warn(
+          `pageContent too large (${pageContentToProcess.length} chars). Truncating to ${MAX_CONTENT_SIZE}.`
+        );
+        pageContentToProcess = pageContentToProcess.slice(0, MAX_CONTENT_SIZE);
+      }
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -117,7 +113,7 @@ serve(async (req) => {
     console.log('Analyzing FAQ relevance for question:', question.substring(0, 100));
 
     // Limit page content to avoid token limits
-    const limitedContent = pageContentToProcess.substring(0, 5000);
+    const limitedContent = pageContentToProcess ? pageContentToProcess.substring(0, 5000) : 'Geen content beschikbaar';
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

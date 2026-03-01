@@ -114,8 +114,8 @@ export const FaqSuggestions = ({
   };
 
   const analyzeRelevance = async () => {
-    if (!websiteUrl || !pageContent) {
-      toast.error('Website URL en content zijn vereist voor analyse');
+    if (!websiteUrl) {
+      toast.error('Website URL is vereist voor analyse');
       return;
     }
 
@@ -203,8 +203,8 @@ export const FaqSuggestions = ({
   };
 
   const analyzeSingleFaq = async (index: number) => {
-    if (!websiteUrl || !pageContent) {
-      toast.error('Website URL en content zijn vereist voor analyse');
+    if (!websiteUrl) {
+      toast.error('Website URL is vereist voor analyse');
       return;
     }
 
@@ -248,8 +248,8 @@ export const FaqSuggestions = ({
   };
 
   const regenerateFaq = async (index: number) => {
-    if (!websiteUrl || !pageContent) {
-      toast.error('Website URL en content zijn vereist voor regeneratie');
+    if (!websiteUrl) {
+      toast.error('Website URL is vereist voor regeneratie');
       return;
     }
 
@@ -345,7 +345,7 @@ export const FaqSuggestions = ({
               variant="default"
               size="sm"
               onClick={analyzeRelevance}
-              disabled={isAnalyzing || !websiteUrl || analyzingSingleIndex !== null}
+              disabled={isAnalyzing || analyzingSingleIndex !== null}
             >
               {isAnalyzing ? (
                 <>
