@@ -121,7 +121,7 @@ const Auth = () => {
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Search className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">SEO Analyzer</span>
+            <span className="text-2xl font-bold">CrawlWizard</span>
           </div>
           <p className="text-muted-foreground">
             Analyseer en optimaliseer je website voor zoekmachines

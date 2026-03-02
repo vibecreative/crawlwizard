@@ -142,7 +142,7 @@ const Landing = () => {
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
               <Search className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">SEO Analyzer</span>
+            <span className="text-xl font-bold">CrawlWizard</span>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -219,7 +219,7 @@ const Landing = () => {
               <div className="w-3 h-3 rounded-full bg-green-500/60" />
               <div className="flex-1 mx-4">
                 <div className="bg-background rounded-md px-4 py-1 text-sm text-muted-foreground max-w-md mx-auto text-center">
-                  seo-analyzer.app/dashboard
+                  crawlwizard.app/dashboard
                 </div>
               </div>
             </div>
@@ -381,6 +381,35 @@ const Landing = () => {
       </section>
       */}
 
+      {/* How AI Works Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-3xl">
+          <div className="text-center mb-10">
+            <Badge variant="secondary" className="mb-4">Achtergrond</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Hoe werkt een AI-tool eigenlijk?
+            </h2>
+          </div>
+          <div className="space-y-6 text-muted-foreground text-lg leading-relaxed">
+            <p>
+              Als jij een vraag stelt aan ChatGPT of Google AI, krijg je geen lijst met links – je krijgt gewoon een antwoord. Maar dat antwoord komt ergens vandaan: AI-tools zijn getraind op een enorme mix van bronnen – Wikipedia, nieuwssites, wetenschappelijke artikelen, forums én gewone websites zoals die van jou. De vraag is dus niet óf jouw website gelezen wordt – maar of een AI hem goed genoeg begrijpt om hem als betrouwbare bron te gebruiken.
+            </p>
+            <p>
+              De meeste AI-tools leerden het internet kennen tot een bepaalde datum – ze crawlen niet continu real-time. Maar dat betekent niet dat jouw website er niet toe doet. Tools zoals Google AI Overviews en Perplexity crawlen wél actief en actueel. En grote AI-modellen worden regelmatig opnieuw getraind op nieuwe data. Je structuur vandaag bepaalt dus of jij morgen als bron wordt meegenomen.
+            </p>
+            <p>
+              Dat "lezen" werkt overigens precies zoals bij Google: een geautomatiseerde bot crawlt jouw website en probeert te begrijpen waar jouw pagina over gaat. Is je structuur onduidelijk? Dan begrijpt de AI het niet goed – en word je niet geciteerd als bron.
+            </p>
+            <p>
+              CrawlWizard laat je zien wat zo'n bot ziet als hij jouw website bezoekt. Kloppen je koppen? Begrijpt een machine je content? Heb je de juiste structured data? Wij maken het inzichtelijk – zodat jij niet alleen beter scoort in Google, maar ook vaker opduikt als bron in AI-antwoorden.
+            </p>
+            <p className="font-semibold text-foreground italic border-l-4 border-primary pl-6">
+              Goede structuur is de taal die zoekmachines én AI spreken. CrawlWizard helpt jou dit inzichtelijker te maken én de juiste actie te ondernemen.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-3xl text-center">
@@ -419,7 +448,7 @@ const Landing = () => {
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                 <Search className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold">SEO Analyzer</span>
+              <span className="font-semibold">CrawlWizard</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <a href="#features" className="hover:text-foreground transition-colors">Features</a>
@@ -432,7 +461,7 @@ const Landing = () => {
               </button>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2025 SEO Analyzer. Alle rechten voorbehouden.
+              © 2025 CrawlWizard. Alle rechten voorbehouden.
             </p>
           </div>
         </div>
