@@ -68,7 +68,7 @@ const Privacy = () => {
               <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
                 <Search className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">SEO Analyzer</span>
+              <span className="text-xl font-bold">CrawlWizard</span>
             </button>
           </div>
           <ThemeToggle />
@@ -164,7 +164,7 @@ const Privacy = () => {
             <section>
               <h2 className="text-2xl font-semibold mb-3">1. Inleiding</h2>
               <p className="text-muted-foreground">
-                SEO Analyzer respecteert je privacy en zorgt ervoor dat je persoonlijke gegevens worden beschermd. Dit privacybeleid is van toepassing op de website en diensten van SEO Analyzer en legt uit welke gegevens we verzamelen, waarom we dat doen en hoe we deze beschermen.
+                CrawlWizard respecteert je privacy en zorgt ervoor dat je persoonlijke gegevens worden beschermd. Dit privacybeleid is van toepassing op de website en diensten van CrawlWizard en legt uit welke gegevens we verzamelen, waarom we dat doen en hoe we deze beschermen.
               </p>
               <p className="text-muted-foreground">
                 Dit beleid voldoet aan de Algemene Verordening Gegevensbescherming (AVG/GDPR) en is van toepassing op alle bezoekers en gebruikers van onze dienst.
@@ -257,7 +257,7 @@ const Privacy = () => {
       <footer className="py-8 px-4 border-t border-border">
         <div className="container mx-auto max-w-6xl text-center">
           <p className="text-sm text-muted-foreground">
-            © 2025 SEO Analyzer. Alle rechten voorbehouden.
+            © 2025 CrawlWizard. Alle rechten voorbehouden.
           </p>
         </div>
       </footer>
