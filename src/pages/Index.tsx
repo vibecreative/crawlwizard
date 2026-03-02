@@ -512,86 +512,23 @@ const Index = () => {
     };
   };
 
-  const fetchWithRetry = async (url: string, maxRetries: number = 3): Promise<string> => {
-    const corsProxies = [
-      (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-      (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-      (u: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-    ];
+  const fetchWithRetry = async (url: string): Promise<string> => {
+    console.log('Fetching page via backend:', url);
+    
+    const { data, error } = await supabase.functions.invoke('fetch-page', {
+      body: { url },
+    });
 
-    // Patterns that indicate a proxy error page rather than actual content
-    const errorPatterns = [
-      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*403\s*(Forbidden)?/i,
-      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*404\s*(Not Found)?/i,
-      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*502\s*(Bad Gateway)?/i,
-      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*503\s*(Service Unavailable)?/i,
-      /^<!DOCTYPE[^>]*>\s*<html[^>]*>\s*<head>\s*<title>\s*Access Denied/i,
-      /<title>\s*Error\s*<\/title>/i,
-      /<h1>\s*403\s*(Forbidden)?\s*<\/h1>/i,
-      /<h1>\s*404\s*(Not Found)?\s*<\/h1>/i,
-      /<h1>\s*Access Denied\s*<\/h1>/i,
-    ];
-
-    const isErrorPage = (html: string): boolean => {
-      // Check for common error patterns
-      for (const pattern of errorPatterns) {
-        if (pattern.test(html)) {
-          console.warn('Detected proxy error page, trying next proxy...');
-          return true;
-        }
-      }
-      
-      // Check if the page is suspiciously short and contains error-like content
-      if (html.length < 2000) {
-        const lowerHtml = html.toLowerCase();
-        if (
-          (lowerHtml.includes('403') && lowerHtml.includes('forbidden')) ||
-          (lowerHtml.includes('404') && lowerHtml.includes('not found')) ||
-          (lowerHtml.includes('access denied')) ||
-          (lowerHtml.includes('error') && !lowerHtml.includes('<article'))
-        ) {
-          console.warn('Detected short error page, trying next proxy...');
-          return true;
-        }
-      }
-      
-      return false;
-    };
-
-    let lastError: Error | null = null;
-
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      for (const proxyFn of corsProxies) {
-        try {
-          const proxyUrl = proxyFn(url);
-          console.log(`Poging ${attempt + 1}, proxy: ${proxyUrl.split('?')[0]}`);
-          
-          const response = await fetch(proxyUrl, {
-            signal: AbortSignal.timeout(15000),
-          });
-          
-          if (response.ok) {
-            const html = await response.text();
-            // Check minimum length AND that it's not an error page
-            if (html && html.length > 100 && !isErrorPage(html)) {
-              return html;
-            } else if (isErrorPage(html)) {
-              lastError = new Error('Proxy returned error page');
-              continue;
-            }
-          }
-        } catch (error) {
-          console.warn(`Proxy mislukt:`, error);
-          lastError = error as Error;
-        }
-      }
-      
-      if (attempt < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+    if (error) {
+      console.error('Edge function error:', error);
+      throw new Error('Kon de website niet ophalen. Probeer het later opnieuw.');
     }
 
-    throw lastError || new Error('Kon de website niet ophalen na meerdere pogingen');
+    if (!data?.success || !data?.html) {
+      throw new Error(data?.error || 'Geen HTML ontvangen van de server');
+    }
+
+    return data.html;
   };
 
   const analyzeUrl = async (url: string, primaryKeyword: string = '', secondaryKeywords: string[] = []) => {
