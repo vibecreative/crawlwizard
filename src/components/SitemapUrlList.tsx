@@ -14,6 +14,7 @@ interface SitemapUrlListProps {
   onStopAnalysis?: () => void;
   isAnalyzing: boolean;
   analyzedCount: number;
+  maxPages?: number;
 }
 
 export const SitemapUrlList = ({ 
@@ -22,7 +23,8 @@ export const SitemapUrlList = ({
   onAnalyzeSelected, 
   onStopAnalysis,
   isAnalyzing,
-  analyzedCount 
+  analyzedCount,
+  maxPages
 }: SitemapUrlListProps) => {
   const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set(urls.map(u => u.loc)));
 
@@ -45,7 +47,11 @@ export const SitemapUrlList = ({
   };
 
   const handleAnalyze = () => {
-    onAnalyzeSelected(Array.from(selectedUrls));
+    let selected = Array.from(selectedUrls);
+    if (maxPages && selected.length > maxPages) {
+      selected = selected.slice(0, maxPages);
+    }
+    onAnalyzeSelected(selected);
   };
 
   const getRelativePath = (fullUrl: string) => {

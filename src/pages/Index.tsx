@@ -6,6 +6,7 @@ import { SitemapUrlList } from "@/components/SitemapUrlList";
 import { WebsiteAnalysisResults, PageAnalysisResult } from "@/components/WebsiteAnalysisResults";
 import { AnalysisResults } from "@/components/AnalysisResults";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -843,9 +844,17 @@ const Index = () => {
                 <FileText className="h-4 w-4" />
                 Enkele pagina
               </TabsTrigger>
-              <TabsTrigger value="website" className="flex items-center gap-2">
+              <TabsTrigger 
+                value="website" 
+                className="flex items-center gap-2"
+                disabled={userPlan === 'free'}
+                title={userPlan === 'free' ? 'Upgrade naar Scale of Enterprise voor volledige website-analyse' : ''}
+              >
                 <Globe className="h-4 w-4" />
                 Volledige website
+                {userPlan === 'free' && (
+                  <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">Scale+</Badge>
+                )}
               </TabsTrigger>
             </TabsList>
             
@@ -868,6 +877,7 @@ const Index = () => {
                     onStopAnalysis={handleStopAnalysis}
                     isAnalyzing={isAnalyzingWebsite}
                     analyzedCount={analyzedPagesCount}
+                    maxPages={userPlan === 'enterprise' ? 500 : 100}
                   />
                 </div>
               )}
