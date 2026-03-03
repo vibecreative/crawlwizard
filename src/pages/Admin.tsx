@@ -24,6 +24,17 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Shield,
   Users,
   LogOut,
@@ -31,6 +42,7 @@ import {
   UserCheck,
   UserX,
   Crown,
+  Trash2,
 } from "lucide-react";
 
 interface AdminUser {
@@ -131,6 +143,34 @@ const Admin = () => {
     } catch (error) {
       console.error("Error updating user:", error);
       toast.error("Kon gebruiker niet bijwerken");
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    setUpdatingUser(userId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=delete`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Delete failed");
+
+      toast.success("Gebruiker verwijderd");
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Kon gebruiker niet verwijderen");
     } finally {
       setUpdatingUser(null);
     }
@@ -327,6 +367,38 @@ const Admin = () => {
                             >
                               Maak admin
                             </Button>
+                          )}
+                          {u.id !== user?.id && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-xs text-destructive hover:text-destructive"
+                                  disabled={updatingUser === u.id}
+                                >
+                                  <Trash2 className="h-3 w-3 mr-1" />
+                                  Verwijder
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Weet je zeker dat je <strong>{u.full_name || u.email}</strong> wilt verwijderen? Dit verwijdert het account en alle bijbehorende data permanent.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteUser(u.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Verwijderen
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           )}
                         </div>
                       </TableCell>
