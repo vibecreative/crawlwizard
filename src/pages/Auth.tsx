@@ -102,7 +102,7 @@ const Auth = () => {
     } else {
       toast({
         title: 'Account aangemaakt!',
-        description: 'Je bent nu ingelogd.',
+        description: 'Controleer je e-mail om je account te bevestigen.',
       });
     }
   };

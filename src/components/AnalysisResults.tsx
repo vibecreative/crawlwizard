@@ -433,32 +433,38 @@ export const AnalysisResults = ({
         </Card>
       </div>
 
-      {/* Structured Data Analysis */}
-      <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
+      {/* Structured Data Analysis - Scale+ */}
+      {userPlan !== 'free' && (
+        <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
+      )}
 
-      {/* Keyword Placement Advice - Show prominently when a primary keyword was analyzed */}
-      {data.keywordPlacement && (
+      {/* Keyword Placement Advice - Scale+ */}
+      {userPlan !== 'free' && data.keywordPlacement && (
         <KeywordPlacementAdvice analysis={data.keywordPlacement} />
       )}
 
-      {/* Keyword Analysis */}
-      {data.keywords && data.keywords.length > 0 && (
+      {/* Keyword Analysis - Scale+ */}
+      {userPlan !== 'free' && data.keywords && data.keywords.length > 0 && (
         <KeywordAnalysis keywords={data.keywords} />
       )}
 
-      {/* FAQ Suggestions - Always show to allow generation */}
-      <FaqSuggestions 
-        faqs={data.faqs || []} 
-        websiteUrl={data.url}
-        pageContent={data.html}
-        onFaqsUpdate={onFaqsUpdate}
-        onGenerateFaqs={onGenerateFaqs}
-        isGeneratingFaqs={isGeneratingFaqs}
-        userPlan={userPlan}
-      />
+      {/* FAQ Suggestions - Scale+ */}
+      {userPlan !== 'free' && (
+        <FaqSuggestions 
+          faqs={data.faqs || []} 
+          websiteUrl={data.url}
+          pageContent={data.html}
+          onFaqsUpdate={onFaqsUpdate}
+          onGenerateFaqs={onGenerateFaqs}
+          isGeneratingFaqs={isGeneratingFaqs}
+          userPlan={userPlan}
+        />
+      )}
 
-      {/* JSON-LD Generator */}
-      <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
+      {/* JSON-LD Generator - Scale+ */}
+      {userPlan !== 'free' && (
+        <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
+      )}
 
       {/* Placeholder Cards for DR/UR and Keywords */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
