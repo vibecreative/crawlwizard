@@ -120,6 +120,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // DELETE USER
+    if (req.method === "POST" && action === "delete") {
+      const body = await req.json();
+      const { userId } = body;
+
+      if (!userId) throw new Error("userId is required");
+      if (userId === user.id) throw new Error("Cannot delete yourself");
+
+      // Delete user via admin API (cascades profiles, roles, etc.)
+      const { error } = await adminClient.auth.admin.deleteUser(userId);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Invalid action" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
