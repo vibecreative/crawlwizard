@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Search, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Search, Mail, Lock, User, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Voer een geldig e-mailadres in');
@@ -19,6 +20,8 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -100,10 +103,11 @@ const Auth = () => {
         variant: 'destructive',
       });
     } else {
-      toast({
-        title: 'Account aangemaakt!',
-        description: 'Controleer je e-mail om je account te bevestigen.',
-      });
+      setRegisteredEmail(email);
+      setShowConfirmDialog(true);
+      setEmail('');
+      setPassword('');
+      setFullName('');
     }
   };
 
@@ -267,6 +271,35 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center sm:text-center">
+            <div className="flex justify-center mb-4">
+              <div className="rounded-full bg-primary/10 p-3">
+                <CheckCircle2 className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <DialogTitle className="text-xl">Controleer je inbox!</DialogTitle>
+            <DialogDescription className="text-base pt-2">
+              We hebben een verificatiemail gestuurd naar{' '}
+              <span className="font-semibold text-foreground">{registeredEmail}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground text-center">
+              Klik op de link in de e-mail om je account te activeren. Controleer ook je spam-map als je de mail niet kunt vinden.
+            </p>
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              Begrepen
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
