@@ -149,10 +149,16 @@ const Index = () => {
           const elementText = element.textContent?.trim() || '';
           if (!elementText || elementText.length <= 10) continue;
 
-          // Some sites repeat the heading text as the first line inside the first content block.
-          // Remove that prefix so the "underlying text" doesn't duplicate the heading.
-          const headingPrefixRe = new RegExp(`^\\s*${escapeRegExp(text)}\\s*`, 'i');
-          const cleanedText = elementText.replace(headingPrefixRe, '').trim();
+          // Remove exact heading text from the start of content blocks to avoid duplication.
+          // Use a word-boundary approach to prevent partial character matches.
+          let cleanedText = elementText;
+          if (cleanedText.toLowerCase().startsWith(text.toLowerCase())) {
+            cleanedText = cleanedText.slice(text.length).trim();
+          } else {
+            // Also try removing with the regex approach for minor whitespace differences
+            const headingPrefixRe = new RegExp(`^\\s*${escapeRegExp(text)}\\s*`, 'i');
+            cleanedText = elementText.replace(headingPrefixRe, '').trim();
+          }
           if (!cleanedText || cleanedText.length <= 10) continue;
 
           if (!seenTexts.has(cleanedText)) {
@@ -853,7 +859,17 @@ const Index = () => {
                 <Globe className="h-4 w-4" />
                 Volledige website
                 {userPlan === 'free' && (
-                  <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">Scale+</Badge>
+                  <Badge 
+                    variant="secondary" 
+                    className="ml-1 text-[10px] px-1.5 py-0 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/#pricing');
+                      window.location.href = '/#pricing';
+                    }}
+                  >
+                    Upgraden
+                  </Badge>
                 )}
               </TabsTrigger>
             </TabsList>

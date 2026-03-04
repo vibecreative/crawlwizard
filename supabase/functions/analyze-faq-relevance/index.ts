@@ -126,32 +126,36 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `Je bent een AI Search Readiness expert die analyseert hoe goed een website zou scoren in AI-assistenten zoals ChatGPT en Gemini.
+            content: `Je bent een AI Search Readiness expert die analyseert hoe goed een FAQ-vraag aansluit bij de content van een specifieke webpagina.
 
-Je krijgt:
-1. Een vraag die gebruikers aan AI-assistenten zouden kunnen stellen
-2. De URL en content van een website
+BELANGRIJK CONTEXT:
+De FAQ-vragen zijn BEWUST algemeen geformuleerd als oriëntatievragen die mensen aan AI-assistenten stellen VOORDAT ze een specifieke leverancier bezoeken. Het zijn GEEN product-specifieke vragen. De vragen gaan over het HOOFDONDERWERP/de PRODUCTCATEGORIE van de pagina.
 
 Jouw taak:
-Beoordeel hoe relevant deze website/producten/diensten zouden zijn in een AI-antwoord op deze vraag.
+Beoordeel of de webpagina voldoende relevante informatie bevat om een goed antwoord te geven op deze algemene oriëntatievraag. Kijk naar:
+1. Past het ONDERWERP van de vraag bij het hoofdonderwerp van de pagina? (belangrijkste factor)
+2. Bevat de pagina informatie die kan helpen bij het beantwoorden van de vraag?
+3. Zou een AI-assistent deze pagina als relevante bron kunnen gebruiken?
 
-Geef een score van 0-100:
-- 80-100: Hoog relevant - Website zou waarschijnlijk direct genoemd worden in eerste dialoog
-- 50-79: Gemiddeld relevant - Website zou mogelijk genoemd worden, maar niet als top-optie
-- 0-49: Laag relevant - Website zou waarschijnlijk niet genoemd worden
+Scoringsrichtlijn:
+- 80-100: Het onderwerp van de vraag sluit direct aan bij de pagina-content. De pagina bevat relevante informatie.
+- 50-79: Het onderwerp is gerelateerd maar de pagina gaat over een specifiek sub-aspect, of de vraag is breder dan de pagina-scope.
+- 0-49: Het onderwerp van de vraag heeft weinig tot geen overlap met de pagina-content.
 
-Leg kort uit waarom je deze score geeft (max 50 woorden).`
+KRITISCH: Een algemene vraag over hetzelfde onderwerp als de pagina verdient ALTIJD een score van minimaal 60, ook als de pagina niet letterlijk elk detail van het antwoord bevat.
+
+Leg kort uit waarom je deze score geeft (max 50 woorden, in het Nederlands).`
           },
           {
             role: 'user',
-            content: `Vraag: "${question}"
+            content: `FAQ-vraag: "${question}"
 
 Website URL: ${websiteUrl}
 
-Website content:
+Pagina-content (samenvatting):
 ${limitedContent}
 
-Analyseer de relevantie en geef een score.`
+Beoordeel hoe goed deze pagina als bron kan dienen voor een AI-antwoord op bovenstaande vraag.`
           }
         ],
         tools: [

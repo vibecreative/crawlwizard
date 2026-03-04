@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw, ChevronDown, RefreshCw, Loader2 } from "lucide-react";
+import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw, ChevronDown, RefreshCw, Loader2, Lock, ArrowUpRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { HeadingStructureScore } from "./HeadingStructureScore";
 import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
@@ -73,7 +74,32 @@ interface AnalysisResultsProps {
   userPlan?: string;
 }
 
-export const AnalysisResults = ({ 
+const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
+  <Card className="p-6 shadow-soft border-dashed border-2 border-muted-foreground/20 bg-muted/30 relative overflow-hidden">
+    <div className="flex items-start justify-between">
+      <div className="flex items-start gap-3">
+        <div className="p-2 rounded-lg bg-muted">
+          <Lock className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-muted-foreground">{title}</h3>
+          <p className="text-sm text-muted-foreground/70 mt-1 max-w-lg">{description}</p>
+        </div>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        className="shrink-0 gap-1.5 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground"
+        onClick={onUpgrade}
+      >
+        Upgraden
+        <ArrowUpRight className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  </Card>
+);
+
+export const AnalysisResults = ({
   data, 
   onReset, 
   onFaqsUpdate, 
@@ -83,6 +109,9 @@ export const AnalysisResults = ({
   isGeneratingFaqs,
   userPlan
 }: AnalysisResultsProps) => {
+  const navigate = useNavigate();
+  const isFree = userPlan === 'free';
+  
   const getHeadingColor = (level: number) => {
     const colors = {
       1: "bg-heading-h1",
@@ -434,22 +463,40 @@ export const AnalysisResults = ({
       </div>
 
       {/* Structured Data Analysis - Scale+ */}
-      {userPlan !== 'free' && (
+      {!isFree ? (
         <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
+      ) : (
+        <LockedFeatureCard 
+          title="Rich Snippets & Structured Data" 
+          description="Ontdek welke structured data je pagina bevat en welke je mist voor betere zichtbaarheid in zoekresultaten."
+          onUpgrade={() => navigate('/#pricing')}
+        />
       )}
 
       {/* Keyword Placement Advice - Scale+ */}
-      {userPlan !== 'free' && data.keywordPlacement && (
-        <KeywordPlacementAdvice analysis={data.keywordPlacement} />
+      {!isFree ? (
+        data.keywordPlacement && <KeywordPlacementAdvice analysis={data.keywordPlacement} />
+      ) : (
+        <LockedFeatureCard 
+          title="Keyword Plaatsing Advies" 
+          description="Controleer of je primaire keyword op de juiste plekken staat: URL, H1 en introductietekst."
+          onUpgrade={() => navigate('/#pricing')}
+        />
       )}
 
       {/* Keyword Analysis - Scale+ */}
-      {userPlan !== 'free' && data.keywords && data.keywords.length > 0 && (
-        <KeywordAnalysis keywords={data.keywords} />
+      {!isFree ? (
+        data.keywords && data.keywords.length > 0 && <KeywordAnalysis keywords={data.keywords} />
+      ) : (
+        <LockedFeatureCard 
+          title="Keyword Analyse" 
+          description="Analyseer keyword-dichtheid, plaatsing en krijg concrete verbetersugesties per keyword."
+          onUpgrade={() => navigate('/#pricing')}
+        />
       )}
 
       {/* FAQ Suggestions - Scale+ */}
-      {userPlan !== 'free' && (
+      {!isFree ? (
         <FaqSuggestions 
           faqs={data.faqs || []} 
           websiteUrl={data.url}
@@ -459,11 +506,23 @@ export const AnalysisResults = ({
           isGeneratingFaqs={isGeneratingFaqs}
           userPlan={userPlan}
         />
+      ) : (
+        <LockedFeatureCard 
+          title="FAQ Suggesties" 
+          description="Genereer AI-gestuurde FAQ's geoptimaliseerd voor featured snippets en AI-zoekmachines."
+          onUpgrade={() => navigate('/#pricing')}
+        />
       )}
 
       {/* JSON-LD Generator - Scale+ */}
-      {userPlan !== 'free' && (
+      {!isFree ? (
         <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
+      ) : (
+        <LockedFeatureCard 
+          title="JSON-LD Generator" 
+          description="Genereer automatisch het juiste JSON-LD schema voor je pagina, klaar om te implementeren."
+          onUpgrade={() => navigate('/#pricing')}
+        />
       )}
 
       {/* Placeholder Cards for DR/UR and Keywords */}
