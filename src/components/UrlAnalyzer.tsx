@@ -43,10 +43,10 @@ export const UrlAnalyzer = ({ onAnalyze, isLoading }: UrlAnalyzerProps) => {
     <div className="w-full max-w-4xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-5xl font-bold mb-4 gradient-text">
-          SEO Analyse Tool
+          Structuuranalyse
         </h1>
         <p className="text-lg text-muted-foreground">
-          Analyseer de technische SEO structuur van elke webpagina
+          Ontdek hoe zoekmachines én AI jouw pagina lezen, begrijpen en citeren
         </p>
       </div>
 
