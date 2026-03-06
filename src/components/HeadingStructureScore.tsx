@@ -209,7 +209,7 @@ export const HeadingStructureScore = ({ headings, meta, structuredData }: Headin
         <div>
           <h3 className="text-xl font-semibold flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            SEO Score
+            Paginastructuur score
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
             Analyse van headings, meta tags en structured data
