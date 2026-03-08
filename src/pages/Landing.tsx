@@ -65,14 +65,14 @@ const Landing = () => {
     },
     {
       name: 'Scale', monthlyPrice: '€17,95', yearlyPrice: '€14,95', period: 'per maand',
-      description: 'Voor serieuze websites', subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
+      description: 'Voor ambitieuze websites', subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
       credits: '50 AI-credits/maand',
       features: ['Volledige website-analyse', 'Tot 100 pagina\'s per scan', '1 project opslaan', 'AI FAQ Generator', 'Keyword analyse', 'Structured data analyse', '50 AI-credits per maand', 'Browser AI (onbeperkt, gratis)'],
       cta: 'Start met Scale', popular: true, variant: 'default' as const
     },
     {
       name: 'Enterprise', monthlyPrice: '€39,95', yearlyPrice: '€35', period: 'per maand',
-      description: 'Voor teams & bureaus', subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
+      description: 'Voor écht serieuze websites & bureau\'s', subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
       credits: '200 AI-credits/maand',
       features: ['Alles uit Scale', 'Tot 500 pagina\'s per scan', '3 projecten opslaan', 'AI Ranking Check (4 modellen)', 'AI Artikel Generator', '200 AI-credits per maand', 'Browser AI (onbeperkt, gratis)', 'Prioriteit support'],
       cta: 'Start met Enterprise', popular: false, variant: 'outline' as const
@@ -484,6 +484,7 @@ const Landing = () => {
               </motion.div>
             ))}
           </motion.div>
+          <p className="text-center text-xs text-muted-foreground mt-6">Alle prijzen zijn exclusief btw.</p>
         </div>
       </section>
 
