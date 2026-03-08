@@ -43,7 +43,7 @@ export const FaqSuggestions = ({
   userPlan = "free",
   brandContext = ""
 }: FaqSuggestionsProps) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzingSingleIndex, setAnalyzingSingleIndex] = useState<number | null>(null);
@@ -55,12 +55,11 @@ export const FaqSuggestions = ({
   const isEnterprise = userPlan === 'enterprise';
 
   useEffect(() => {
-    // Check if browser supports WebGPU for local AI
     checkBrowserAiSupport().then(supported => {
       setBrowserAiAvailable(supported);
-      console.log('Browser AI (WebGPU) supported:', supported);
     });
   }, []);
+
   const generateJsonLd = () => {
     return {
       "@context": "https://schema.org",
@@ -78,7 +77,7 @@ export const FaqSuggestions = ({
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(`${label} gekopieerd naar klembord`);
+    toast.success(t('faq.copiedToClipboard', { label }));
   };
 
   const downloadJson = () => {
@@ -92,7 +91,7 @@ export const FaqSuggestions = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success('FAQ Schema gedownload');
+    toast.success(t('faq.schemaDownloaded'));
   };
 
   const analyzeWithCloudAi = async (faq: FaqItem, index: number): Promise<AnalysisResult | null> => {
@@ -109,9 +108,8 @@ export const FaqSuggestions = ({
       return null;
     }
 
-    // Check for credits_exhausted error in response
     if (data?.error === 'credits_exhausted') {
-      toast.error(data.message || 'Je AI-credits zijn op voor deze maand.');
+      toast.error(t('faq.creditsExhausted'));
       throw new Error('credits_exhausted');
     }
 
@@ -125,7 +123,7 @@ export const FaqSuggestions = ({
 
   const analyzeRelevance = async () => {
     if (!websiteUrl) {
-      toast.error('Website URL is vereist voor analyse');
+      toast.error(t('faq.urlRequired'));
       return;
     }
 
@@ -133,7 +131,6 @@ export const FaqSuggestions = ({
     
     if (useBrowserAi) {
       setIsLoadingModel(true);
-      toast.info('Browser AI model wordt geladen... Dit kan even duren bij eerste gebruik.');
     }
 
     const results = new Map<number, AnalysisResult>();
@@ -144,25 +141,21 @@ export const FaqSuggestions = ({
         let result: AnalysisResult | null = null;
 
         if (useBrowserAi && browserAiAvailable) {
-          // Use browser-based AI
           try {
             result = await analyzeWithBrowserAi(faq);
             setIsLoadingModel(false);
           } catch (browserError) {
             console.error('Browser AI failed, falling back to cloud:', browserError);
-            toast.error('Browser AI faalde, probeer Cloud AI');
+            toast.error(t('faq.browserAiFailed'));
             result = await analyzeWithCloudAi(faq, i);
           }
         } else {
-          // Use cloud AI (Lovable AI / Gemini) with browser fallback
           result = await analyzeWithCloudAi(faq, i);
           
-          // If cloud fails and browser AI is available, use it as fallback
           if (!result && browserAiAvailable) {
-            console.log('Cloud AI failed, trying browser fallback...');
             try {
               result = await analyzeWithBrowserAi(faq);
-              toast.info('Cloud AI niet beschikbaar, browser AI gebruikt als fallback');
+              toast.info(t('faq.cloudNotAvailable'));
             } catch (fallbackError) {
               console.error('Browser fallback also failed:', fallbackError);
             }
@@ -175,17 +168,16 @@ export const FaqSuggestions = ({
 
         setAnalysisResults(new Map(results));
         
-        // Small delay between requests (less needed for browser AI)
         if (i < faqs.length - 1) {
           await new Promise(resolve => setTimeout(resolve, useBrowserAi ? 100 : 1000));
         }
       }
 
       const source = useBrowserAi ? 'Browser AI' : 'Cloud AI';
-      toast.success(`AI Search Readiness analyse voltooid via ${source}!`);
+      toast.success(t('faq.analysisComplete', { source }));
     } catch (error) {
       console.error('Error during analysis:', error);
-      toast.error('Er ging iets mis tijdens de analyse');
+      toast.error(t('faq.analysisFailed'));
     } finally {
       setIsAnalyzing(false);
       setIsLoadingModel(false);
@@ -200,9 +192,9 @@ export const FaqSuggestions = ({
     };
 
     const labels = {
-      high: "Hoog relevant",
-      medium: "Gemiddeld relevant",
-      low: "Laag relevant"
+      high: t('faq.highRelevance'),
+      medium: t('faq.mediumRelevance'),
+      low: t('faq.lowRelevance')
     };
 
     return (
@@ -214,7 +206,7 @@ export const FaqSuggestions = ({
 
   const analyzeSingleFaq = async (index: number) => {
     if (!websiteUrl) {
-      toast.error('Website URL is vereist voor analyse');
+      toast.error(t('faq.urlRequired'));
       return;
     }
 
@@ -247,11 +239,11 @@ export const FaqSuggestions = ({
         const newResults = new Map(analysisResults);
         newResults.set(index, result);
         setAnalysisResults(newResults);
-        toast.success('Vraag geanalyseerd!');
+        toast.success(t('faq.questionAnalyzed'));
       }
     } catch (error) {
       console.error('Error analyzing single FAQ:', error);
-      toast.error('Fout bij analyseren van de vraag');
+      toast.error(t('faq.questionAnalyzeFailed'));
     } finally {
       setAnalyzingSingleIndex(null);
     }
@@ -259,13 +251,13 @@ export const FaqSuggestions = ({
 
   const regenerateFaq = async (index: number) => {
     if (!websiteUrl) {
-      toast.error('Website URL is vereist voor regeneratie');
+      toast.error(t('faq.urlRequiredRegenerate'));
       return;
     }
 
     const analysis = analysisResults.get(index);
     if (!analysis) {
-      toast.error('Voer eerst een AI Search Readiness analyse uit');
+      toast.error(t('faq.analyzeFirst'));
       return;
     }
 
@@ -288,31 +280,28 @@ export const FaqSuggestions = ({
         updatedFaqs[index] = data;
         onFaqsUpdate(updatedFaqs);
         
-        // Clear analysis result for this FAQ so it can be re-analyzed
         const newResults = new Map(analysisResults);
         newResults.delete(index);
         setAnalysisResults(newResults);
         
-        toast.success('Vraag geregenereerd! Klik op "Analyseer" om de nieuwe score te zien.');
+        toast.success(t('faq.questionRegenerated'));
       }
     } catch (error) {
       console.error('Error regenerating FAQ:', error);
-      toast.error('Fout bij het regenereren van de vraag');
+      toast.error(t('faq.questionRegenerateFailed'));
     } finally {
       setRegeneratingIndex(null);
     }
   };
 
-  // Show generate button if no FAQs yet
   if (faqs.length === 0) {
     return (
       <Card className="p-6">
         <div className="text-center py-8">
           <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-xl font-semibold mb-2">FAQ Suggesties</h3>
+          <h3 className="text-xl font-semibold mb-2">{t('faq.title')}</h3>
           <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-            Genereer AI-gestuurde FAQ suggesties op basis van de pagina-inhoud. 
-            Deze vragen zijn geoptimaliseerd voor AI-zoekmachines en featured snippets.
+            {t('faq.emptyDescription')}
           </p>
           {onGenerateFaqs ? (
             <Button
@@ -323,18 +312,18 @@ export const FaqSuggestions = ({
               {isGeneratingFaqs ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  FAQs genereren...
+                  {t('faq.generating')}
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Genereer FAQ Suggesties
+                  {t('faq.generateButton')}
                 </>
               )}
             </Button>
           ) : (
             <p className="text-sm text-muted-foreground">
-              FAQ generatie is niet beschikbaar voor deze pagina.
+              {t('faq.notAvailable')}
             </p>
           )}
         </div>
@@ -347,9 +336,9 @@ export const FaqSuggestions = ({
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-semibold mb-2">FAQ Suggesties</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('faq.title')}</h3>
             <p className="text-sm text-muted-foreground">
-              Algemene vragen die bezoekers aan AI-assistenten stellen tijdens hun oriëntatiefase
+              {t('faq.subtitle')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -362,12 +351,12 @@ export const FaqSuggestions = ({
               {isAnalyzing ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isLoadingModel ? 'Model laden...' : 'Analyseren...'}
+                  {isLoadingModel ? t('faq.loadingModel') : t('faq.analyzing')}
                 </>
               ) : (
                 <>
                   {useBrowserAi ? <Cpu className="w-4 h-4 mr-2" /> : <Cloud className="w-4 h-4 mr-2" />}
-                  Analyseer Alle
+                  {t('faq.analyzeAll')}
                 </>
               )}
             </Button>
@@ -377,7 +366,7 @@ export const FaqSuggestions = ({
               onClick={() => copyToClipboard(JSON.stringify(generateJsonLd(), null, 2), 'JSON-LD Schema')}
             >
               <Copy className="w-4 h-4 mr-2" />
-              Kopieer Schema
+              {t('faq.copySchema')}
             </Button>
             <Button
               variant="outline"
@@ -385,7 +374,7 @@ export const FaqSuggestions = ({
               onClick={downloadJson}
             >
               <Download className="w-4 h-4 mr-2" />
-              Download
+              {t('faq.download')}
             </Button>
           </div>
         </div>
@@ -393,7 +382,7 @@ export const FaqSuggestions = ({
         {/* AI Mode Toggle */}
         <div className="flex flex-col gap-3 p-4 bg-muted/50 rounded-lg">
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-sm font-medium">Analyse methode:</span>
+            <span className="text-sm font-medium">{t('faq.analysisMethod')}</span>
             <div className="flex gap-2">
               <Button
                 variant={!useBrowserAi ? "default" : "outline"}
@@ -402,46 +391,45 @@ export const FaqSuggestions = ({
                 disabled={isAnalyzing || analyzingSingleIndex !== null}
               >
                 <Cloud className="w-3 h-3 mr-2" />
-                Cloud AI (Gemini)
+                {t('faq.cloudAi')}
               </Button>
               <Button
                 variant={useBrowserAi ? "default" : "outline"}
                 size="sm"
                 onClick={() => setUseBrowserAi(true)}
                 disabled={isAnalyzing || analyzingSingleIndex !== null || !browserAiAvailable}
-                title={browserAiAvailable === false ? "Je browser ondersteunt geen WebGPU" : undefined}
+                title={browserAiAvailable === false ? t('faq.webGpuNotSupported') : undefined}
               >
                 <Cpu className="w-3 h-3 mr-2" />
-                Browser AI (Lokaal)
+                {t('faq.browserAi')}
               </Button>
             </div>
             {browserAiAvailable === false && (
-              <span className="text-xs text-muted-foreground">(WebGPU niet ondersteund)</span>
+              <span className="text-xs text-muted-foreground">{t('faq.webGpuNotSupported')}</span>
             )}
           </div>
 
-          {/* Toelichting per methode */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-muted-foreground">
             <div className={`rounded-md border p-3 space-y-1.5 ${!useBrowserAi ? 'border-primary/40 bg-primary/5' : 'border-border/50'}`}>
               <p className="font-semibold text-foreground flex items-center gap-1.5">
-                <Cloud className="w-3 h-3" /> Cloud AI (Gemini)
+                <Cloud className="w-3 h-3" /> {t('faq.cloudAi')}
               </p>
               <ul className="space-y-0.5">
-                <li>✅ Nauwkeurigste analyse via Gemini</li>
-                <li>✅ Werkt in elke browser</li>
-                <li>⚠️ Kost AI-credits per vraag</li>
-                <li>⚠️ Korte wachttijd tussen vragen</li>
+                <li>✅ {t('faq.cloudAccurate')}</li>
+                <li>✅ {t('faq.cloudAllBrowsers')}</li>
+                <li>⚠️ {t('faq.cloudCredits')}</li>
+                <li>⚠️ {t('faq.cloudDelay')}</li>
               </ul>
             </div>
             <div className={`rounded-md border p-3 space-y-1.5 ${useBrowserAi ? 'border-primary/40 bg-primary/5' : 'border-border/50'}`}>
               <p className="font-semibold text-foreground flex items-center gap-1.5">
-                <Cpu className="w-3 h-3" /> Browser AI (Lokaal)
+                <Cpu className="w-3 h-3" /> {t('faq.browserAi')}
               </p>
               <ul className="space-y-0.5">
-                <li>✅ Volledig gratis, geen credits nodig</li>
-                <li>✅ Privacy: data blijft in je browser</li>
-                <li>⚠️ Vereist WebGPU (Chrome 113+)</li>
-                <li>⚠️ Eerste keer laden duurt langer</li>
+                <li>✅ {t('faq.browserFree')}</li>
+                <li>✅ {t('faq.browserPrivacy')}</li>
+                <li>⚠️ {t('faq.browserRequires')}</li>
+                <li>⚠️ {t('faq.browserFirstLoad')}</li>
               </ul>
             </div>
           </div>
@@ -461,12 +449,11 @@ export const FaqSuggestions = ({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {/* Show analyze button if no analysis exists for this FAQ */}
                 {!analysis && (
                   <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-dashed">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">
-                        Analyseer deze vraag om de AI Search Readiness score te bepalen
+                        {t('faq.analyzePrompt')}
                       </p>
                       <Button
                         variant="outline"
@@ -477,12 +464,12 @@ export const FaqSuggestions = ({
                         {analyzingSingleIndex === index ? (
                           <>
                             <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-                            Analyseren...
+                            {t('faq.analyzing')}
                           </>
                         ) : (
                           <>
                             <Search className="w-3 h-3 mr-2" />
-                            Analyseer
+                            {t('faq.analyze')}
                           </>
                         )}
                       </Button>
@@ -490,22 +477,20 @@ export const FaqSuggestions = ({
                   </div>
                 )}
                 
-                {/* Show analysis results with action buttons */}
                 {analysis && (
                   <div className="mb-4 p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
-                        <p className="text-sm font-medium mb-1">AI Search Readiness Analyse:</p>
+                        <p className="text-sm font-medium mb-1">{t('faq.aiSearchReadiness')}</p>
                         <p className="text-sm text-muted-foreground">{analysis.explanation}</p>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
-                        {/* Always show re-analyze button */}
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => analyzeSingleFaq(index)}
                           disabled={analyzingSingleIndex === index || isAnalyzing}
-                          title="Opnieuw analyseren"
+                          title={t('faq.reanalyze')}
                         >
                           {analyzingSingleIndex === index ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
@@ -513,7 +498,6 @@ export const FaqSuggestions = ({
                             <Search className="w-3 h-3" />
                           )}
                         </Button>
-                        {/* Show regenerate button for low/medium scores */}
                         {analysis.score < 70 && (
                           <Button
                             variant="outline"
@@ -524,12 +508,12 @@ export const FaqSuggestions = ({
                             {regeneratingIndex === index ? (
                               <>
                                 <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-                                Bezig...
+                                {t('faq.busy')}
                               </>
                             ) : (
                               <>
                                 <RefreshCw className="w-3 h-3 mr-2" />
-                                Regenereer
+                                {t('faq.regenerate')}
                               </>
                             )}
                           </Button>
@@ -544,18 +528,18 @@ export const FaqSuggestions = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard(faq.question, 'Vraag')}
+                    onClick={() => copyToClipboard(faq.question, t('faq.copyQuestion'))}
                   >
                     <Copy className="w-3 h-3 mr-2" />
-                    Kopieer vraag
+                    {t('faq.copyQuestion')}
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard(faq.answer, 'Antwoord')}
+                    onClick={() => copyToClipboard(faq.answer, t('faq.copyAnswer'))}
                   >
                     <Copy className="w-3 h-3 mr-2" />
-                    Kopieer antwoord
+                    {t('faq.copyAnswer')}
                   </Button>
                   {isEnterprise && (
                     <Button
@@ -564,7 +548,7 @@ export const FaqSuggestions = ({
                       onClick={() => setArticleOpenIndex(articleOpenIndex === index ? null : index)}
                     >
                       <FileText className="w-3 h-3 mr-2" />
-                      {articleOpenIndex === index ? 'Sluit artikel' : 'Genereer artikel'}
+                      {articleOpenIndex === index ? t('faq.closeArticle') : t('faq.generateArticle')}
                     </Button>
                   )}
                   {!isEnterprise && (
@@ -572,10 +556,10 @@ export const FaqSuggestions = ({
                       variant="outline"
                       size="sm"
                       disabled
-                      title="Alleen beschikbaar voor Enterprise abonnees"
+                      title={t('faq.enterpriseOnly')}
                     >
                       <FileText className="w-3 h-3 mr-2" />
-                      Genereer artikel
+                      {t('faq.generateArticle')}
                       <Badge variant="secondary" className="ml-1 text-[10px] px-1">Enterprise</Badge>
                     </Button>
                   )}
@@ -596,7 +580,7 @@ export const FaqSuggestions = ({
       </Accordion>
 
       <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-        <h4 className="font-medium mb-2 text-sm">JSON-LD Schema Preview</h4>
+        <h4 className="font-medium mb-2 text-sm">{t('faq.jsonLdPreview')}</h4>
         <pre className="text-xs overflow-x-auto p-3 bg-background rounded border">
           {JSON.stringify(generateJsonLd(), null, 2)}
         </pre>
