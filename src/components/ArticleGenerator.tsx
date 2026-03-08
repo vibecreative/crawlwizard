@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ interface ArticleGeneratorProps {
 }
 
 export const ArticleGenerator = ({ question, answer, pageContent, brandContext, onClose }: ArticleGeneratorProps) => {
+  const { i18n } = useTranslation();
   const [article, setArticle] = useState<string | null>(null);
   const [detection, setDetection] = useState<AiDetection | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -39,6 +41,7 @@ export const ArticleGenerator = ({ question, answer, pageContent, brandContext, 
           pageContent,
           brandContext,
           mode,
+          language: i18n.language,
           ...(mode === "rewrite" && { articleText: article }),
         }
       });

@@ -15,18 +15,18 @@ const MODELS = [
   { id: "openai/gpt-5-mini", label: "GPT-5 Mini" },
 ];
 
-// Each question costs 4 credits (1 per model; analysis calls use cheap model and are free)
 const CREDITS_PER_QUESTION = 4;
 
 interface RankingRequest {
   questions: string[];
   domain: string;
   pageId: string;
+  language?: string;
 }
 
 async function checkCredits(supabase: any, userId: string, creditsNeeded: number) {
   const { data, error } = await supabase.rpc('get_remaining_credits', { _user_id: userId });
-  if (error) throw new Error('Kon credits niet controleren');
+  if (error) throw new Error('Could not check credits');
   const credits = typeof data === 'string' ? JSON.parse(data) : data;
   if (credits.remaining < creditsNeeded) return { allowed: false, ...credits };
   return { allowed: true, ...credits };
@@ -40,16 +40,21 @@ async function askModel(
   apiKey: string,
   modelId: string,
   question: string,
-  domain: string
+  domain: string,
+  lang: string
 ) {
   try {
+    const systemContent = lang === 'en'
+      ? "You are a helpful AI assistant. Answer the question as completely as possible. Mention relevant websites, brands and companies if you know them."
+      : "Je bent een behulpzame AI-assistent. Beantwoord de vraag zo volledig mogelijk. Noem relevante websites, merken en bedrijven als je ze kent.";
+
     const questionResponse = await fetch(AI_GATEWAY_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: modelId,
         messages: [
-          { role: "system", content: "Je bent een behulpzame AI-assistent. Beantwoord de vraag zo volledig mogelijk. Noem relevante websites, merken en bedrijven als je ze kent." },
+          { role: "system", content: systemContent },
           { role: "user", content: question },
         ],
         max_tokens: 1000,
@@ -59,14 +64,18 @@ async function askModel(
     if (!questionResponse.ok) {
       const status = questionResponse.status;
       const body = await questionResponse.text();
-      if (status === 429) return { response: "Rate limit bereikt", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
-      if (status === 402) return { response: "Credits op", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
+      if (status === 429) return { response: "Rate limit reached", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
+      if (status === 402) return { response: "Credits exhausted", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
       console.error(`Model ${modelId} error: ${status} ${body}`);
-      return { response: `Fout: ${status}`, isMentioned: false, mentionPosition: null, sentiment: "neutral" };
+      return { response: `Error: ${status}`, isMentioned: false, mentionPosition: null, sentiment: "neutral" };
     }
 
     const questionData = await questionResponse.json();
     const aiResponse = questionData.choices?.[0]?.message?.content || "";
+
+    const analysisSystemContent = lang === 'en'
+      ? `Analyze the AI response and determine if the domain "${domain}" (or the brand/company name associated with this domain) is mentioned.`
+      : `Analyseer het AI-antwoord en bepaal of het domein "${domain}" (of de merknaam/bedrijfsnaam die bij dit domein hoort) wordt genoemd.`;
 
     const analysisResponse = await fetch(AI_GATEWAY_URL, {
       method: "POST",
@@ -74,8 +83,8 @@ async function askModel(
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: `Analyseer het AI-antwoord en bepaal of het domein "${domain}" (of de merknaam/bedrijfsnaam die bij dit domein hoort) wordt genoemd.` },
-          { role: "user", content: `Domein: ${domain}\n\nAI Antwoord:\n${aiResponse}` },
+          { role: "system", content: analysisSystemContent },
+          { role: "user", content: `${lang === 'en' ? 'Domain' : 'Domein'}: ${domain}\n\nAI ${lang === 'en' ? 'Response' : 'Antwoord'}:\n${aiResponse}` },
         ],
         tools: [
           {
@@ -125,7 +134,7 @@ async function askModel(
     return { response: aiResponse, isMentioned, mentionPosition: isMentioned ? 1 : null, sentiment: "neutral" };
   } catch (error) {
     console.error(`Error with model ${modelId}:`, error);
-    return { response: "Fout bij ophalen", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
+    return { response: "Error fetching", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
   }
 }
 
@@ -148,31 +157,32 @@ serve(async (req) => {
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Niet geautoriseerd" }), {
+      return new Response(JSON.stringify({ error: "Not authorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
     if (!profile || profile.plan !== "enterprise") {
-      return new Response(JSON.stringify({ error: "Enterprise plan vereist" }), {
+      return new Response(JSON.stringify({ error: "Enterprise plan required" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { questions, domain, pageId }: RankingRequest = await req.json();
+    const { questions, domain, pageId, language }: RankingRequest = await req.json();
+    const lang = language === 'en' ? 'en' : 'nl';
+
     if (!questions?.length || !domain || !pageId) {
-      return new Response(JSON.stringify({ error: "Vragen, domein en pagina ID zijn vereist" }), {
+      return new Response(JSON.stringify({ error: "Questions, domain and page ID are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const limitedQuestions = questions.slice(0, 5);
     const totalCredits = limitedQuestions.length * CREDITS_PER_QUESTION;
 
-    // Credit check
     const creditCheck = await checkCredits(supabase, user.id, totalCredits);
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
-        message: `Onvoldoende credits. Deze check kost ${totalCredits} credits, je hebt er nog ${creditCheck.remaining}.`,
+        message: `Insufficient credits. This check costs ${totalCredits} credits, you have ${creditCheck.remaining} remaining.`,
         credits: creditCheck
       }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -187,7 +197,7 @@ serve(async (req) => {
     const results: any[] = [];
     for (const question of limitedQuestions) {
       const modelPromises = MODELS.map(async (model) => {
-        const result = await askModel(LOVABLE_API_KEY, model.id, question, domain);
+        const result = await askModel(LOVABLE_API_KEY, model.id, question, domain, lang);
         return {
           check_id: check.id,
           question,
@@ -208,7 +218,6 @@ serve(async (req) => {
 
     await supabase.from("ai_ranking_checks").update({ status: "completed" }).eq("id", check.id);
 
-    // Log credit usage after successful completion
     await logCreditUsage(supabase, user.id, 'ai_ranking_check', totalCredits);
 
     return new Response(JSON.stringify({ checkId: check.id, results }), {
@@ -217,7 +226,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("check-ai-ranking error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Onbekende fout" }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { SEOHead } from "@/components/SEOHead";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +35,7 @@ interface ProjectData {
 }
 
 const PageDetails = () => {
+  const { i18n } = useTranslation();
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -174,7 +176,7 @@ const PageDetails = () => {
       toast.info("FAQs worden gegenereerd...");
 
       const { data, error } = await supabase.functions.invoke('generate-faqs', {
-        body: { html: htmlContent, brandContext }
+        body: { html: htmlContent, brandContext, language: i18n.language }
       });
 
       if (error) throw error;

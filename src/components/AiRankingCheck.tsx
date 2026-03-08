@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +61,7 @@ const MODEL_ORDER = [
 ];
 
 export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }: AiRankingCheckProps) => {
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const isEnterprise = userPlan === "enterprise";
   const [isRunning, setIsRunning] = useState(false);
@@ -137,7 +139,7 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
 
     try {
       const { data, error } = await supabase.functions.invoke("check-ai-ranking", {
-        body: { questions, domain, pageId },
+        body: { questions, domain, pageId, language: i18n.language },
       });
 
       if (error) throw error;

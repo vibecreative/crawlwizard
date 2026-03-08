@@ -6,6 +6,30 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function getSystemPrompt(language: string) {
+  if (language === 'en') {
+    return `You are an SEO expert who writes optimized meta tags for web pages. You write in English unless the page content is clearly in another language.
+
+Rules:
+- Title Tag: max 60 characters, contains the main keyword, be specific and attractive
+- Meta Description: max 155 characters, contains a call-to-action or value proposition, arouse curiosity
+- OG Title: max 60 characters, may be slightly catchier/more social than the title tag
+- OG Description: max 200 characters, focus on social shareability and clickability
+
+For each field, also provide a brief explanation (1 sentence) of why you made this choice.`;
+  }
+
+  return `Je bent een SEO-expert die geoptimaliseerde meta-tags schrijft voor webpagina's. Je schrijft in het Nederlands tenzij de pagina-inhoud duidelijk in een andere taal is.
+
+Regels:
+- Title Tag: max 60 karakters, bevat het belangrijkste keyword, wees specifiek en aantrekkelijk
+- Meta Description: max 155 karakters, bevat een call-to-action of waardepropositie, wek nieuwsgierigheid
+- OG Title: max 60 karakters, mag iets pakkender/socialer dan de title tag
+- OG Description: max 200 karakters, focus op sociale deelbaarheid en klikbaarheid
+
+Geef voor elk veld ook een korte uitleg (1 zin) waarom je deze keuze hebt gemaakt.`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -29,7 +53,6 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Verify user
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -41,41 +64,44 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check credits
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
     const { data: creditsData } = await adminClient.rpc("get_remaining_credits", { _user_id: user.id });
     const remaining = creditsData?.remaining ?? 0;
     if (remaining <= 0) {
-      return new Response(JSON.stringify({ error: "Geen AI-credits meer beschikbaar deze maand." }), {
+      return new Response(JSON.stringify({ error: "No AI credits remaining this month." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { url, pageContent, currentMeta } = await req.json();
+    const { url, pageContent, currentMeta, language } = await req.json();
+    const lang = language === 'en' ? 'en' : 'nl';
 
-    // Truncate content to avoid token limits
     const truncatedContent = (pageContent || "").substring(0, 4000);
 
-    const systemPrompt = `Je bent een SEO-expert die geoptimaliseerde meta-tags schrijft voor webpagina's. Je schrijft in het Nederlands tenzij de pagina-inhoud duidelijk in een andere taal is.
+    const missingLabel = lang === 'en' ? '(missing)' : '(ontbreekt)';
+    const userPrompt = lang === 'en'
+      ? `Generate optimized meta tags for this page.
 
-Regels:
-- Title Tag: max 60 karakters, bevat het belangrijkste keyword, wees specifiek en aantrekkelijk
-- Meta Description: max 155 karakters, bevat een call-to-action of waardepropositie, wek nieuwsgierigheid
-- OG Title: max 60 karakters, mag iets pakkender/socialer dan de title tag
-- OG Description: max 200 karakters, focus op sociale deelbaarheid en klikbaarheid
+URL: ${url}
 
-Geef voor elk veld ook een korte uitleg (1 zin) waarom je deze keuze hebt gemaakt.`;
+Current meta tags:
+- Title: ${currentMeta?.title || missingLabel}
+- Description: ${currentMeta?.description || missingLabel}
+- OG Title: ${currentMeta?.ogTitle || missingLabel}
+- OG Description: ${currentMeta?.ogDescription || missingLabel}
 
-    const userPrompt = `Genereer geoptimaliseerde meta-tags voor deze pagina.
+Page content (summary):
+${truncatedContent}`
+      : `Genereer geoptimaliseerde meta-tags voor deze pagina.
 
 URL: ${url}
 
 Huidige meta-tags:
-- Title: ${currentMeta?.title || "(ontbreekt)"}
-- Description: ${currentMeta?.description || "(ontbreekt)"}
-- OG Title: ${currentMeta?.ogTitle || "(ontbreekt)"}
-- OG Description: ${currentMeta?.ogDescription || "(ontbreekt)"}
+- Title: ${currentMeta?.title || missingLabel}
+- Description: ${currentMeta?.description || missingLabel}
+- OG Title: ${currentMeta?.ogTitle || missingLabel}
+- OG Description: ${currentMeta?.ogDescription || missingLabel}
 
 Pagina-inhoud (samenvatting):
 ${truncatedContent}`;
@@ -89,7 +115,7 @@ ${truncatedContent}`;
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: getSystemPrompt(lang) },
           { role: "user", content: userPrompt },
         ],
         tools: [
@@ -150,13 +176,13 @@ ${truncatedContent}`;
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Te veel verzoeken, probeer het later opnieuw." }), {
+        return new Response(JSON.stringify({ error: "Too many requests, try again later." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Lovable AI-tegoed is op. Voeg credits toe in je workspace." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -174,7 +200,6 @@ ${truncatedContent}`;
 
     const suggestions = JSON.parse(toolCall.function.arguments);
 
-    // Deduct credit
     await adminClient.from("ai_credit_usage").insert({
       user_id: user.id,
       action_type: "meta_tag_generation",

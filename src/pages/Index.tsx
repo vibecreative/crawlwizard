@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { SEOHead } from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
@@ -31,6 +32,7 @@ import {
 } from "@/lib/htmlParser";
 
 const Index = () => {
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
@@ -111,7 +113,7 @@ const Index = () => {
     setIsGeneratingFaqs(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-faqs', {
-        body: { html: analysisData.html }
+        body: { html: analysisData.html, language: i18n.language }
       });
 
       if (error) throw error;

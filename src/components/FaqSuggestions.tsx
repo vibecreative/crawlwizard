@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, Download, Sparkles, Loader2, RefreshCw, Cpu, Cloud, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { analyzeRelevanceInBrowser, checkBrowserAiSupport, BrowserAnalysisResult } from "@/lib/browserAiRelevance";
 import { ArticleGenerator } from "./ArticleGenerator";
@@ -42,6 +43,7 @@ export const FaqSuggestions = ({
   userPlan = "free",
   brandContext = ""
 }: FaqSuggestionsProps) => {
+  const { i18n } = useTranslation();
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzingSingleIndex, setAnalyzingSingleIndex] = useState<number | null>(null);
@@ -274,7 +276,8 @@ export const FaqSuggestions = ({
           html: pageContent,
           previousQuestion: faqs[index].question,
           analysisExplanation: analysis.explanation,
-          brandContext
+          brandContext,
+          language: i18n.language
         }
       });
 
