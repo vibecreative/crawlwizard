@@ -85,6 +85,12 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
+      <SEOHead
+        title="Inloggen"
+        description="Log in of maak een account aan bij CrawlWizard om je website te analyseren op SEO en AI-vindbaarheid."
+        canonical="/auth"
+        noindex
+      />
       {/* Background accents */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
