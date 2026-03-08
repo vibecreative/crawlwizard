@@ -40,6 +40,7 @@ const scaleIn = {
 const Landing = () => {
   const navigate = useNavigate();
   const [isYearly, setIsYearly] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const features = [
     { icon: Layers, title: 'Heading Analyse', description: 'Ontdek in één oogopslag of je heading-structuur klopt – de basis van elke goed geïndexeerde pagina.' },
