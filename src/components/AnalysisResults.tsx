@@ -10,6 +10,7 @@ import { JsonLdGenerator } from "./JsonLdGenerator";
 import { FaqSuggestions } from "./FaqSuggestions";
 import { KeywordAnalysis } from "./KeywordAnalysis";
 import { KeywordPlacementAdvice } from "./KeywordPlacementAdvice";
+import { AiRankingCheck } from "./AiRankingCheck";
 
 interface HeadingInfo {
   level: number;
