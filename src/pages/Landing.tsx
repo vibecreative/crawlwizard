@@ -543,7 +543,7 @@ const Landing = () => {
               size="lg" 
               variant="outline"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-base px-8 py-6 border-white/20 text-white hover:bg-white/10 hover:text-white"
+              className="text-base px-8 py-6 border-white/20 dark:text-white dark:hover:bg-white/10 dark:hover:text-white text-foreground border-foreground/20 hover:bg-foreground/10"
             >
               Bekijk de prijzen
             </Button>
