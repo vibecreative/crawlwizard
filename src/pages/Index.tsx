@@ -32,6 +32,7 @@ import {
 } from "@/lib/htmlParser";
 
 const Index = () => {
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);

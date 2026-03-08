@@ -35,6 +35,7 @@ interface ProjectData {
 }
 
 const PageDetails = () => {
+  const { i18n } = useTranslation();
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
