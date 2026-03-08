@@ -56,6 +56,7 @@ const PageDetails = () => {
   const { user } = useAuth();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
+  const [brandContext, setBrandContext] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isReanalyzing, setIsReanalyzing] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
