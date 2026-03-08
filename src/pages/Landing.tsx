@@ -484,6 +484,7 @@ const Landing = () => {
               </motion.div>
             ))}
           </motion.div>
+          <p className="text-center text-xs text-muted-foreground mt-6">Alle prijzen zijn exclusief btw.</p>
         </div>
       </section>
 
