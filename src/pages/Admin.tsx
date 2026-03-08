@@ -75,6 +75,7 @@ const Admin = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [updatingUser, setUpdatingUser] = useState<string | null>(null);
