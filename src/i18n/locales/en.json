@@ -1,0 +1,271 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "howItWorks": "How it works",
+    "login": "Log in",
+    "getStarted": "Get started free",
+    "privacy": "Privacy Policy"
+  },
+  "hero": {
+    "badge": "Now with AI-powered FAQ Generator",
+    "title1": "Get found by",
+    "titleHighlight": "search engines",
+    "title2": "and by AI",
+    "subtitle": "Analyze your entire website structure and get actionable insights to become the source in Google and in ChatGPT, Perplexity and AI Overviews.",
+    "viewFeatures": "View features"
+  },
+  "stats": {
+    "pagesPerScan": "Pages per scan",
+    "seoChecks": "SEO checks per page",
+    "aiModels": "AI models",
+    "avgScanTime": "Average scan time"
+  },
+  "demo": {
+    "seoScore": "SEO Score",
+    "pages": "Pages",
+    "improvements": "Improvements",
+    "sinceLastAnalysis": "+12 since last analysis",
+    "ofTotal": "of 30 total",
+    "actionableTips": "actionable tips"
+  },
+  "features": {
+    "label": "Features",
+    "title": "Everything you need to\nget found",
+    "subtitle": "By search engines. By AI tools. By your audience.",
+    "headingAnalysis": {
+      "title": "Heading Analysis",
+      "description": "Instantly discover if your heading structure is correct – the foundation of every well-indexed page."
+    },
+    "metaStructured": {
+      "title": "Meta & Structured Data",
+      "description": "Structured data is the key to rich snippets and how AI tools understand your content. We make it transparent."
+    },
+    "seoScore": {
+      "title": "SEO Score",
+      "description": "Not a vague rating, but a concrete score with exact improvement points. Know exactly what to tackle tomorrow."
+    },
+    "websiteAnalysis": {
+      "title": "Website Analysis",
+      "description": "Scan your entire website at once. Up to 500 pages analyzed, no problem overlooked."
+    },
+    "aiFaqGenerator": {
+      "title": "AI FAQ Generator",
+      "description": "FAQs are gold for rich snippets and AI answers. Generate relevant questions your audience is asking."
+    },
+    "keywordAnalysis": {
+      "title": "Keyword Analysis",
+      "description": "Writing too much or too little about your core topic? We show you – per page, per keyword."
+    }
+  },
+  "howItWorks": {
+    "label": "How it works",
+    "title": "3 steps to better visibility",
+    "step1": { "title": "Enter your URL", "desc": "Paste your website URL and we'll automatically crawl all your pages." },
+    "step2": { "title": "View your analysis", "desc": "Receive a complete SEO report with scores, issues, and opportunities." },
+    "step3": { "title": "Optimize", "desc": "Use our AI tools to improve content and rank higher." }
+  },
+  "pricing": {
+    "label": "Pricing",
+    "title": "Transparent pricing",
+    "subtitle": "Start free. No credit card, no hidden costs.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "saveUpTo": "Save up to 17%",
+    "perMonth": "/month",
+    "billedYearly": "Billed yearly",
+    "saveWithYearly": "Save with yearly plan",
+    "mostChosen": "Most popular",
+    "allPricesExVat": "All prices exclude VAT.",
+    "creditUsageTitle": "Credit usage per action:",
+    "creditActions": {
+      "faqAnalysis": "FAQ Analysis: 1 credit",
+      "faqRegeneration": "FAQ Regeneration: 1 credit",
+      "faqGeneration": "FAQ Generation: 2 credits",
+      "articleGenerator": "Article Generator: 3 credits",
+      "aiRankingCheck": "AI Ranking Check: 4 credits/question"
+    },
+    "plans": {
+      "free": {
+        "description": "Free to explore",
+        "subtitle": "Analyze your first pages and discover what can be improved.",
+        "period": "forever",
+        "cta": "Get started free",
+        "credits": "10 AI credits/month",
+        "features": ["1 page per analysis", "Up to 10 analyses", "SEO score per page", "Heading structure analysis", "Meta information overview", "10 AI credits per month", "Browser AI (unlimited, free)"]
+      },
+      "scale": {
+        "description": "For ambitious websites",
+        "subtitle": "Analyze your entire website and know exactly where your gains are.",
+        "cta": "Start with Scale",
+        "credits": "50 AI credits/month",
+        "features": ["Full website analysis", "Up to 100 pages per scan", "Save 1 project", "AI FAQ Generator", "Keyword analysis", "Structured data analysis", "50 AI credits per month", "Browser AI (unlimited, free)"]
+      },
+      "enterprise": {
+        "description": "For serious websites & agencies",
+        "subtitle": "Manage multiple websites, report to clients, scale without limits.",
+        "cta": "Start with Enterprise",
+        "credits": "200 AI credits/month",
+        "features": ["Everything in Scale", "Up to 500 pages per scan", "Save 3 projects", "AI Ranking Check (4 models)", "AI Article Generator", "200 AI credits per month", "Browser AI (unlimited, free)", "Priority support"]
+      }
+    }
+  },
+  "aiExplainer": {
+    "label": "Background",
+    "title": "How does an AI tool actually work?",
+    "p1": "When you ask ChatGPT or Google AI a question, you don't get a list of links – you get an answer. But that answer comes from somewhere: AI tools are trained on a massive mix of sources – Wikipedia, news sites, scientific articles, forums, and regular websites like yours.",
+    "p2": "Most AI tools learned the internet up to a certain date – they don't continuously crawl in real-time. But that doesn't mean your website doesn't matter. Tools like Google AI Overviews and Perplexity do actively crawl current content.",
+    "p3": "CrawlWizard shows you what a bot sees when it visits your website. Are your headings correct? Can a machine understand your content? Do you have the right structured data? We make it transparent.",
+    "quote": "Good structure is the language that search engines and AI speak. CrawlWizard helps you make this more transparent.",
+    "howWeUseAi": "How CrawlWizard uses AI",
+    "serverAi": {
+      "title": "Server AI",
+      "description": "For heavy tasks like FAQ generation, article writing, and AI Ranking Checks, CrawlWizard uses powerful large language models (LLMs) on our servers – think OpenAI and Google Gemini models. Your page content is sent as context, after which the model generates optimized output. This uses AI credits; the amount depends on your plan."
+    },
+    "browserAi": {
+      "title": "Browser AI",
+      "description": "For quick relevance analyses, CrawlWizard runs a compact embedding model (MiniLM) directly in your browser via WebGPU. The model calculates the semantic similarity between an FAQ question and your page content using cosine similarity. No data leaves your device, no credits needed, and it works unlimited."
+    }
+  },
+  "trust": {
+    "euData": "Data stored in the",
+    "euLocation": "EU (Frankfurt, Germany)",
+    "gdpr": "compliant",
+    "ssl": "Encrypted connection"
+  },
+  "cta": {
+    "title": "Will your website be the source that gets cited?",
+    "subtitle": "Analyze your website for free and discover what can be improved for Google and AI tools.",
+    "button": "Analyze my website free",
+    "viewPricing": "View pricing"
+  },
+  "auth": {
+    "title": "Log in",
+    "description": "Log in or create an account at CrawlWizard to analyze your website for SEO and AI discoverability.",
+    "subtitle": "Analyze and optimize your website",
+    "account": "Account",
+    "accountDesc": "Log in or create an account",
+    "loginTab": "Log in",
+    "registerTab": "Register",
+    "email": "Email address",
+    "emailPlaceholder": "name@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "fullName": "Full name (optional)",
+    "fullNamePlaceholder": "John Doe",
+    "loginButton": "Log in",
+    "loggingIn": "Logging in...",
+    "registerButton": "Create account",
+    "registering": "Registering...",
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid email or password.",
+    "confirmEmail": "Please confirm your email address first.",
+    "loginError": "An error occurred while logging in.",
+    "welcomeBack": "Welcome back!",
+    "loginSuccess": "You have been successfully logged in.",
+    "registerFailed": "Registration failed",
+    "userExists": "This email address is already registered.",
+    "registerError": "An error occurred while registering.",
+    "checkInbox": "Check your inbox!",
+    "verificationSent": "We sent a verification email to",
+    "clickLink": "Click the link in the email to activate your account.",
+    "understood": "Got it",
+    "invalidEmail": "Please enter a valid email address",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordMin": "At least 6 characters"
+  },
+  "dashboard": {
+    "projects": "Projects",
+    "pages": "Pages",
+    "avgScore": "Avg. Score",
+    "myProjects": "My Projects",
+    "newAnalysis": "New Analysis",
+    "noProjects": "No projects found",
+    "noProjectsDesc": "Start your first website analysis to create projects.",
+    "startNewAnalysis": "Start New Analysis",
+    "completed": "Completed",
+    "analyzing": "Analyzing...",
+    "queued": "Queued",
+    "pageOverview": "Page Overview",
+    "noPagesAnalyzed": "No pages analyzed",
+    "issues": "issues",
+    "noIssues": "No issues",
+    "deleteConfirm": "Are you sure you want to delete this project?",
+    "projectDeleted": "Project deleted",
+    "projectDeleteFailed": "Could not delete project",
+    "loadProjectsFailed": "Could not load projects",
+    "loadPagesFailed": "Could not load pages",
+    "details": "Details",
+    "aiCredits": "AI Credits"
+  },
+  "analysis": {
+    "pageStructureScore": "Page Structure Score",
+    "pageStructureDesc": "Analysis of headings, meta tags, and structured data",
+    "excellent": "Excellent",
+    "good": "Good",
+    "needsWork": "Needs work",
+    "headingStructure": "Heading Structure",
+    "metaInformation": "Meta Information",
+    "titleTag": "Title Tag",
+    "metaDescription": "Meta Description",
+    "ogTitle": "Open Graph Title",
+    "ogDescription": "Open Graph Description",
+    "ogImage": "Open Graph Image",
+    "length": "Length",
+    "characters": "characters",
+    "tooLong": "Too long",
+    "analysisResults": "Analysis Results",
+    "reanalyze": "Re-analyze page",
+    "backTo": "Back to",
+    "upgrade": "Upgrade",
+    "richSnippets": "Rich Snippets & Structured Data"
+  },
+  "jsonLd": {
+    "title": "JSON-LD Generator",
+    "subtitle": "Generate complete structured data for your website",
+    "selected": "selected",
+    "websiteSchema": "WebSite Schema",
+    "websiteDesc": "Basic information about your website with sitelinks searchbox",
+    "organizationSchema": "Organization Schema",
+    "organizationDesc": "Business information and contact details",
+    "breadcrumbSchema": "BreadcrumbList Schema",
+    "breadcrumbDesc": "Navigation structure for this page",
+    "articleSchema": "Article Schema",
+    "articleDesc": "For articles, blog posts, and news stories",
+    "faqSchema": "FAQPage Schema",
+    "faqDescAvailable": "For frequently asked questions ({{count}} FAQs available)",
+    "faqDescUnavailable": "No FAQs available",
+    "recommended": "Recommended",
+    "relevantForPage": "— relevant for this page type",
+    "combinedTip": "All selected schemas are automatically combined into one JSON-LD code that you can copy.",
+    "copyButton": "Copy JSON-LD Code",
+    "copied": "Copied!",
+    "copySuccess": "JSON-LD copied to clipboard!",
+    "copyFailed": "Copy failed",
+    "selectMinOne": "Select at least one schema type",
+    "headTip": "Paste this code in the <head> section of your HTML, preferably just before the closing </head> tag.",
+    "tip": "Tip:"
+  },
+  "cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to improve your experience. You can adjust your preferences or read our",
+    "privacyLink": "privacy policy",
+    "readMore": "for more information.",
+    "customize": "Customize cookie preferences",
+    "necessary": "Necessary only",
+    "acceptAll": "Accept all"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "of": "of",
+    "over": "remaining"
+  }
+}

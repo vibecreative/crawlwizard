@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Shield, ChevronDown, ChevronUp } from 'lucide-react';
@@ -13,6 +14,7 @@ interface CookieBannerProps {
 
 const CookieBanner = ({ onAcceptAll, onRejectAll, onSavePreferences }: CookieBannerProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
   const [prefs, setPrefs] = useState<CookiePreferences>({
     necessary: true,
@@ -57,16 +59,16 @@ const CookieBanner = ({ onAcceptAll, onRejectAll, onSavePreferences }: CookieBan
               <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg">Cookie-instellingen</h3>
+              <h3 className="font-semibold text-lg">{t('cookie.title')}</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Wij gebruiken cookies om je ervaring te verbeteren. Je kunt je voorkeuren aanpassen of ons{' '}
+                {t('cookie.description')}{' '}
                 <button
                   onClick={() => navigate('/privacy')}
                   className="text-primary underline underline-offset-2 hover:text-primary/80"
                 >
-                  privacybeleid
+                  {t('cookie.privacyLink')}
                 </button>{' '}
-                lezen voor meer informatie.
+                {t('cookie.readMore')}
               </p>
             </div>
           </div>
@@ -77,7 +79,7 @@ const CookieBanner = ({ onAcceptAll, onRejectAll, onSavePreferences }: CookieBan
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            {showDetails ? 'Minder opties' : 'Cookie-voorkeuren aanpassen'}
+            {t('cookie.customize')}
           </button>
 
           {showDetails && (
@@ -103,7 +105,7 @@ const CookieBanner = ({ onAcceptAll, onRejectAll, onSavePreferences }: CookieBan
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-2">
             <Button onClick={onRejectAll} variant="outline" className="flex-1">
-              Alleen noodzakelijke
+              {t('cookie.necessary')}
             </Button>
             {showDetails && (
               <Button
@@ -111,11 +113,11 @@ const CookieBanner = ({ onAcceptAll, onRejectAll, onSavePreferences }: CookieBan
                 variant="secondary"
                 className="flex-1"
               >
-                Voorkeuren opslaan
+                {t('common.save')}
               </Button>
             )}
             <Button onClick={onAcceptAll} className="flex-1 gradient-primary text-primary-foreground">
-              Alles accepteren
+              {t('cookie.acceptAll')}
             </Button>
           </div>
         </div>

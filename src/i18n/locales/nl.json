@@ -1,0 +1,271 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Prijzen",
+    "howItWorks": "Hoe het werkt",
+    "login": "Inloggen",
+    "getStarted": "Gratis starten",
+    "privacy": "Privacybeleid"
+  },
+  "hero": {
+    "badge": "Nu met AI-gedreven FAQ Generator",
+    "title1": "Word gevonden door",
+    "titleHighlight": "zoekmachines",
+    "title2": "én door AI",
+    "subtitle": "Analyseer je volledige websitestructuur en krijg actionable inzichten om de bron te zijn in Google én in ChatGPT, Perplexity en AI Overviews.",
+    "viewFeatures": "Bekijk features"
+  },
+  "stats": {
+    "pagesPerScan": "Pagina's per scan",
+    "seoChecks": "SEO-checks per pagina",
+    "aiModels": "AI-modellen",
+    "avgScanTime": "Gemiddelde scantijd"
+  },
+  "demo": {
+    "seoScore": "SEO Score",
+    "pages": "Pagina's",
+    "improvements": "Verbeterpunten",
+    "sinceLastAnalysis": "+12 sinds vorige analyse",
+    "ofTotal": "van 30 totaal",
+    "actionableTips": "actionable tips"
+  },
+  "features": {
+    "label": "Features",
+    "title": "Alles wat je nodig hebt om\ngevonden te worden",
+    "subtitle": "Door zoekmachines. Door AI-tools. Door je doelgroep.",
+    "headingAnalysis": {
+      "title": "Heading Analyse",
+      "description": "Ontdek in één oogopslag of je heading-structuur klopt – de basis van elke goed geïndexeerde pagina."
+    },
+    "metaStructured": {
+      "title": "Meta & Structured Data",
+      "description": "Structured data is de sleutel tot rich snippets én tot hoe AI-tools jouw content begrijpen. Wij maken het inzichtelijk."
+    },
+    "seoScore": {
+      "title": "SEO Score",
+      "description": "Geen vaag rapportcijfer, maar een concrete score met exacte verbeterpunten. Weet precies wat je morgen moet aanpakken."
+    },
+    "websiteAnalysis": {
+      "title": "Website Analyse",
+      "description": "Scan je hele website in één keer. Tot 500 pagina's geanalyseerd, geen enkel probleem over het hoofd gezien."
+    },
+    "aiFaqGenerator": {
+      "title": "AI FAQ Generator",
+      "description": "FAQ's zijn goud voor rich snippets én voor AI-antwoorden. Genereer direct relevante vragen die jouw doelgroep stelt."
+    },
+    "keywordAnalysis": {
+      "title": "Keyword Analyse",
+      "description": "Schrijf je té veel of te weinig over je kernonderwerp? Wij laten het zien – per pagina, per keyword."
+    }
+  },
+  "howItWorks": {
+    "label": "Hoe het werkt",
+    "title": "In 3 stappen naar betere vindbaarheid",
+    "step1": { "title": "Voer je URL in", "desc": "Plak de URL van je website en wij crawlen automatisch al je pagina's." },
+    "step2": { "title": "Bekijk je analyse", "desc": "Ontvang een compleet SEO-rapport met scores, problemen en kansen." },
+    "step3": { "title": "Optimaliseer", "desc": "Gebruik onze AI-tools om content te verbeteren en hoger te scoren." }
+  },
+  "pricing": {
+    "label": "Prijzen",
+    "title": "Transparante prijzen",
+    "subtitle": "Begin gratis. Geen creditcard, geen verborgen kosten.",
+    "monthly": "Maandelijks",
+    "yearly": "Jaarlijks",
+    "saveUpTo": "Bespaar tot 17%",
+    "perMonth": "/maand",
+    "billedYearly": "Jaarlijks gefactureerd",
+    "saveWithYearly": "Bespaar met jaarlijks abonnement",
+    "mostChosen": "Meest gekozen",
+    "allPricesExVat": "Alle prijzen zijn exclusief btw.",
+    "creditUsageTitle": "Credit-verbruik per actie:",
+    "creditActions": {
+      "faqAnalysis": "FAQ Analyse: 1 credit",
+      "faqRegeneration": "FAQ Regeneratie: 1 credit",
+      "faqGeneration": "FAQ Generatie: 2 credits",
+      "articleGenerator": "Artikel Generator: 3 credits",
+      "aiRankingCheck": "AI Ranking Check: 4 credits/vraag"
+    },
+    "plans": {
+      "free": {
+        "description": "Gratis verkennen",
+        "subtitle": "Analyseer je eerste pagina's en ontdek wat er beter kan.",
+        "period": "voor altijd",
+        "cta": "Gratis starten",
+        "credits": "10 AI-credits/maand",
+        "features": ["1 pagina per analyse", "Tot 10 analyses", "SEO-score per pagina", "Heading-structuur analyse", "Meta-informatie overzicht", "10 AI-credits per maand", "Browser AI (onbeperkt, gratis)"]
+      },
+      "scale": {
+        "description": "Voor ambitieuze websites",
+        "subtitle": "Analyseer je hele website en weet precies waar je winst ligt.",
+        "cta": "Start met Scale",
+        "credits": "50 AI-credits/maand",
+        "features": ["Volledige website-analyse", "Tot 100 pagina's per scan", "1 project opslaan", "AI FAQ Generator", "Keyword analyse", "Structured data analyse", "50 AI-credits per maand", "Browser AI (onbeperkt, gratis)"]
+      },
+      "enterprise": {
+        "description": "Voor écht serieuze websites & bureau's",
+        "subtitle": "Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.",
+        "cta": "Start met Enterprise",
+        "credits": "200 AI-credits/maand",
+        "features": ["Alles uit Scale", "Tot 500 pagina's per scan", "3 projecten opslaan", "AI Ranking Check (4 modellen)", "AI Artikel Generator", "200 AI-credits per maand", "Browser AI (onbeperkt, gratis)", "Prioriteit support"]
+      }
+    }
+  },
+  "aiExplainer": {
+    "label": "Achtergrond",
+    "title": "Hoe werkt een AI-tool eigenlijk?",
+    "p1": "Als jij een vraag stelt aan ChatGPT of Google AI, krijg je geen lijst met links – je krijgt gewoon een antwoord. Maar dat antwoord komt ergens vandaan: AI-tools zijn getraind op een enorme mix van bronnen – Wikipedia, nieuwssites, wetenschappelijke artikelen, forums én gewone websites zoals die van jou.",
+    "p2": "De meeste AI-tools leerden het internet kennen tot een bepaalde datum – ze crawlen niet continu real-time. Maar dat betekent niet dat jouw website er niet toe doet. Tools zoals Google AI Overviews en Perplexity crawlen wél actief en actueel.",
+    "p3": "CrawlWizard laat je zien wat zo'n bot ziet als hij jouw website bezoekt. Kloppen je koppen? Begrijpt een machine je content? Heb je de juiste structured data? Wij maken het inzichtelijk.",
+    "quote": "Goede structuur is de taal die zoekmachines én AI spreken. CrawlWizard helpt jou dit inzichtelijker te maken.",
+    "howWeUseAi": "Hoe CrawlWizard AI inzet",
+    "serverAi": {
+      "title": "Server AI",
+      "description": "Voor zware taken zoals FAQ-generatie, artikelen schrijven en AI Ranking Checks schakelt CrawlWizard krachtige large language models (LLM's) in op onze servers — denk aan modellen van OpenAI en Google Gemini. Je pagina-inhoud wordt als context meegestuurd, waarna het model geoptimaliseerde output genereert. Hiervoor gebruik je AI-credits; het aantal hangt af van je plan."
+    },
+    "browserAi": {
+      "title": "Browser AI",
+      "description": "Voor snelle relevantie-analyses draait CrawlWizard een compact embedding-model (MiniLM) rechtstreeks in jouw browser via WebGPU. Het model berekent de semantische overeenkomst tussen een FAQ-vraag en je pagina-inhoud met cosine similarity. Geen data verlaat je apparaat, er zijn geen credits nodig en het werkt onbeperkt."
+    }
+  },
+  "trust": {
+    "euData": "Data opgeslagen in de",
+    "euLocation": "EU (Frankfurt, Duitsland)",
+    "gdpr": "compliant",
+    "ssl": "Versleutelde verbinding"
+  },
+  "cta": {
+    "title": "Wordt jouw website de bron die geciteerd wordt?",
+    "subtitle": "Analyseer jouw website gratis en ontdek wat er beter kan voor Google én AI-tools.",
+    "button": "Analyseer mijn website gratis",
+    "viewPricing": "Bekijk de prijzen"
+  },
+  "auth": {
+    "title": "Inloggen",
+    "description": "Log in of maak een account aan bij CrawlWizard om je website te analyseren op SEO en AI-vindbaarheid.",
+    "subtitle": "Analyseer en optimaliseer je website",
+    "account": "Account",
+    "accountDesc": "Log in of maak een account aan",
+    "loginTab": "Inloggen",
+    "registerTab": "Registreren",
+    "email": "E-mailadres",
+    "emailPlaceholder": "naam@voorbeeld.nl",
+    "password": "Wachtwoord",
+    "passwordPlaceholder": "••••••••",
+    "fullName": "Volledige naam (optioneel)",
+    "fullNamePlaceholder": "Jan Jansen",
+    "loginButton": "Inloggen",
+    "loggingIn": "Inloggen...",
+    "registerButton": "Account aanmaken",
+    "registering": "Registreren...",
+    "loginFailed": "Inloggen mislukt",
+    "invalidCredentials": "Ongeldige e-mail of wachtwoord.",
+    "confirmEmail": "Bevestig eerst je e-mailadres.",
+    "loginError": "Er is een fout opgetreden bij het inloggen.",
+    "welcomeBack": "Welkom terug!",
+    "loginSuccess": "Je bent succesvol ingelogd.",
+    "registerFailed": "Registratie mislukt",
+    "userExists": "Dit e-mailadres is al geregistreerd.",
+    "registerError": "Er is een fout opgetreden bij het registreren.",
+    "checkInbox": "Controleer je inbox!",
+    "verificationSent": "We hebben een verificatiemail gestuurd naar",
+    "clickLink": "Klik op de link in de e-mail om je account te activeren.",
+    "understood": "Begrepen",
+    "invalidEmail": "Voer een geldig e-mailadres in",
+    "passwordMinLength": "Wachtwoord moet minimaal 6 karakters zijn",
+    "passwordMin": "Minimaal 6 karakters"
+  },
+  "dashboard": {
+    "projects": "Projecten",
+    "pages": "Pagina's",
+    "avgScore": "Gem. Score",
+    "myProjects": "Mijn Projecten",
+    "newAnalysis": "Nieuwe Analyse",
+    "noProjects": "Geen projecten gevonden",
+    "noProjectsDesc": "Start je eerste website analyse om projecten aan te maken.",
+    "startNewAnalysis": "Nieuwe Analyse Starten",
+    "completed": "Voltooid",
+    "analyzing": "Bezig...",
+    "queued": "In wachtrij",
+    "pageOverview": "Pagina Overzicht",
+    "noPagesAnalyzed": "Geen pagina's geanalyseerd",
+    "issues": "problemen",
+    "noIssues": "Geen problemen",
+    "deleteConfirm": "Weet je zeker dat je dit project wilt verwijderen?",
+    "projectDeleted": "Project verwijderd",
+    "projectDeleteFailed": "Kon project niet verwijderen",
+    "loadProjectsFailed": "Kon projecten niet laden",
+    "loadPagesFailed": "Kon pagina's niet laden",
+    "details": "Details",
+    "aiCredits": "AI Credits"
+  },
+  "analysis": {
+    "pageStructureScore": "Paginastructuur score",
+    "pageStructureDesc": "Analyse van headings, meta tags en structured data",
+    "excellent": "Uitstekend",
+    "good": "Goed",
+    "needsWork": "Verbeterpunten",
+    "headingStructure": "Heading Structuur",
+    "metaInformation": "Meta Informatie",
+    "titleTag": "Title Tag",
+    "metaDescription": "Meta Description",
+    "ogTitle": "Open Graph Title",
+    "ogDescription": "Open Graph Description",
+    "ogImage": "Open Graph Image",
+    "length": "Lengte",
+    "characters": "karakters",
+    "tooLong": "Te lang",
+    "analysisResults": "Analyse Resultaten",
+    "reanalyze": "Pagina opnieuw analyseren",
+    "backTo": "Terug naar",
+    "upgrade": "Upgraden",
+    "richSnippets": "Rich Snippets & Structured Data"
+  },
+  "jsonLd": {
+    "title": "JSON-LD Generator",
+    "subtitle": "Genereer complete structured data voor uw website",
+    "selected": "geselecteerd",
+    "websiteSchema": "WebSite Schema",
+    "websiteDesc": "Basisinformatie over uw website met sitelinks searchbox",
+    "organizationSchema": "Organization Schema",
+    "organizationDesc": "Bedrijfsinformatie en contactgegevens",
+    "breadcrumbSchema": "BreadcrumbList Schema",
+    "breadcrumbDesc": "Navigatiestructuur voor deze pagina",
+    "articleSchema": "Article Schema",
+    "articleDesc": "Voor artikelen, blog posts en nieuwsberichten",
+    "faqSchema": "FAQPage Schema",
+    "faqDescAvailable": "Voor veelgestelde vragen ({{count}} FAQ's beschikbaar)",
+    "faqDescUnavailable": "Geen FAQ's beschikbaar",
+    "recommended": "Aanbevolen",
+    "relevantForPage": "— relevant voor dit paginatype",
+    "combinedTip": "Alle geselecteerde schema's worden automatisch samengevoegd tot één gecombineerde JSON-LD code die u kunt kopiëren.",
+    "copyButton": "Kopieer JSON-LD Code",
+    "copied": "Gekopieerd!",
+    "copySuccess": "JSON-LD gekopieerd naar klembord!",
+    "copyFailed": "Kopiëren mislukt",
+    "selectMinOne": "Selecteer minimaal één schema type",
+    "headTip": "Plak deze code in de <head> sectie van uw HTML, bij voorkeur vlak voor de sluitende </head> tag.",
+    "tip": "Tip:"
+  },
+  "cookie": {
+    "title": "Cookie-instellingen",
+    "description": "Wij gebruiken cookies om je ervaring te verbeteren. Je kunt je voorkeuren aanpassen of ons",
+    "privacyLink": "privacybeleid",
+    "readMore": "lezen voor meer informatie.",
+    "customize": "Cookie-voorkeuren aanpassen",
+    "necessary": "Alleen noodzakelijke",
+    "acceptAll": "Alles accepteren"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Er is een fout opgetreden",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "close": "Sluiten",
+    "back": "Terug",
+    "next": "Volgende",
+    "of": "van",
+    "over": "over"
+  }
+}
