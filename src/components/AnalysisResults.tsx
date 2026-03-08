@@ -173,8 +173,8 @@ export const AnalysisResults = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Heading Structure */}
-        <Card className="p-6 shadow-soft">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <Card className="p-4 sm:p-6 shadow-soft">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
             Heading Structuur
           </h3>
