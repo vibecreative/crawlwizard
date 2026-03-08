@@ -19,8 +19,11 @@ import {
   Info
 } from 'lucide-react';
 
+import { useState } from 'react';
+
 const Landing = () => {
   const navigate = useNavigate();
+  const [isYearly, setIsYearly] = useState(true);
 
   const features = [
     {
@@ -58,7 +61,8 @@ const Landing = () => {
   const plans = [
     {
       name: 'Free',
-      price: '€0',
+      monthlyPrice: '€0',
+      yearlyPrice: '€0',
       period: 'voor altijd',
       description: 'Gratis verkennen',
       subtitle: 'Analyseer je eerste pagina\'s en ontdek wat er beter kan.',
@@ -78,7 +82,8 @@ const Landing = () => {
     },
     {
       name: 'Scale',
-      price: '€14,95',
+      monthlyPrice: '€17,95',
+      yearlyPrice: '€14,95',
       period: 'per maand',
       description: 'Voor serieuze websites',
       subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
@@ -99,7 +104,8 @@ const Landing = () => {
     },
     {
       name: 'Enterprise',
-      price: '€35',
+      monthlyPrice: '€39,95',
+      yearlyPrice: '€35',
       period: 'per maand',
       description: 'Voor teams & bureaus',
       subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
@@ -310,6 +316,27 @@ const Landing = () => {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Begin vandaag gratis. Geen creditcard, geen verborgen kosten – wel direct inzicht.
             </p>
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Maandelijks
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsYearly(!isYearly)}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${isYearly ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform ${isYearly ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+              <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Jaarlijks
+              </span>
+              {isYearly && (
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
+                  Bespaar tot 17%
+                </Badge>
+              )}
+            </div>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {plans.map((plan, index) => (
@@ -327,8 +354,14 @@ const Landing = () => {
                 <CardHeader className="text-center pb-4">
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground ml-2">{plan.period}</span>
+                    <span className="text-4xl font-bold">{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</span>
+                    <span className="text-muted-foreground ml-2">{plan.name === 'Free' ? plan.period : 'per maand'}</span>
+                    {isYearly && plan.name !== 'Free' && (
+                      <p className="text-xs text-muted-foreground mt-1">Jaarlijks gefactureerd</p>
+                    )}
+                    {!isYearly && plan.name !== 'Free' && plan.monthlyPrice !== plan.yearlyPrice && (
+                      <p className="text-xs text-primary mt-1">Bespaar met jaarlijks abonnement</p>
+                    )}
                   </div>
                   <p className="text-muted-foreground mt-2 font-medium">{plan.description}</p>
                   {plan.subtitle && <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>}
