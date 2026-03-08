@@ -61,7 +61,8 @@ const Landing = () => {
   const plans = [
     {
       name: 'Free',
-      price: '€0',
+      monthlyPrice: '€0',
+      yearlyPrice: '€0',
       period: 'voor altijd',
       description: 'Gratis verkennen',
       subtitle: 'Analyseer je eerste pagina\'s en ontdek wat er beter kan.',
@@ -81,7 +82,8 @@ const Landing = () => {
     },
     {
       name: 'Scale',
-      price: '€14,95',
+      monthlyPrice: '€17,95',
+      yearlyPrice: '€14,95',
       period: 'per maand',
       description: 'Voor serieuze websites',
       subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
@@ -102,7 +104,8 @@ const Landing = () => {
     },
     {
       name: 'Enterprise',
-      price: '€35',
+      monthlyPrice: '€39,95',
+      yearlyPrice: '€35',
       period: 'per maand',
       description: 'Voor teams & bureaus',
       subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
