@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, Download, Sparkles, Loader2, RefreshCw, Cpu, Cloud, Search, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { analyzeRelevanceInBrowser, checkBrowserAiSupport, BrowserAnalysisResult } from "@/lib/browserAiRelevance";
 import { ArticleGenerator } from "./ArticleGenerator";
