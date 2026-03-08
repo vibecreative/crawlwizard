@@ -23,7 +23,7 @@ import {
   Trash2,
   Eye,
   Shield,
-  Sparkles
+  Search
 } from "lucide-react";
 
 interface ProjectPage {
@@ -62,7 +62,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchProjects();
-    // Check admin role
     if (user?.id) {
       supabase
         .from("user_roles")
@@ -75,22 +74,17 @@ const Dashboard = () => {
     }
   }, [user?.id]);
 
-  // Fetch all project pages for average score calculation
   useEffect(() => {
     const fetchAllProjectPages = async () => {
       if (projects.length === 0) return;
-      
       const projectsNeedingPages = projects.filter(p => !p.pages);
       if (projectsNeedingPages.length === 0) return;
-
       try {
         const { data, error } = await supabase
           .from("project_pages")
           .select("*")
           .in("project_id", projectsNeedingPages.map(p => p.id));
-
         if (error) throw error;
-
         if (data) {
           setProjects(prev => prev.map(p => {
             const projectPages = data.filter(page => page.project_id === p.id);
@@ -101,7 +95,6 @@ const Dashboard = () => {
         console.error("Error fetching all project pages:", error);
       }
     };
-
     fetchAllProjectPages();
   }, [projects.length]);
 
@@ -111,7 +104,6 @@ const Dashboard = () => {
         .from("projects")
         .select("*")
         .order("updated_at", { ascending: false });
-
       if (error) throw error;
       setProjects(data || []);
     } catch (error) {
@@ -130,9 +122,7 @@ const Dashboard = () => {
         .select("*")
         .eq("project_id", projectId)
         .order("seo_score", { ascending: true });
-
       if (error) throw error;
-
       setProjects(prev => prev.map(p => 
         p.id === projectId ? { ...p, pages: data || [] } : p
       ));
@@ -158,17 +148,10 @@ const Dashboard = () => {
 
   const handleDeleteProject = async (projectId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    
     if (!confirm("Weet je zeker dat je dit project wilt verwijderen?")) return;
-
     try {
-      const { error } = await supabase
-        .from("projects")
-        .delete()
-        .eq("id", projectId);
-
+      const { error } = await supabase.from("projects").delete().eq("id", projectId);
       if (error) throw error;
-
       setProjects(prev => prev.filter(p => p.id !== projectId));
       toast.success("Project verwijderd");
     } catch (error) {
@@ -179,8 +162,8 @@ const Dashboard = () => {
 
   const getScoreColor = (score: number | null) => {
     if (score === null) return "text-muted-foreground";
-    if (score >= 80) return "text-emerald-500";
-    if (score >= 60) return "text-amber-500";
+    if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
+    if (score >= 60) return "text-amber-600 dark:text-amber-400";
     return "text-destructive";
   };
 
@@ -216,70 +199,72 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Globe className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">CrawlWizard</h1>
+      <header className="border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-md gradient-primary flex items-center justify-center">
+              <Search className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <h1 className="text-lg font-bold font-display">CrawlWizard</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground hidden sm:block">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground hidden sm:block">
               {user?.email}
             </span>
             {isAdmin && (
-              <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
-                <Shield className="h-4 w-4 mr-2" />
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="h-8 text-xs">
+                <Shield className="h-3.5 w-3.5 mr-1.5" />
                 Admin
               </Button>
             )}
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-primary/10">
-                  <Globe className="h-6 w-6 text-primary" />
+          <Card className="shadow-soft border-border/50">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Globe className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Totaal Projecten</p>
-                  <p className="text-2xl font-bold">{projects.length}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Projecten</p>
+                  <p className="text-2xl font-bold font-display">{projects.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-emerald-500/10">
-                  <FileText className="h-6 w-6 text-emerald-500" />
+          <Card className="shadow-soft border-border/50">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Geanalyseerde Pagina's</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Pagina's</p>
+                  <p className="text-2xl font-bold font-display">
                     {projects.reduce((acc, p) => acc + (p.analyzed_pages || 0), 0)}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-amber-500/10">
-                  <TrendingUp className="h-6 w-6 text-amber-500" />
+          <Card className="shadow-soft border-border/50">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Gem. SEO Score</p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Gem. Score</p>
+                  <p className="text-2xl font-bold font-display">
                     {projects.length > 0 
                       ? Math.round(projects.reduce((acc, p) => {
                           const score = getAverageScore(p);
@@ -294,22 +279,22 @@ const Dashboard = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold">Mijn Projecten</h2>
-          <Button size="sm" onClick={() => navigate("/analyze")}>
-            <Plus className="h-4 w-4 mr-2" />
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-semibold font-display">Mijn Projecten</h2>
+          <Button size="sm" onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground h-8 text-xs">
+            <Plus className="h-3.5 w-3.5 mr-1.5" />
             Nieuwe Analyse
           </Button>
         </div>
 
         {/* Projects List */}
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[1, 2, 3].map(i => (
-              <Card key={i}>
-                <CardContent className="pt-6">
+              <Card key={i} className="shadow-soft border-border/50">
+                <CardContent className="pt-5 pb-5">
                   <div className="flex items-center gap-4">
-                    <Skeleton className="h-12 w-12 rounded-lg" />
+                    <Skeleton className="h-10 w-10 rounded-lg" />
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-4 w-48" />
                       <Skeleton className="h-3 w-32" />
@@ -320,21 +305,23 @@ const Dashboard = () => {
             ))}
           </div>
         ) : projects.length === 0 ? (
-          <Card>
+          <Card className="shadow-soft border-border/50">
             <CardContent className="pt-12 pb-12 text-center">
-              <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Geen projecten gevonden</h3>
-              <p className="text-muted-foreground mb-6">
+              <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
+                <Globe className="h-7 w-7 text-muted-foreground" />
+              </div>
+              <h3 className="text-base font-semibold font-display mb-2">Geen projecten gevonden</h3>
+              <p className="text-sm text-muted-foreground mb-6">
                 Start je eerste website analyse om projecten aan te maken.
               </p>
-              <Button onClick={() => navigate("/analyze")}>
+              <Button onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground">
                 <Plus className="h-4 w-4 mr-2" />
                 Nieuwe Analyse Starten
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {projects.map(project => {
               const avgScore = getAverageScore(project);
               const issuesCount = getIssuesCount(project);
@@ -343,56 +330,56 @@ const Dashboard = () => {
               return (
                 <Card 
                   key={project.id} 
-                  className="cursor-pointer transition-all hover:border-primary/50"
+                  className={`cursor-pointer transition-all shadow-soft border-border/50 hover:border-primary/30 ${isExpanded ? 'border-primary/30' : ''}`}
                   onClick={() => handleExpandProject(project.id)}
                 >
-                  <CardHeader className="pb-3">
+                  <CardHeader className="pb-3 pt-5">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <CardTitle className="text-base">{project.name}</CardTitle>
-                          <Badge variant="outline" className="text-xs">
+                          <CardTitle className="text-sm font-display">{project.name}</CardTitle>
+                          <Badge variant="outline" className="text-[10px] h-5 px-1.5">
                             {project.status === "completed" ? "Voltooid" : 
                              project.status === "analyzing" ? "Bezig..." : "In wachtrij"}
                           </Badge>
                         </div>
-                        <CardDescription className="flex items-center gap-2">
+                        <CardDescription className="flex items-center gap-1.5 text-xs">
                           <Globe className="h-3 w-3" />
                           {project.base_url}
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`text-center px-3 py-1 rounded-lg ${getScoreBg(avgScore)}`}>
-                          <span className={`text-lg font-bold ${getScoreColor(avgScore)}`}>
+                        <div className={`text-center px-3 py-1.5 rounded-lg ${getScoreBg(avgScore)}`}>
+                          <span className={`text-lg font-bold font-display ${getScoreColor(avgScore)}`}>
                             {avgScore ?? "-"}
                           </span>
-                          <p className="text-[10px] text-muted-foreground">Score</p>
                         </div>
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-8 w-8"
                           onClick={(e) => handleDeleteProject(project.id, e)}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-6 text-sm text-muted-foreground mb-3">
+                  <CardContent className="pb-5">
+                    <div className="flex items-center gap-5 text-xs text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
-                        <FileText className="h-4 w-4" />
+                        <FileText className="h-3.5 w-3.5" />
                         {project.analyzed_pages}/{project.total_pages} pagina's
                       </span>
                       {issuesCount > 0 && (
-                        <span className="flex items-center gap-1 text-amber-500">
-                          <AlertTriangle className="h-4 w-4" />
+                        <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                          <AlertTriangle className="h-3.5 w-3.5" />
                           {issuesCount} problemen
                         </span>
                       )}
                       {issuesCount === 0 && project.pages && project.pages.length > 0 && (
-                        <span className="flex items-center gap-1 text-emerald-500">
-                          <CheckCircle2 className="h-4 w-4" />
+                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
                           Geen problemen
                         </span>
                       )}
@@ -401,82 +388,63 @@ const Dashboard = () => {
                     {project.total_pages > 0 && (
                       <Progress 
                         value={(project.analyzed_pages / project.total_pages) * 100} 
-                        className="h-1.5 mb-3"
+                        className="h-1 mb-3"
                       />
                     )}
 
                     {/* Expanded Pages View */}
                     {isExpanded && (
                       <div className="mt-4 pt-4 border-t border-border" onClick={e => e.stopPropagation()}>
-                        <h4 className="text-sm font-medium mb-3">Pagina Overzicht</h4>
+                        <h4 className="text-xs font-semibold font-display uppercase tracking-wider text-muted-foreground mb-3">Pagina Overzicht</h4>
                         
                         {loadingPages === project.id ? (
                           <div className="space-y-2">
                             {[1, 2, 3].map(i => (
-                              <Skeleton key={i} className="h-12 w-full" />
+                              <Skeleton key={i} className="h-10 w-full rounded-lg" />
                             ))}
                           </div>
                         ) : project.pages && project.pages.length > 0 ? (
-                          <div className="space-y-2 max-h-96 overflow-y-auto">
+                          <div className="space-y-1.5 max-h-96 overflow-y-auto">
                             {project.pages.map(page => (
                               <div 
                                 key={page.id}
-                                className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                                className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                               >
-                              <div 
-                                  className="flex-1 min-w-0 mr-4 cursor-pointer hover:text-primary transition-colors"
+                                <div 
+                                  className="flex-1 min-w-0 mr-3 cursor-pointer hover:text-primary transition-colors"
                                   onClick={() => navigate(`/page/${page.id}`)}
                                 >
-                                  <p className="text-sm font-medium truncate">
+                                  <p className="text-xs font-medium truncate">
                                     {page.title || new URL(page.url).pathname || "/"}
                                   </p>
-                                  <p className="text-xs text-muted-foreground truncate">
+                                  <p className="text-[11px] text-muted-foreground truncate">
                                     {page.url}
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  {/* SEO Checks */}
-                                  <div className="hidden sm:flex items-center gap-2">
-                                    <Badge 
-                                      variant={page.has_h1 ? "default" : "destructive"}
-                                      className="text-xs"
-                                    >
-                                      H1
-                                    </Badge>
-                                    <Badge 
-                                      variant={page.has_meta_description ? "default" : "destructive"}
-                                      className="text-xs"
-                                    >
-                                      Meta
-                                    </Badge>
-                                    <Badge 
-                                      variant={page.has_structured_data ? "default" : "secondary"}
-                                      className="text-xs"
-                                    >
-                                      Schema
-                                    </Badge>
+                                <div className="flex items-center gap-2">
+                                  <div className="hidden sm:flex items-center gap-1.5">
+                                    <Badge variant={page.has_h1 ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">H1</Badge>
+                                    <Badge variant={page.has_meta_description ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">Meta</Badge>
+                                    <Badge variant={page.has_structured_data ? "default" : "secondary"} className="text-[10px] h-5 px-1.5">Schema</Badge>
                                   </div>
-                                  {/* Score */}
-                                  <div className={`w-10 text-center py-1 rounded ${getScoreBg(page.seo_score)}`}>
-                                    <span className={`text-sm font-bold ${getScoreColor(page.seo_score)}`}>
+                                  <div className={`w-9 text-center py-0.5 rounded ${getScoreBg(page.seo_score)}`}>
+                                    <span className={`text-xs font-bold ${getScoreColor(page.seo_score)}`}>
                                       {page.seo_score ?? "-"}
                                     </span>
                                   </div>
-                                  {/* View Details Button */}
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-8 text-xs"
+                                    className="h-7 text-[10px] px-2"
                                     onClick={() => navigate(`/page/${page.id}`)}
                                   >
                                     <Eye className="h-3 w-3 mr-1" />
                                     Details
                                   </Button>
-                                  {/* External Link */}
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8"
+                                    className="h-7 w-7"
                                     onClick={() => window.open(page.url, "_blank")}
                                   >
                                     <ExternalLink className="h-3 w-3" />
@@ -486,7 +454,7 @@ const Dashboard = () => {
                             ))}
                           </div>
                         ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">
+                          <p className="text-xs text-muted-foreground text-center py-4">
                             Geen pagina's geanalyseerd
                           </p>
                         )}
@@ -507,7 +475,7 @@ const Dashboard = () => {
         {/* AI Credits Dashboard */}
         {user?.id && (
           <div className="mt-8 mb-8">
-            <h2 className="text-lg font-semibold mb-4">AI Credits</h2>
+            <h2 className="text-base font-semibold font-display mb-4">AI Credits</h2>
             <CreditsDashboard userId={user.id} />
           </div>
         )}

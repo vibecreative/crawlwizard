@@ -1,108 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 220 25% 97%;
-    --foreground: 220 20% 15%;
+    --background: 0 0% 98%;
+    --foreground: 220 25% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 15%;
+    --card-foreground: 220 25% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 15%;
+    --popover-foreground: 220 25% 10%;
 
-    --primary: 245 60% 50%;
+    --primary: 14 90% 52%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 245 80% 65%;
+    --primary-glow: 14 95% 58%;
 
-    --secondary: 220 15% 92%;
-    --secondary-foreground: 220 20% 15%;
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 220 25% 10%;
 
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 12% 45%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 10% 46%;
 
-    --accent: 190 85% 50%;
+    --accent: 14 90% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 245 60% 50%;
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 14 90% 52%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
 
     /* Heading level colors for SEO visualization */
-    --h1-color: 245 60% 50%;
-    --h2-color: 260 60% 55%;
-    --h3-color: 280 55% 60%;
-    --h4-color: 190 70% 50%;
-    --h5-color: 160 60% 50%;
-    --h6-color: 140 50% 50%;
+    --h1-color: 14 90% 52%;
+    --h2-color: 24 85% 50%;
+    --h3-color: 34 80% 48%;
+    --h4-color: 190 70% 42%;
+    --h5-color: 160 60% 42%;
+    --h6-color: 140 50% 42%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(245 60% 50%), hsl(190 85% 50%));
-    --gradient-subtle: linear-gradient(180deg, hsl(220 25% 97%), hsl(220 20% 95%));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 25% 98%));
+    --gradient-primary: linear-gradient(135deg, hsl(14 90% 52%), hsl(24 95% 55%));
+    --gradient-dark: linear-gradient(135deg, hsl(220 30% 12%), hsl(220 25% 18%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 98%), hsl(220 14% 96%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 14% 98%));
 
     /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(220 20% 15% / 0.08);
-    --shadow-glow: 0 0 30px hsl(245 80% 65% / 0.15);
+    --shadow-soft: 0 4px 24px -6px hsl(220 25% 10% / 0.07);
+    --shadow-glow: 0 0 40px hsl(14 90% 52% / 0.15);
+    --shadow-card: 0 1px 3px hsl(220 25% 10% / 0.04), 0 6px 24px hsl(220 25% 10% / 0.06);
   }
 
   .dark {
-    --background: 220 30% 8%;
-    --foreground: 220 15% 95%;
+    --background: 220 30% 6%;
+    --foreground: 220 10% 96%;
 
-    --card: 220 28% 10%;
-    --card-foreground: 220 15% 95%;
+    --card: 220 28% 9%;
+    --card-foreground: 220 10% 96%;
 
-    --popover: 220 28% 10%;
-    --popover-foreground: 220 15% 95%;
+    --popover: 220 28% 9%;
+    --popover-foreground: 220 10% 96%;
 
-    --primary: 245 70% 60%;
+    --primary: 14 90% 55%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 245 80% 70%;
+    --primary-glow: 14 95% 62%;
 
-    --secondary: 220 25% 15%;
-    --secondary-foreground: 220 15% 95%;
+    --secondary: 220 25% 14%;
+    --secondary-foreground: 220 10% 96%;
 
-    --muted: 220 25% 15%;
-    --muted-foreground: 220 15% 60%;
+    --muted: 220 25% 14%;
+    --muted-foreground: 220 10% 55%;
 
-    --accent: 190 85% 55%;
+    --accent: 14 90% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 25% 18%;
-    --input: 220 25% 18%;
-    --ring: 245 70% 60%;
+    --border: 220 25% 16%;
+    --input: 220 25% 16%;
+    --ring: 14 90% 55%;
 
     /* Dark mode heading colors */
-    --h1-color: 245 70% 65%;
-    --h2-color: 260 65% 65%;
-    --h3-color: 280 60% 65%;
-    --h4-color: 190 75% 60%;
-    --h5-color: 160 65% 60%;
-    --h6-color: 140 55% 60%;
+    --h1-color: 14 90% 60%;
+    --h2-color: 24 85% 58%;
+    --h3-color: 34 80% 55%;
+    --h4-color: 190 75% 55%;
+    --h5-color: 160 65% 55%;
+    --h6-color: 140 55% 55%;
 
     /* Dark gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(245 70% 60%), hsl(190 85% 55%));
-    --gradient-subtle: linear-gradient(180deg, hsl(220 30% 8%), hsl(220 28% 10%));
-    --gradient-card: linear-gradient(135deg, hsl(220 28% 10%), hsl(220 25% 12%));
+    --gradient-primary: linear-gradient(135deg, hsl(14 90% 55%), hsl(24 95% 58%));
+    --gradient-dark: linear-gradient(135deg, hsl(220 30% 6%), hsl(220 28% 10%));
+    --gradient-subtle: linear-gradient(180deg, hsl(220 30% 6%), hsl(220 28% 9%));
+    --gradient-card: linear-gradient(135deg, hsl(220 28% 9%), hsl(220 25% 11%));
 
     /* Dark shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.4);
-    --shadow-glow: 0 0 40px hsl(245 80% 65% / 0.2);
+    --shadow-soft: 0 4px 24px -6px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 40px hsl(14 90% 55% / 0.2);
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.2), 0 6px 24px hsl(0 0% 0% / 0.3);
   }
 }
 
@@ -113,14 +115,23 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' auto;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   }
 }
 
 @layer utilities {
   .gradient-primary {
     background: var(--gradient-primary);
+  }
+  
+  .gradient-dark {
+    background: var(--gradient-dark);
   }
   
   .gradient-text {
@@ -136,5 +147,13 @@ All colors MUST be HSL.
   
   .shadow-glow {
     box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .font-display {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   }
 }
