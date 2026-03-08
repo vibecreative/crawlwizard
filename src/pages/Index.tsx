@@ -838,6 +838,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen py-12 px-4">
+      <SEOHead title="Analyse" noindex />
       <div className="container mx-auto">
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
           <span className="text-sm text-muted-foreground hidden sm:inline">
