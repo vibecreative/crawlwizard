@@ -12,6 +12,7 @@ import { KeywordAnalysis } from "./KeywordAnalysis";
 import { KeywordPlacementAdvice } from "./KeywordPlacementAdvice";
 import { AiRankingCheck } from "./AiRankingCheck";
 import { AiCreditsDisplay } from "./AiCreditsDisplay";
+import { MetaTagSuggestions } from "./MetaTagSuggestions";
 import { useAiCredits } from "@/hooks/useAiCredits";
 
 interface HeadingInfo {
@@ -471,6 +472,16 @@ export const AnalysisResults = ({
               </div>
             )}
           </div>
+
+          {/* AI Meta Tag Suggestions */}
+          {!isFree && (
+            <MetaTagSuggestions
+              url={data.url}
+              pageContent={data.html}
+              currentMeta={data.meta}
+              onCreditsUsed={refetchCredits}
+            />
+          )}
         </Card>
       </div>
 
