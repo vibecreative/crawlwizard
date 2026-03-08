@@ -369,124 +369,228 @@ const Admin = () => {
           </Card>
         </div>
 
-        {/* Users Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Gebruikersbeheer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <Skeleton key={i} className="h-14 w-full" />
-                ))}
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Gebruiker</TableHead>
-                    <TableHead>Geregistreerd</TableHead>
-                    <TableHead>Laatst actief</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Rol</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Acties</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((u) => (
-                    <TableRow key={u.id} className={!u.is_active ? "opacity-60" : ""}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{u.full_name || "-"}</p>
-                          <p className="text-sm text-muted-foreground">{u.email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{formatDate(u.created_at)}</TableCell>
-                      <TableCell>{formatDate(u.last_sign_in_at)}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={u.plan}
-                          onValueChange={(value) => updateUser(u.id, { plan: value })}
-                          disabled={updatingUser === u.id}
-                        >
-                          <SelectTrigger className="w-[120px] h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="free">Free</SelectItem>
-                            <SelectItem value="scale">Scale</SelectItem>
-                            <SelectItem value="enterprise">Enterprise</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={u.roles.includes("admin") ? "default" : "secondary"}>
-                          {u.roles.includes("admin") ? "Admin" : "User"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={u.is_active ? "default" : "destructive"}>
-                          {u.is_active ? "Actief" : "Geblokkeerd"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant={u.is_active ? "destructive" : "default"}
-                            size="sm"
-                            className="h-8 text-xs"
-                            disabled={updatingUser === u.id || u.id === user?.id}
-                            onClick={() => updateUser(u.id, { is_active: !u.is_active })}
-                          >
-                            {u.is_active ? "Blokkeer" : "Activeer"}
-                          </Button>
-                          {!u.roles.includes("admin") && u.id !== user?.id && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-xs"
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="h-4 w-4" />
+              Gebruikers
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="gap-2">
+              <Mail className="h-4 w-4" />
+              Berichten
+              {messages.filter(m => !m.is_read).length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1 text-xs">
+                  {messages.filter(m => !m.is_read).length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gebruikersbeheer</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                      <Skeleton key={i} className="h-14 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Gebruiker</TableHead>
+                        <TableHead>Geregistreerd</TableHead>
+                        <TableHead>Laatst actief</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Rol</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Acties</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map((u) => (
+                        <TableRow key={u.id} className={!u.is_active ? "opacity-60" : ""}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{u.full_name || "-"}</p>
+                              <p className="text-sm text-muted-foreground">{u.email}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>{formatDate(u.created_at)}</TableCell>
+                          <TableCell>{formatDate(u.last_sign_in_at)}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={u.plan}
+                              onValueChange={(value) => updateUser(u.id, { plan: value })}
                               disabled={updatingUser === u.id}
-                              onClick={() => updateUser(u.id, { role: "admin" })}
                             >
-                              Maak admin
+                              <SelectTrigger className="w-[120px] h-8">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="free">Free</SelectItem>
+                                <SelectItem value="scale">Scale</SelectItem>
+                                <SelectItem value="enterprise">Enterprise</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={u.roles.includes("admin") ? "default" : "secondary"}>
+                              {u.roles.includes("admin") ? "Admin" : "User"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={u.is_active ? "default" : "destructive"}>
+                              {u.is_active ? "Actief" : "Geblokkeerd"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                variant={u.is_active ? "destructive" : "default"}
+                                size="sm"
+                                className="h-8 text-xs"
+                                disabled={updatingUser === u.id || u.id === user?.id}
+                                onClick={() => updateUser(u.id, { is_active: !u.is_active })}
+                              >
+                                {u.is_active ? "Blokkeer" : "Activeer"}
+                              </Button>
+                              {!u.roles.includes("admin") && u.id !== user?.id && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 text-xs"
+                                  disabled={updatingUser === u.id}
+                                  onClick={() => updateUser(u.id, { role: "admin" })}
+                                >
+                                  Maak admin
+                                </Button>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs"
+                                disabled={updatingUser === u.id}
+                                onClick={() => resetCredits(u.id)}
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Reset credits
+                              </Button>
+                              {u.id !== user?.id && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 text-xs text-destructive hover:text-destructive"
+                                      disabled={updatingUser === u.id}
+                                    >
+                                      <Trash2 className="h-3 w-3 mr-1" />
+                                      Verwijder
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Weet je zeker dat je <strong>{u.full_name || u.email}</strong> wilt verwijderen? Dit verwijdert het account en alle bijbehorende data permanent.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => deleteUser(u.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Verwijderen
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="messages">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Contactberichten
+                  {messages.filter(m => !m.is_read).length > 0 && (
+                    <Badge variant="destructive" className="text-xs">
+                      {messages.filter(m => !m.is_read).length} ongelezen
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {messages.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">Geen berichten ontvangen.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`border rounded-lg p-4 ${!msg.is_read ? "border-primary/50 bg-primary/5" : "border-border"}`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium">{msg.name}</span>
+                              {!msg.is_read && (
+                                <Badge variant="default" className="text-xs">Nieuw</Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">{msg.email}</p>
+                            <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {new Date(msg.created_at).toLocaleString("nl-NL")}
+                            </p>
+                          </div>
+                          <div className="flex gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => toggleMessageRead(msg.id, msg.is_read)}
+                              title={msg.is_read ? "Markeer als ongelezen" : "Markeer als gelezen"}
+                            >
+                              {msg.is_read ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-xs"
-                            disabled={updatingUser === u.id}
-                            onClick={() => resetCredits(u.id)}
-                          >
-                            <RotateCcw className="h-3 w-3 mr-1" />
-                            Reset credits
-                          </Button>
-                          {u.id !== user?.id && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
                                   variant="ghost"
-                                  size="sm"
-                                  className="h-8 text-xs text-destructive hover:text-destructive"
-                                  disabled={updatingUser === u.id}
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive"
                                 >
-                                  <Trash2 className="h-3 w-3 mr-1" />
-                                  Verwijder
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Gebruiker verwijderen?</AlertDialogTitle>
+                                  <AlertDialogTitle>Bericht verwijderen?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Weet je zeker dat je <strong>{u.full_name || u.email}</strong> wilt verwijderen? Dit verwijdert het account en alle bijbehorende data permanent.
+                                    Weet je zeker dat je dit bericht van <strong>{msg.name}</strong> wilt verwijderen?
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Annuleren</AlertDialogCancel>
                                   <AlertDialogAction
-                                    onClick={() => deleteUser(u.id)}
+                                    onClick={() => deleteMessage(msg.id)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
                                     Verwijderen
@@ -494,16 +598,16 @@ const Admin = () => {
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
-                          )}
+                          </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
