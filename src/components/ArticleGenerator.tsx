@@ -37,6 +37,7 @@ export const ArticleGenerator = ({ question, answer, pageContent, brandContext, 
           question,
           answer,
           pageContent,
+          brandContext,
           mode,
           ...(mode === "rewrite" && { articleText: article }),
         }

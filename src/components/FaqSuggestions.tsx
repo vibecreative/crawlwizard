@@ -582,6 +582,7 @@ export const FaqSuggestions = ({
                     question={faq.question}
                     answer={faq.answer}
                     pageContent={pageContent}
+                    brandContext={brandContext}
                     onClose={() => setArticleOpenIndex(null)}
                   />
                 )}
