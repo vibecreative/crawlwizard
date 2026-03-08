@@ -302,18 +302,11 @@ ${JSON.stringify(jsonLdContent, null, 2)}
 
         <div className="h-px bg-border my-4" />
 
-        <label className="flex items-center gap-3 p-4 rounded-lg border-2 border-primary/50 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
-          <Checkbox
-            checked={allSelected}
-            onCheckedChange={handleSelectAll}
-          />
-          <div className="flex-1">
-            <div className="font-semibold text-primary">Selecteer alles</div>
-            <div className="text-xs text-muted-foreground">
-              Genereer alle schema types in één gecombineerde JSON-LD code
-            </div>
-          </div>
-        </label>
+        <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
+          <p className="text-sm text-muted-foreground">
+            <strong className="text-primary">💡 Tip:</strong> Alle geselecteerde schema's worden automatisch samengevoegd tot één gecombineerde JSON-LD code die u kunt kopiëren.
+          </p>
+        </div>
       </div>
 
       {selectedCount > 0 && (
