@@ -173,13 +173,13 @@ export const AnalysisResults = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Heading Structure */}
-        <Card className="p-4 sm:p-6 shadow-soft">
+        <Card className="p-4 sm:p-6 shadow-soft flex flex-col">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
             Heading Structuur
           </h3>
           
-          <div className="space-y-3 mb-6">
+          <div className="space-y-3 mb-6 shrink-0">
             {[1, 2, 3, 4, 5, 6].map((level) => (
               <div key={level} className="flex items-center gap-3">
                 <Badge className={`${getHeadingColor(level)} text-white px-3 py-1`}>
@@ -198,7 +198,7 @@ export const AnalysisResults = ({
             ))}
           </div>
 
-          <div className="space-y-4 max-h-96 overflow-y-auto">
+          <div className="space-y-4 min-h-0 flex-1 overflow-y-auto">
             {(() => {
               // First, sort headings by their position on the page (top to bottom)
               const sortedHeadings = [...data.headings].sort((a, b) => a.position.top - b.position.top);
