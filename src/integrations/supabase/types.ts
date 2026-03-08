@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_ranking_checks: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          page_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          page_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          page_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_ranking_checks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "project_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_ranking_checks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_ranking_results: {
+        Row: {
+          ai_response: string | null
+          check_id: string
+          created_at: string
+          id: string
+          is_mentioned: boolean | null
+          mention_position: number | null
+          model: string
+          question: string
+          sentiment: string | null
+        }
+        Insert: {
+          ai_response?: string | null
+          check_id: string
+          created_at?: string
+          id?: string
+          is_mentioned?: boolean | null
+          mention_position?: number | null
+          model: string
+          question: string
+          sentiment?: string | null
+        }
+        Update: {
+          ai_response?: string | null
+          check_id?: string
+          created_at?: string
+          id?: string
+          is_mentioned?: boolean | null
+          mention_position?: number | null
+          model?: string
+          question?: string
+          sentiment?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_ranking_results_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "ai_ranking_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           company_name: string | null

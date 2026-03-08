@@ -10,6 +10,7 @@ import { JsonLdGenerator } from "./JsonLdGenerator";
 import { FaqSuggestions } from "./FaqSuggestions";
 import { KeywordAnalysis } from "./KeywordAnalysis";
 import { KeywordPlacementAdvice } from "./KeywordPlacementAdvice";
+import { AiRankingCheck } from "./AiRankingCheck";
 
 interface HeadingInfo {
   level: number;
@@ -72,6 +73,7 @@ interface AnalysisResultsProps {
   onGenerateFaqs?: () => Promise<void>;
   isGeneratingFaqs?: boolean;
   userPlan?: string;
+  pageId?: string;
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
@@ -107,7 +109,8 @@ export const AnalysisResults = ({
   isReanalyzing,
   onGenerateFaqs,
   isGeneratingFaqs,
-  userPlan
+  userPlan,
+  pageId
 }: AnalysisResultsProps) => {
   const navigate = useNavigate();
   const isFree = userPlan === 'free';
@@ -510,6 +513,22 @@ export const AnalysisResults = ({
         <LockedFeatureCard 
           title="FAQ Suggesties" 
           description="Genereer AI-gestuurde FAQ's geoptimaliseerd voor featured snippets en AI-zoekmachines."
+          onUpgrade={() => navigate('/#pricing')}
+        />
+      )}
+
+      {/* AI Ranking Check - Enterprise */}
+      {userPlan === 'enterprise' ? (
+        <AiRankingCheck
+          pageId={pageId || ""}
+          domain={(() => { try { return new URL(data.url).hostname; } catch { return data.url; } })()}
+          faqs={data.faqs}
+          userPlan={userPlan}
+        />
+      ) : (
+        <LockedFeatureCard 
+          title="AI Ranking Check" 
+          description="Controleer of je website wordt genoemd door ChatGPT, Gemini en andere AI-modellen. Ontdek je positie en sentiment per model."
           onUpgrade={() => navigate('/#pricing')}
         />
       )}
