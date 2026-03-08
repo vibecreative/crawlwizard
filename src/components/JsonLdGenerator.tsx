@@ -57,12 +57,24 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
   };
 
   const generateWebSiteSchema = () => {
-    const schema = {
+    const baseUrl = (() => {
+      try { return new URL(url).origin; } catch { return url; }
+    })();
+
+    const schema: any = {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": meta.title || getDomainName(url),
       "description": meta.description || "",
-      "url": url,
+      "url": baseUrl,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${baseUrl}/search?q={search_term_string}`
+        },
+        "query-input": "required name=search_term_string"
+      }
     };
     
     if (meta.ogImage) {
