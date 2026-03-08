@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -20,31 +21,32 @@ interface DayData {
   credits: number;
 }
 
-const ACTION_LABELS: Record<string, string> = {
-  faq_analysis: "FAQ Analyse",
-  faq_generation: "FAQ Generatie",
-  faq_regeneration: "FAQ Regeneratie",
-  ai_ranking_check: "AI Ranking Check",
-  article_generation: "Artikel Generator",
-};
-
-const ACTION_COLORS: Record<string, string> = {
-  faq_analysis: "hsl(var(--primary))",
-  faq_generation: "hsl(var(--accent))",
-  faq_regeneration: "hsl(142, 76%, 36%)",
-  ai_ranking_check: "hsl(262, 83%, 58%)",
-  article_generation: "hsl(25, 95%, 53%)",
-};
-
 interface CreditsDashboardProps {
   userId: string;
 }
 
 export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
+  const { t, i18n } = useTranslation();
   const { credits, isLoading: creditsLoading } = useAiCredits(userId);
   const [usageData, setUsageData] = useState<CreditUsageRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [period, setPeriod] = useState<"week" | "month">("week");
+
+  const ACTION_LABELS: Record<string, string> = {
+    faq_analysis: "FAQ " + t('faq.analyze'),
+    faq_generation: "FAQ " + t('faq.generateButton').split(' ')[0],
+    faq_regeneration: "FAQ " + t('faq.regenerate'),
+    ai_ranking_check: t('aiRanking.title'),
+    article_generation: t('article.title'),
+  };
+
+  const ACTION_COLORS: Record<string, string> = {
+    faq_analysis: "hsl(var(--primary))",
+    faq_generation: "hsl(var(--accent))",
+    faq_regeneration: "hsl(142, 76%, 36%)",
+    ai_ranking_check: "hsl(262, 83%, 58%)",
+    article_generation: "hsl(25, 95%, 53%)",
+  };
 
   useEffect(() => {
     fetchUsageData();
@@ -75,13 +77,14 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
     const days = period === "week" ? 7 : 30;
     const result: DayData[] = [];
     const now = new Date();
+    const locale = i18n.language === 'nl' ? 'nl-NL' : 'en-US';
 
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split("T")[0];
       const label = period === "week"
-        ? date.toLocaleDateString("nl-NL", { weekday: "short" })
+        ? date.toLocaleDateString(locale, { weekday: "short" })
         : `${date.getDate()}/${date.getMonth() + 1}`;
 
       const dayCredits = usageData
@@ -126,7 +129,7 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
       <Card>
         <CardContent className="pt-6">
           <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">
-            Laden...
+            {t('common.loading')}
           </div>
         </CardContent>
       </Card>
@@ -148,7 +151,6 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
 
   return (
     <div className="space-y-4">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
@@ -157,7 +159,7 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
                 <Zap className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Credits over</p>
+                <p className="text-xs text-muted-foreground">{t('credits.remaining')}</p>
                 <div className="flex items-baseline gap-1.5">
                   <p className={`text-2xl font-bold ${isExhausted ? "text-destructive" : isLow ? "text-orange-500" : ""}`}>
                     {credits?.remaining ?? "-"}
@@ -177,7 +179,7 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
                 <Activity className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Vandaag gebruikt</p>
+                <p className="text-xs text-muted-foreground">{t('credits.usedToday')}</p>
                 <p className="text-2xl font-bold">{todayUsage}</p>
               </div>
             </div>
@@ -191,7 +193,7 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
                 <Calendar className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Deze maand</p>
+                <p className="text-xs text-muted-foreground">{t('credits.thisMonth')}</p>
                 <div className="flex items-baseline gap-1.5">
                   <p className="text-2xl font-bold">{credits?.used ?? 0}</p>
                   <Badge variant="outline" className="text-[10px]">
@@ -204,22 +206,17 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
         </Card>
       </div>
 
-      {/* Chart */}
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-primary" />
-              Credit Verbruik
+              {t('credits.usage')}
             </CardTitle>
             <Tabs value={period} onValueChange={(v) => setPeriod(v as "week" | "month")}>
               <TabsList className="h-8">
-                <TabsTrigger value="week" className="text-xs px-3 h-6">
-                  Week
-                </TabsTrigger>
-                <TabsTrigger value="month" className="text-xs px-3 h-6">
-                  Maand
-                </TabsTrigger>
+                <TabsTrigger value="week" className="text-xs px-3 h-6">{t('credits.week')}</TabsTrigger>
+                <TabsTrigger value="month" className="text-xs px-3 h-6">{t('credits.month')}</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -229,16 +226,8 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 11 }}
-                  className="text-muted-foreground"
-                />
-                <YAxis
-                  allowDecimals={false}
-                  tick={{ fontSize: 11 }}
-                  className="text-muted-foreground"
-                />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} className="text-muted-foreground" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} className="text-muted-foreground" />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
@@ -247,25 +236,19 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
                     fontSize: "12px",
                   }}
                   labelFormatter={(label) => `${label}`}
-                  formatter={(value: number) => [`${value} credits`, "Verbruik"]}
+                  formatter={(value: number) => [`${value} ${t('credits.creditsLabel')}`, t('credits.verbruik')]}
                 />
-                <Bar
-                  dataKey="credits"
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={40}
-                />
+                <Bar dataKey="credits" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
 
-      {/* Breakdown by action type */}
       {actionBreakdown.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Verbruik per functie</CardTitle>
+            <CardTitle className="text-base">{t('credits.usagePerFunction')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {actionBreakdown.map((item) => (
@@ -279,7 +262,7 @@ export const CreditsDashboard = ({ userId }: CreditsDashboardProps) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">{item.count}</span>
-                  <span className="text-xs text-muted-foreground">credits</span>
+                  <span className="text-xs text-muted-foreground">{t('credits.creditsLabel')}</span>
                 </div>
               </div>
             ))}
