@@ -43,6 +43,7 @@ import {
   UserX,
   Crown,
   Trash2,
+  RotateCcw,
 } from "lucide-react";
 
 interface AdminUser {
