@@ -137,7 +137,7 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
 
     try {
       const { data, error } = await supabase.functions.invoke("check-ai-ranking", {
-        body: { questions, domain, pageId },
+        body: { questions, domain, pageId, language: i18n.language },
       });
 
       if (error) throw error;

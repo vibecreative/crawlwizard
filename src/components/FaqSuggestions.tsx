@@ -274,7 +274,8 @@ export const FaqSuggestions = ({
           html: pageContent,
           previousQuestion: faqs[index].question,
           analysisExplanation: analysis.explanation,
-          brandContext
+          brandContext,
+          language: i18n.language
         }
       });
 

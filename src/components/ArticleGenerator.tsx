@@ -39,6 +39,7 @@ export const ArticleGenerator = ({ question, answer, pageContent, brandContext, 
           pageContent,
           brandContext,
           mode,
+          language: i18n.language,
           ...(mode === "rewrite" && { articleText: article }),
         }
       });

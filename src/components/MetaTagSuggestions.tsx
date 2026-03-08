@@ -46,7 +46,7 @@ export const MetaTagSuggestions = ({ url, pageContent, currentMeta, onCreditsUse
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-meta-tags", {
-        body: { url, pageContent, currentMeta },
+        body: { url, pageContent, currentMeta, language: i18n.language },
       });
 
       if (error) throw error;
