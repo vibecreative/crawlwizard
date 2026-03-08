@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import ContactForm from '@/components/ContactForm';
 import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
