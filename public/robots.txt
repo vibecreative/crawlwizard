@@ -10,5 +10,26 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI Crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
 User-agent: *
 Allow: /
+
+Sitemap: https://crawlwizard.nl/sitemap.xml
