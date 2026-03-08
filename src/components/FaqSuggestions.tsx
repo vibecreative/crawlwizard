@@ -379,35 +379,60 @@ export const FaqSuggestions = ({
         </div>
         
         {/* AI Mode Toggle */}
-        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-          <span className="text-sm font-medium">Analyse methode:</span>
-          <div className="flex gap-2">
-            <Button
-              variant={!useBrowserAi ? "default" : "outline"}
-              size="sm"
-              onClick={() => setUseBrowserAi(false)}
-              disabled={isAnalyzing || analyzingSingleIndex !== null}
-            >
-              <Cloud className="w-3 h-3 mr-2" />
-              Cloud AI (Gemini)
-            </Button>
-            <Button
-              variant={useBrowserAi ? "default" : "outline"}
-              size="sm"
-              onClick={() => setUseBrowserAi(true)}
-              disabled={isAnalyzing || analyzingSingleIndex !== null || !browserAiAvailable}
-              title={browserAiAvailable === false ? "Je browser ondersteunt geen WebGPU" : undefined}
-            >
-              <Cpu className="w-3 h-3 mr-2" />
-              Browser AI (Lokaal)
-            </Button>
+        <div className="flex flex-col gap-3 p-4 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-medium">Analyse methode:</span>
+            <div className="flex gap-2">
+              <Button
+                variant={!useBrowserAi ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseBrowserAi(false)}
+                disabled={isAnalyzing || analyzingSingleIndex !== null}
+              >
+                <Cloud className="w-3 h-3 mr-2" />
+                Cloud AI (Gemini)
+              </Button>
+              <Button
+                variant={useBrowserAi ? "default" : "outline"}
+                size="sm"
+                onClick={() => setUseBrowserAi(true)}
+                disabled={isAnalyzing || analyzingSingleIndex !== null || !browserAiAvailable}
+                title={browserAiAvailable === false ? "Je browser ondersteunt geen WebGPU" : undefined}
+              >
+                <Cpu className="w-3 h-3 mr-2" />
+                Browser AI (Lokaal)
+              </Button>
+            </div>
+            {browserAiAvailable === false && (
+              <span className="text-xs text-muted-foreground">(WebGPU niet ondersteund)</span>
+            )}
           </div>
-          {browserAiAvailable === false && (
-            <span className="text-xs text-muted-foreground">(WebGPU niet ondersteund)</span>
-          )}
-          {useBrowserAi && browserAiAvailable && (
-            <span className="text-xs text-muted-foreground">(Gratis, draait lokaal in je browser)</span>
-          )}
+
+          {/* Toelichting per methode */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-muted-foreground">
+            <div className={`rounded-md border p-3 space-y-1.5 ${!useBrowserAi ? 'border-primary/40 bg-primary/5' : 'border-border/50'}`}>
+              <p className="font-semibold text-foreground flex items-center gap-1.5">
+                <Cloud className="w-3 h-3" /> Cloud AI (Gemini)
+              </p>
+              <ul className="space-y-0.5">
+                <li>✅ Nauwkeurigste analyse via Gemini</li>
+                <li>✅ Werkt in elke browser</li>
+                <li>⚠️ Kost AI-credits per vraag</li>
+                <li>⚠️ Korte wachttijd tussen vragen</li>
+              </ul>
+            </div>
+            <div className={`rounded-md border p-3 space-y-1.5 ${useBrowserAi ? 'border-primary/40 bg-primary/5' : 'border-border/50'}`}>
+              <p className="font-semibold text-foreground flex items-center gap-1.5">
+                <Cpu className="w-3 h-3" /> Browser AI (Lokaal)
+              </p>
+              <ul className="space-y-0.5">
+                <li>✅ Volledig gratis, geen credits nodig</li>
+                <li>✅ Privacy: data blijft in je browser</li>
+                <li>⚠️ Vereist WebGPU (Chrome 113+)</li>
+                <li>⚠️ Eerste keer laden duurt langer</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
