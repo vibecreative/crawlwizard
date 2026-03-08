@@ -316,6 +316,27 @@ const Landing = () => {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Begin vandaag gratis. Geen creditcard, geen verborgen kosten – wel direct inzicht.
             </p>
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Maandelijks
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsYearly(!isYearly)}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${isYearly ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-background shadow-sm transition-transform ${isYearly ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+              <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Jaarlijks
+              </span>
+              {isYearly && (
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
+                  Bespaar tot 17%
+                </Badge>
+              )}
+            </div>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {plans.map((plan, index) => (
