@@ -291,14 +291,6 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* AI Credits Dashboard */}
-        {user?.id && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">AI Credits</h2>
-            <CreditsDashboard userId={user.id} />
-          </div>
-        )}
-
         {/* Actions */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold">Mijn Projecten</h2>
@@ -502,6 +494,14 @@ const Dashboard = () => {
                 </Card>
               );
             })}
+          </div>
+        )}
+
+        {/* AI Credits Dashboard */}
+        {user?.id && (
+          <div className="mt-8 mb-8">
+            <h2 className="text-lg font-semibold mb-4">AI Credits</h2>
+            <CreditsDashboard userId={user.id} />
           </div>
         )}
       </main>
