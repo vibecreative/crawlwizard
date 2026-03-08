@@ -92,10 +92,6 @@ const Index = () => {
       setTimeout(() => {
         document.getElementById('analysis-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
-      
-      setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      }, 100);
     } catch (error) {
       console.error('Analyse fout:', error);
       toast.error("Er is een fout opgetreden bij het analyseren van de URL. Probeer het opnieuw.");
