@@ -62,7 +62,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { question, answer, pageContent, mode } = body;
+    const { question, answer, pageContent, mode, brandContext } = body;
 
     if (!question || !answer) {
       return new Response(JSON.stringify({ error: 'Vraag en antwoord zijn vereist' }), {
