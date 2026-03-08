@@ -437,15 +437,6 @@ export const AnalysisResults = ({
             )}
           </div>
 
-          {/* AI Meta Tag Suggestions */}
-          {!isFree && (
-            <MetaTagSuggestions
-              url={data.url}
-              pageContent={data.html}
-              currentMeta={data.meta}
-              onCreditsUsed={refetchCredits}
-            />
-          )}
         </Card>
       </div>
 
