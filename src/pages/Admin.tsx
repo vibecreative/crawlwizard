@@ -100,7 +100,7 @@ const Admin = () => {
       }
 
       setIsAdmin(true);
-      await fetchUsers();
+      await Promise.all([fetchUsers(), fetchMessages()]);
     } catch (error) {
       console.error("Error checking admin:", error);
       setIsLoading(false);
