@@ -362,6 +362,16 @@ export const AnalysisResults = ({
             Meta Informatie
           </h3>
 
+          {/* AI Meta Tag Suggestions - bovenaan */}
+          {!isFree && (
+            <MetaTagSuggestions
+              url={data.url}
+              pageContent={data.html}
+              currentMeta={data.meta}
+              onCreditsUsed={refetchCredits}
+            />
+          )}
+
           <div className="space-y-4">
             {data.meta.title && (
               <div>
