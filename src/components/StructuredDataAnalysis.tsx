@@ -80,6 +80,17 @@ export const StructuredDataAnalysis = ({ structuredData, url }: StructuredDataAn
         Rich Snippets & Structured Data
       </h3>
 
+      {/* Context Explanation */}
+      <div className="mb-6 p-4 bg-secondary/30 rounded-lg text-sm text-muted-foreground space-y-1.5">
+        <p className="font-medium text-foreground">Waarom zie ik niet alle schema's?</p>
+        <p>
+          Niet elke pagina heeft dezelfde structured data nodig. CrawlWizard analyseert het type pagina 
+          (homepage, productpagina, blog, etc.) en toont alleen de schema's die relevant zijn. 
+          Zo voorkom je onnodige of dubbele markup — iets wat zoekmachines juist als een negatief signaal 
+          kunnen zien.
+        </p>
+      </div>
+
       {/* Status Overview */}
       <div className="mb-6">
         {hasStructuredData ? (
