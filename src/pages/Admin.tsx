@@ -43,6 +43,7 @@ import {
   UserX,
   Crown,
   Trash2,
+  RotateCcw,
 } from "lucide-react";
 
 interface AdminUser {
@@ -143,6 +144,33 @@ const Admin = () => {
     } catch (error) {
       console.error("Error updating user:", error);
       toast.error("Kon gebruiker niet bijwerken");
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
+  const resetCredits = async (userId: string) => {
+    setUpdatingUser(userId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=reset-credits`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Reset failed");
+
+      toast.success("AI-credits gereset voor deze maand");
+    } catch (error) {
+      console.error("Error resetting credits:", error);
+      toast.error("Kon credits niet resetten");
     } finally {
       setUpdatingUser(null);
     }
@@ -368,6 +396,16 @@ const Admin = () => {
                               Maak admin
                             </Button>
                           )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs"
+                            disabled={updatingUser === u.id}
+                            onClick={() => resetCredits(u.id)}
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Reset credits
+                          </Button>
                           {u.id !== user?.id && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>

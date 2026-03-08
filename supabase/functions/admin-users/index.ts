@@ -120,6 +120,30 @@ Deno.serve(async (req) => {
       });
     }
 
+    // RESET AI CREDITS
+    if (req.method === "POST" && action === "reset-credits") {
+      const body = await req.json();
+      const { userId } = body;
+
+      if (!userId) throw new Error("userId is required");
+
+      // Delete all credit usage for current month
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const { error } = await adminClient
+        .from("ai_credit_usage")
+        .delete()
+        .eq("user_id", userId)
+        .gte("created_at", startOfMonth.toISOString());
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // DELETE USER
     if (req.method === "POST" && action === "delete") {
       const body = await req.json();
