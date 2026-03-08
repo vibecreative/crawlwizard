@@ -15,7 +15,8 @@ import {
   FileText, 
   TrendingUp,
   Users,
-  Star
+  Star,
+  Info
 } from 'lucide-react';
 
 const Landing = () => {
