@@ -20,7 +20,9 @@ import {
   Bot,
   Gauge,
   Menu,
-  X
+  X,
+  Shield,
+  Lock
 } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
