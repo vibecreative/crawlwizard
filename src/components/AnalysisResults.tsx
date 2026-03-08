@@ -520,16 +520,6 @@ export const AnalysisResults = ({
         />
       )}
 
-      {/* JSON-LD Generator - Scale+ */}
-      {!isFree ? (
-        <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
-      ) : (
-        <LockedFeatureCard 
-          title="JSON-LD Generator" 
-          description="Genereer automatisch het juiste JSON-LD schema voor je pagina, klaar om te implementeren."
-          onUpgrade={() => navigate('/#pricing')}
-        />
-      )}
 
       {/* Placeholder Cards for DR/UR and Keywords */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
