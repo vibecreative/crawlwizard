@@ -561,7 +561,7 @@ const Landing = () => {
               <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors">Privacybeleid</button>
               <button onClick={() => navigate('/auth')} className="hover:text-foreground transition-colors">Inloggen</button>
             </div>
-            <p className="text-xs text-muted-foreground">© 2025 CrawlWizard</p>
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} CrawlWizard</p>
           </div>
         </div>
       </footer>

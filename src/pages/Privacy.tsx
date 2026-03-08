@@ -257,7 +257,7 @@ const Privacy = () => {
       <footer className="py-8 px-4 border-t border-border">
         <div className="container mx-auto max-w-6xl text-center">
           <p className="text-sm text-muted-foreground">
-            © 2025 CrawlWizard. Alle rechten voorbehouden.
+            © {new Date().getFullYear()} CrawlWizard. Alle rechten voorbehouden.
           </p>
         </div>
       </footer>
