@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Zap } from "lucide-react";
@@ -22,6 +23,8 @@ const planLabels: Record<string, string> = {
 };
 
 export const AiCreditsDisplay = ({ credits, isLoading, compact = false }: AiCreditsDisplayProps) => {
+  const { t } = useTranslation();
+
   if (isLoading || !credits) return null;
 
   const percentage = Math.round((credits.used / credits.limit) * 100);
@@ -51,18 +54,18 @@ export const AiCreditsDisplay = ({ credits, isLoading, compact = false }: AiCred
           </Badge>
         </span>
         <span className={`text-xs ${isExhausted ? 'text-destructive font-semibold' : isLow ? 'text-orange-500' : 'text-muted-foreground'}`}>
-          {credits.remaining} van {credits.limit} over
+          {credits.remaining} {t('credits.of')} {credits.limit} {t('credits.over')}
         </span>
       </div>
       <Progress value={percentage} className="h-1.5" />
       {isExhausted && (
         <p className="text-xs text-destructive">
-          Je AI-credits zijn op. Upgrade je plan of wacht tot volgende maand.
+          {t('credits.exhausted')}
         </p>
       )}
       {isLow && !isExhausted && (
         <p className="text-xs text-orange-500">
-          Je credits raken op. Nog {credits.remaining} over deze maand.
+          {t('credits.low', { count: credits.remaining })}
         </p>
       )}
     </div>

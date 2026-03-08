@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ export interface PageAnalysisResult {
   hasMetaDescription: boolean;
   hasStructuredData: boolean;
   headingIssues: number;
-  analysisData?: any; // Full analysis data for detailed view
+  analysisData?: any;
 }
 
 interface WebsiteAnalysisResultsProps {
@@ -33,6 +34,7 @@ interface WebsiteAnalysisResultsProps {
 }
 
 export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalysisResultsProps) => {
+  const { t } = useTranslation();
   const successCount = results.filter(r => r.status === 'success').length;
   const errorCount = results.filter(r => r.status === 'error').length;
   const avgScore = results
@@ -62,7 +64,6 @@ export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalys
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
@@ -70,7 +71,7 @@ export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalys
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Pagina's geanalyseerd</p>
+              <p className="text-sm text-muted-foreground">{t('websiteResults.pagesAnalyzed')}</p>
               <p className="text-2xl font-bold">{successCount}</p>
             </div>
           </div>
@@ -82,7 +83,7 @@ export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalys
               <Search className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Gemiddelde SEO Score</p>
+              <p className="text-sm text-muted-foreground">{t('websiteResults.avgSeoScore')}</p>
               <p className={`text-2xl font-bold ${getScoreColor(avgScore)}`}>
                 {avgScore.toFixed(0)}%
               </p>
@@ -96,7 +97,7 @@ export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalys
               <CheckCircle2 className="h-5 w-5 text-green-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Succesvol</p>
+              <p className="text-sm text-muted-foreground">{t('websiteResults.successful')}</p>
               <p className="text-2xl font-bold text-green-500">{successCount}</p>
             </div>
           </div>
@@ -108,16 +109,15 @@ export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalys
               <XCircle className="h-5 w-5 text-red-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Fouten</p>
+              <p className="text-sm text-muted-foreground">{t('websiteResults.errors')}</p>
               <p className="text-2xl font-bold text-red-500">{errorCount}</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Results List */}
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Analyseresultaten per pagina</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('websiteResults.resultsPerPage')}</h2>
         
         <ScrollArea className="h-[500px] pr-4">
           <div className="space-y-3">
@@ -137,7 +137,7 @@ export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalys
                         {result.title || getRelativePath(result.url)}
                       </p>
                       {result.status === 'error' && (
-                        <Badge variant="destructive" className="text-xs">Fout</Badge>
+                        <Badge variant="destructive" className="text-xs">{t('websiteResults.error')}</Badge>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
@@ -200,7 +200,7 @@ export const WebsiteAnalysisResults = ({ results, onViewDetails }: WebsiteAnalys
                         onClick={() => onViewDetails(result.url)}
                         className="gap-1"
                       >
-                        Details
+                        {t('websiteResults.details')}
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     )}

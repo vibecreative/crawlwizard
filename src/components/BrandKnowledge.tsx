@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,74 +36,20 @@ const emptyBrand: BrandData = {
   example_texts: "",
 };
 
-const fields: { key: keyof BrandData; label: string; icon: React.ReactNode; placeholder: string; description: string; multiline: boolean }[] = [
-  {
-    key: "company_description",
-    label: "Bedrijfsomschrijving",
-    icon: <Building2 className="h-4 w-4" />,
-    placeholder: "Beschrijf kort wat je bedrijf doet, de kernactiviteiten en sector...",
-    description: "Wat doet je bedrijf? Welke producten/diensten bied je aan?",
-    multiline: true,
-  },
-  {
-    key: "tone_of_voice",
-    label: "Tone of Voice",
-    icon: <MessageSquare className="h-4 w-4" />,
-    placeholder: "Bijv. professioneel maar toegankelijk, technisch, informeel, humoristisch...",
-    description: "Hoe communiceert je merk? Formeel of informeel? Technisch of eenvoudig?",
-    multiline: false,
-  },
-  {
-    key: "target_audience",
-    label: "Doelgroep",
-    icon: <Users className="h-4 w-4" />,
-    placeholder: "Beschrijf je ideale klant: leeftijd, functie, sector, behoeften...",
-    description: "Wie zijn je ideale klanten? Wat zijn hun pijnpunten?",
-    multiline: true,
-  },
-  {
-    key: "usps",
-    label: "USP's & Onderscheidende Factoren",
-    icon: <Trophy className="h-4 w-4" />,
-    placeholder: "Wat maakt jullie uniek? Elk USP op een nieuwe regel...",
-    description: "Wat onderscheidt je van de concurrentie? Noem je sterkste punten.",
-    multiline: true,
-  },
-  {
-    key: "key_messages",
-    label: "Kernboodschappen",
-    icon: <Sparkles className="h-4 w-4" />,
-    placeholder: "De belangrijkste boodschappen die altijd terugkomen in communicatie...",
-    description: "Welke boodschappen moeten altijd doorklinken in je content?",
-    multiline: true,
-  },
-  {
-    key: "preferred_terms",
-    label: "Gewenste woorden & termen",
-    icon: <BookOpen className="h-4 w-4" />,
-    placeholder: "Woorden die je graag gebruikt, gescheiden door komma's of nieuwe regels...",
-    description: "Brand-specifiek vocabulaire dat je consistent wilt gebruiken.",
-    multiline: false,
-  },
-  {
-    key: "avoided_terms",
-    label: "Vermijd deze woorden",
-    icon: <Ban className="h-4 w-4" />,
-    placeholder: "Woorden of termen die je niet wilt gebruiken...",
-    description: "Termen die niet passen bij je merk of die je wilt vermijden.",
-    multiline: false,
-  },
-  {
-    key: "example_texts",
-    label: "Voorbeeldteksten",
-    icon: <FileText className="h-4 w-4" />,
-    placeholder: "Plak hier voorbeeldteksten die de ideale schrijfstijl weergeven...",
-    description: "Bestaande teksten die als referentie dienen voor toon en stijl.",
-    multiline: true,
-  },
-];
-
 export const BrandKnowledge = ({ projectId }: BrandKnowledgeProps) => {
+  const { t } = useTranslation();
+
+  const fields: { key: keyof BrandData; label: string; icon: React.ReactNode; placeholder: string; description: string; multiline: boolean }[] = [
+    { key: "company_description", label: t('brand.companyDescription'), icon: <Building2 className="h-4 w-4" />, placeholder: t('brand.companyDescPlaceholder'), description: t('brand.companyDescHelp'), multiline: true },
+    { key: "tone_of_voice", label: t('brand.toneOfVoice'), icon: <MessageSquare className="h-4 w-4" />, placeholder: t('brand.toneOfVoicePlaceholder'), description: t('brand.toneOfVoiceHelp'), multiline: false },
+    { key: "target_audience", label: t('brand.targetAudience'), icon: <Users className="h-4 w-4" />, placeholder: t('brand.targetAudiencePlaceholder'), description: t('brand.targetAudienceHelp'), multiline: true },
+    { key: "usps", label: t('brand.usps'), icon: <Trophy className="h-4 w-4" />, placeholder: t('brand.uspsPlaceholder'), description: t('brand.uspsHelp'), multiline: true },
+    { key: "key_messages", label: t('brand.keyMessages'), icon: <Sparkles className="h-4 w-4" />, placeholder: t('brand.keyMessagesPlaceholder'), description: t('brand.keyMessagesHelp'), multiline: true },
+    { key: "preferred_terms", label: t('brand.preferredTerms'), icon: <BookOpen className="h-4 w-4" />, placeholder: t('brand.preferredTermsPlaceholder'), description: t('brand.preferredTermsHelp'), multiline: false },
+    { key: "avoided_terms", label: t('brand.avoidedTerms'), icon: <Ban className="h-4 w-4" />, placeholder: t('brand.avoidedTermsPlaceholder'), description: t('brand.avoidedTermsHelp'), multiline: false },
+    { key: "example_texts", label: t('brand.exampleTexts'), icon: <FileText className="h-4 w-4" />, placeholder: t('brand.exampleTextsPlaceholder'), description: t('brand.exampleTextsHelp'), multiline: true },
+  ];
+
   const [data, setData] = useState<BrandData>(emptyBrand);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -158,10 +105,10 @@ export const BrandKnowledge = ({ projectId }: BrandKnowledgeProps) => {
         if (error) throw error;
         setHasExisting(true);
       }
-      toast.success("Brand knowledge opgeslagen!");
+      toast.success(t('brand.saved'));
     } catch (err: any) {
       console.error("Error saving brand knowledge:", err);
-      toast.error("Kon brand knowledge niet opslaan");
+      toast.error(t('brand.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -178,7 +125,7 @@ export const BrandKnowledge = ({ projectId }: BrandKnowledgeProps) => {
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
-          Laden...
+          {t('common.loading')}
         </CardContent>
       </Card>
     );
@@ -191,16 +138,16 @@ export const BrandKnowledge = ({ projectId }: BrandKnowledgeProps) => {
           <div>
             <CardTitle className="text-base flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              Brand Knowledge
+              {t('brand.title')}
             </CardTitle>
             <CardDescription>
-              Vul je merkinformatie in zodat gegenereerde teksten en aanbevelingen on-brand zijn.
-              <span className="ml-2 text-xs text-muted-foreground">({filledCount}/{fields.length} ingevuld)</span>
+              {t('brand.description')}
+              <span className="ml-2 text-xs text-muted-foreground">({filledCount}/{fields.length} {t('brand.filled')})</span>
             </CardDescription>
           </div>
           <Button onClick={handleSave} disabled={isSaving} size="sm">
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-            Opslaan
+            {t('brand.save')}
           </Button>
         </div>
       </CardHeader>
