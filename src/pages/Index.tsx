@@ -571,6 +571,11 @@ const Index = () => {
       setAnalysisData(data);
       toast.success("Analyse voltooid!");
       
+      // Scroll to analysis results section
+      setTimeout(() => {
+        document.getElementById('analysis-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      
       // FAQs are now generated on-demand via button in FaqSuggestions component
       
       setTimeout(() => {
