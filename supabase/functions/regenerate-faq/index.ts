@@ -112,6 +112,7 @@ KRITISCHE REGELS:
 - Vraag: Algemeen over het hoofdonderwerp/productcategorie (8-15 woorden)
 - Antwoord: Gebaseerd op concrete pagina-content (75-150 woorden)
 - Vermijd vragen over details die NIET op de pagina staan
+${brandContext ? `\nBRAND CONTEXT - Pas het antwoord aan op deze merkidentiteit:\n${brandContext}\n\nGebruik de tone of voice en terminologie van dit merk.` : ''}
 
 Genereer 1 FAQ item. Schrijf in het Nederlands.`
           },

@@ -115,6 +115,7 @@ EISEN:
 - Diversiteit: 3x basisinformatie, 2x vergelijkingen, 2x praktische toepassing, 2x problemen/zorgen, 1x kosten/waarde
 - Taal: B1-niveau, conversational, natuurlijk
 - CRITICAL: Antwoorden MOETEN beginnen met de eerste woorden van het eigenlijke antwoord. GEEN labels.
+${brandContext ? `\nBRAND CONTEXT - Pas de antwoorden aan op deze merkidentiteit:\n${brandContext}\n\nGebruik de tone of voice en terminologie van dit merk. Vermijd termen die het merk niet gebruikt.` : ''}
 
 Genereer 10 FAQ items. Schrijf in het Nederlands.`
           },
