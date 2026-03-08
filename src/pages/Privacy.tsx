@@ -258,12 +258,10 @@ const Privacy = () => {
 
             <section>
               <h2 className="text-2xl font-semibold mb-3">10. Contact</h2>
-              <p className="text-muted-foreground">
-                Heb je vragen over dit privacybeleid of wil je een van je rechten uitoefenen? Neem dan contact met ons op via:
+              <p className="text-muted-foreground mb-4">
+                Heb je vragen over dit privacybeleid of wil je een van je rechten uitoefenen? Neem dan contact met ons op via onderstaand formulier:
               </p>
-              <p className="text-muted-foreground font-medium mt-2">
-                E-mail: privacy@seoanalyzer.nl
-              </p>
+              <ContactForm />
             </section>
           </div>
         </div>
