@@ -45,6 +45,9 @@ import {
   Crown,
   Trash2,
   RotateCcw,
+  Mail,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 interface AdminUser {
