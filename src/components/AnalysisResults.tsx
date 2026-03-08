@@ -517,6 +517,7 @@ export const AnalysisResults = ({
           onGenerateFaqs={onGenerateFaqs}
           isGeneratingFaqs={isGeneratingFaqs}
           userPlan={userPlan}
+          brandContext={brandContext}
         />
       ) : (
         <LockedFeatureCard 

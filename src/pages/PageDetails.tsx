@@ -668,6 +668,7 @@ const PageDetails = () => {
           userPlan={userPlan}
           pageId={pageData.id}
           userId={user?.id}
+          brandContext={brandContext}
         />
       </main>
     </div>
