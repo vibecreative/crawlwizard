@@ -113,11 +113,12 @@ export const AnalysisResults = ({
   onGenerateFaqs,
   isGeneratingFaqs,
   userPlan,
-  pageId
+  pageId,
+  userId
 }: AnalysisResultsProps) => {
   const navigate = useNavigate();
   const isFree = userPlan === 'free';
-  
+  const { credits, isLoading: creditsLoading, refetchCredits } = useAiCredits(userId);
   const getHeadingColor = (level: number) => {
     const colors = {
       1: "bg-heading-h1",
