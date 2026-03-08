@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { BrandKnowledge } from "@/components/BrandKnowledge";
 import { 
   Plus, 
   Globe, 
@@ -21,7 +22,8 @@ import {
   ExternalLink,
   Trash2,
   Eye,
-  Shield
+  Shield,
+  Sparkles
 } from "lucide-react";
 
 interface ProjectPage {
