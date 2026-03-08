@@ -257,7 +257,7 @@ const Privacy = () => {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3">9. Contact</h2>
+              <h2 className="text-2xl font-semibold mb-3">10. Contact</h2>
               <p className="text-muted-foreground">
                 Heb je vragen over dit privacybeleid of wil je een van je rechten uitoefenen? Neem dan contact met ons op via:
               </p>
