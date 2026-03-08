@@ -31,21 +31,21 @@ interface AnalysisResultsProps {
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
-  <Card className="p-6 shadow-soft border-dashed border-2 border-muted-foreground/20 bg-muted/30 relative overflow-hidden">
-    <div className="flex items-start justify-between">
+  <Card className="p-4 sm:p-6 shadow-soft border-dashed border-2 border-muted-foreground/20 bg-muted/30 relative overflow-hidden">
+    <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-muted">
+        <div className="p-2 rounded-lg bg-muted shrink-0">
           <Lock className="h-5 w-5 text-muted-foreground" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-muted-foreground">{title}</h3>
-          <p className="text-sm text-muted-foreground/70 mt-1 max-w-lg">{description}</p>
+          <h3 className="text-base sm:text-lg font-semibold text-muted-foreground">{title}</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground/70 mt-1 max-w-lg">{description}</p>
         </div>
       </div>
       <Button
         variant="outline"
         size="sm"
-        className="shrink-0 gap-1.5 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground"
+        className="shrink-0 gap-1.5 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground self-start sm:self-auto"
         onClick={onUpgrade}
       >
         Upgraden
