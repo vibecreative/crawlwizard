@@ -20,7 +20,9 @@ import {
   Bot,
   Gauge,
   Menu,
-  X
+  X,
+  Shield,
+  Lock
 } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -521,6 +523,32 @@ const Landing = () => {
             <motion.blockquote variants={fadeUp} transition={{ duration: 0.5 }} className="font-semibold text-foreground italic border-l-4 border-primary pl-6 py-2 font-display text-lg">
               Goede structuur is de taal die zoekmachines én AI spreken. CrawlWizard helpt jou dit inzichtelijker te maken.
             </motion.blockquote>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Trust Bar */}
+      <section className="py-12 px-4 border-t border-border">
+        <div className="container mx-auto max-w-5xl">
+          <motion.div
+            className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={stagger}
+          >
+            <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              <span className="text-lg">🇪🇺</span>
+              <span>Data opgeslagen in de <strong className="text-foreground">EU (Frankfurt, Duitsland)</strong></span>
+            </motion.div>
+            <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              <Shield className="w-4 h-4 text-primary" />
+              <span><strong className="text-foreground">AVG/GDPR</strong> compliant</span>
+            </motion.div>
+            <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              <Lock className="w-4 h-4 text-primary" />
+              <span>Versleutelde verbinding <strong className="text-foreground">(SSL/TLS)</strong></span>
+            </motion.div>
           </motion.div>
         </div>
       </section>

@@ -240,14 +240,24 @@ const Privacy = () => {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3">8. Gegevens delen met derden</h2>
+              <h2 className="text-2xl font-semibold mb-3">8. Locatie van gegevensopslag</h2>
+              <p className="text-muted-foreground">
+                Alle gegevens die via CrawlWizard worden verzameld en opgeslagen, worden bewaard op servers binnen de <strong>Europese Unie</strong>. Onze infrastructuur draait op <strong>AWS-servers in Frankfurt, Duitsland (EU-West)</strong>, wat volledig voldoet aan de vereisten van de AVG/GDPR voor gegevensopslag binnen de EER (Europese Economische Ruimte).
+              </p>
+              <p className="text-muted-foreground mt-2">
+                Er vindt geen doorgifte van persoonsgegevens naar landen buiten de EU/EER plaats, tenzij dit uitdrukkelijk vermeld wordt en er passende waarborgen zijn getroffen conform artikel 46 van de AVG.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-semibold mb-3">9. Gegevens delen met derden</h2>
               <p className="text-muted-foreground">
                 Wij delen je gegevens niet met derden, tenzij dit noodzakelijk is voor het verlenen van onze diensten (zoals hostingproviders) of wanneer we hiertoe wettelijk verplicht zijn. Alle verwerkers waarmee wij samenwerken hebben een verwerkersovereenkomst getekend.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3">9. Contact</h2>
+              <h2 className="text-2xl font-semibold mb-3">10. Contact</h2>
               <p className="text-muted-foreground">
                 Heb je vragen over dit privacybeleid of wil je een van je rechten uitoefenen? Neem dan contact met ons op via:
               </p>
