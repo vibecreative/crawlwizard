@@ -11,7 +11,7 @@ const CREDITS_REQUIRED = 1;
 
 async function checkCredits(supabase: any, userId: string, creditsNeeded: number) {
   const { data, error } = await supabase.rpc('get_remaining_credits', { _user_id: userId });
-  if (error) throw new Error('Kon credits niet controleren');
+  if (error) throw new Error('Could not check credits');
   const credits = typeof data === 'string' ? JSON.parse(data) : data;
   if (credits.remaining < creditsNeeded) return { allowed: false, ...credits };
   return { allowed: true, ...credits };
@@ -21,73 +21,42 @@ async function logCreditUsage(supabase: any, userId: string, actionType: string,
   await supabase.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
 }
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+function getSystemPrompt(language: string, brandContext?: string) {
+  if (language === 'en') {
+    return `You are an SEO and AI search behavior expert creating FAQ schemas optimized for LLMs and featured snippets.
+
+CRITICALLY IMPORTANT - THE SEARCH PROCESS:
+You generate FAQs that people ask AI assistants (ChatGPT, Gemini, Perplexity) DURING their research phase, BEFORE visiting a specific provider or page. These are questions from someone who:
+- Has not yet chosen a specific solution or product
+- Is researching what the best option is
+- Is considering different alternatives
+- Is hesitating between different solutions
+- Is wondering if this is even the right solution
+
+FORBIDDEN: Questions about specific products, brands, models or features that only exist on this page. Questions must be GENERAL about the main topic/product category.
+
+PERSPECTIVE - WHAT THE SEARCHER ASKS:
+- "Is this the right solution for my problem?"
+- "What are the alternatives and when do I choose which?"
+- "What common mistakes should I avoid?"
+- "What should I look for when choosing?"
+- "What are the pros and cons of different options?"
+
+ANSWERS - USE PAGE CONTENT:
+Answer the general questions with concrete information from the analyzed page where possible.
+
+REQUIREMENTS:
+- Questions: Natural conversational language, 8-15 words, mix of what/how/why/which/when
+- Answers: 75-150 words with concrete, practical information
+- Diversity: 3x basic information, 2x comparisons, 2x practical application, 2x problems/concerns, 1x cost/value
+- Language: B1 level, conversational, natural
+- CRITICAL: Answers MUST start with the first words of the actual answer. NO labels.
+${brandContext ? `\nBRAND CONTEXT - Adapt the answers to this brand identity:\n${brandContext}\n\nUse the tone of voice and terminology of this brand. Avoid terms the brand does not use.` : ''}
+
+Generate 10 FAQ items. Write in English.`;
   }
 
-  try {
-    const authHeader = req.headers.get('Authorization') ?? '';
-    const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
-    if (!jwt) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    // Credit check
-    const creditCheck = await checkCredits(supabaseClient, user.id, CREDITS_REQUIRED);
-    if (!creditCheck.allowed) {
-      return new Response(JSON.stringify({ 
-        error: 'credits_exhausted',
-        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used}/${creditCheck.limit} gebruikt.`,
-        credits: creditCheck
-      }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    const body = await req.json();
-    const { html, brandContext } = body;
-    if (!html || typeof html !== 'string') {
-      return new Response(JSON.stringify({ error: 'HTML content is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    let htmlToProcess = html.length > MAX_CONTENT_SIZE ? html.slice(0, MAX_CONTENT_SIZE) : html;
-
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured');
-
-    const textContent = htmlToProcess
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    const limitedContent = textContent.substring(0, 10000);
-
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'openai/gpt-5-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Je bent een SEO en AI-zoekgedrag expert die FAQ-schema's maakt geoptimaliseerd voor LLM's en featured snippets.
+  return `Je bent een SEO en AI-zoekgedrag expert die FAQ-schema's maakt geoptimaliseerd voor LLM's en featured snippets.
 
 KRITISCH BELANGRIJK - HET ZOEKPROCES:
 Je genereert FAQ's die mensen aan AI-assistenten (ChatGPT, Gemini, Perplexity) stellen TIJDENS hun oriëntatiefase, VOORDAT ze een specifieke leverancier of pagina bezoeken. Het zijn vragen van iemand die:
@@ -117,11 +86,78 @@ EISEN:
 - CRITICAL: Antwoorden MOETEN beginnen met de eerste woorden van het eigenlijke antwoord. GEEN labels.
 ${brandContext ? `\nBRAND CONTEXT - Pas de antwoorden aan op deze merkidentiteit:\n${brandContext}\n\nGebruik de tone of voice en terminologie van dit merk. Vermijd termen die het merk niet gebruikt.` : ''}
 
-Genereer 10 FAQ items. Schrijf in het Nederlands.`
-          },
-          {
-            role: 'user',
-            content: `Analyseer deze pagina en genereer 10 FAQ items:\n\n${limitedContent}`
+Genereer 10 FAQ items. Schrijf in het Nederlands.`;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!jwt) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const creditCheck = await checkCredits(supabaseClient, user.id, CREDITS_REQUIRED);
+    if (!creditCheck.allowed) {
+      return new Response(JSON.stringify({ 
+        error: 'credits_exhausted',
+        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used}/${creditCheck.limit} gebruikt.`,
+        credits: creditCheck
+      }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const body = await req.json();
+    const { html, brandContext, language } = body;
+    const lang = language === 'en' ? 'en' : 'nl';
+
+    if (!html || typeof html !== 'string') {
+      return new Response(JSON.stringify({ error: 'HTML content is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    let htmlToProcess = html.length > MAX_CONTENT_SIZE ? html.slice(0, MAX_CONTENT_SIZE) : html;
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured');
+
+    const textContent = htmlToProcess
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const limitedContent = textContent.substring(0, 10000);
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-5-mini',
+        messages: [
+          { role: 'system', content: getSystemPrompt(lang, brandContext) },
+          { role: 'user', content: lang === 'en'
+            ? `Analyze this page and generate 10 FAQ items:\n\n${limitedContent}`
+            : `Analyseer deze pagina en genereer 10 FAQ items:\n\n${limitedContent}`
           }
         ],
         tools: [
@@ -129,7 +165,7 @@ Genereer 10 FAQ items. Schrijf in het Nederlands.`
             type: "function",
             function: {
               name: "generate_faqs",
-              description: "Genereer 10 FAQ items",
+              description: "Generate 10 FAQ items",
               parameters: {
                 type: "object",
                 properties: {
@@ -159,8 +195,8 @@ Genereer 10 FAQ items. Schrijf in het Nederlands.`
     });
 
     if (!response.ok) {
-      if (response.status === 429) return new Response(JSON.stringify({ error: 'Rate limit bereikt, probeer het later opnieuw.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      if (response.status === 402) return new Response(JSON.stringify({ error: 'Credits opgebruikt.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (response.status === 429) return new Response(JSON.stringify({ error: 'Rate limit reached, try again later.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (response.status === 402) return new Response(JSON.stringify({ error: 'Credits exhausted.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       const errorText = await response.text();
       console.error('AI gateway error:', response.status, errorText);
       throw new Error('AI gateway error');
@@ -170,7 +206,7 @@ Genereer 10 FAQ items. Schrijf in het Nederlands.`
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) throw new Error('Geen tool call ontvangen van AI');
+    if (!toolCall) throw new Error('No tool call received from AI');
     const faqs = JSON.parse(toolCall.function.arguments).faqs;
 
     return new Response(JSON.stringify({ faqs }), {
