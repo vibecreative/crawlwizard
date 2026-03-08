@@ -443,7 +443,7 @@ const Landing = () => {
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button type="button" className="inline-flex cursor-help mt-3">
+                          <button type="button" className="inline-flex justify-center cursor-help mt-3 w-full">
                             <span className="text-xs bg-muted px-2.5 py-1 rounded-full inline-flex items-center gap-1">
                               ⚡ {plan.credits}
                               <Info className="w-3 h-3 text-muted-foreground" />
@@ -524,6 +524,51 @@ const Landing = () => {
             <motion.blockquote variants={fadeUp} transition={{ duration: 0.5 }} className="font-semibold text-foreground italic border-l-4 border-primary pl-6 py-2 font-display text-lg">
               Goede structuur is de taal die zoekmachines én AI spreken. CrawlWizard helpt jou dit inzichtelijker te maken.
             </motion.blockquote>
+          </motion.div>
+
+          {/* How CrawlWizard uses AI */}
+          <motion.div 
+            className="mt-16 pt-16 border-t border-border"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={stagger}
+          >
+            <motion.h3 variants={fadeUp} transition={{ duration: 0.5 }} className="text-2xl md:text-3xl font-bold font-display mb-6 text-center">
+              Hoe CrawlWizard AI inzet
+            </motion.h3>
+            <div className="grid md:grid-cols-2 gap-8">
+              <motion.div variants={fadeUp} transition={{ duration: 0.5 }}>
+                <Card className="h-full border-border/50">
+                  <CardHeader>
+                    <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                      <Zap className="w-5 h-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-base font-display">Server AI</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Voor zware taken zoals FAQ-generatie, artikelen schrijven en AI Ranking Checks schakelt CrawlWizard krachtige AI-modellen in op onze servers. Hiervoor gebruik je AI-credits – het aantal hangt af van je plan.
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+              <motion.div variants={fadeUp} transition={{ duration: 0.5 }}>
+                <Card className="h-full border-border/50">
+                  <CardHeader>
+                    <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                      <Globe className="w-5 h-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-base font-display">Browser AI</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Voor snelle relevantie-analyses draait CrawlWizard een compact AI-model direct in jouw browser via WebGPU. Geen data verlaat je apparaat, er zijn geen credits nodig en het werkt onbeperkt – helemaal gratis.
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
