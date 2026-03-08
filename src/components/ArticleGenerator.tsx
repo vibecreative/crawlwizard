@@ -23,6 +23,7 @@ interface ArticleGeneratorProps {
 }
 
 export const ArticleGenerator = ({ question, answer, pageContent, brandContext, onClose }: ArticleGeneratorProps) => {
+  const { i18n } = useTranslation();
   const [article, setArticle] = useState<string | null>(null);
   const [detection, setDetection] = useState<AiDetection | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);

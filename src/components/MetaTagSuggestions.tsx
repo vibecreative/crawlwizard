@@ -39,6 +39,7 @@ const charLimits: Record<string, { max: number; label: string }> = {
 };
 
 export const MetaTagSuggestions = ({ url, pageContent, currentMeta, onCreditsUsed }: MetaTagSuggestionsProps) => {
+  const { i18n } = useTranslation();
   const [suggestions, setSuggestions] = useState<MetaSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
