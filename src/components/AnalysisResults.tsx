@@ -115,7 +115,8 @@ export const AnalysisResults = ({
   isGeneratingFaqs,
   userPlan,
   pageId,
-  userId
+  userId,
+  brandContext
 }: AnalysisResultsProps) => {
   const navigate = useNavigate();
   const isFree = userPlan === 'free';
