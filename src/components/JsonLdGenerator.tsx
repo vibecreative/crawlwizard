@@ -253,83 +253,52 @@ ${JSON.stringify(jsonLdContent, null, 2)}
       </div>
 
       <div className="space-y-4 mb-6">
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors cursor-pointer">
-          <Checkbox
-            checked={selectedSchemas.website}
-            onCheckedChange={(checked) =>
-              setSelectedSchemas(prev => ({ ...prev, website: checked as boolean }))
-            }
-          />
-          <div className="flex-1">
-            <div className="font-medium">WebSite Schema</div>
-            <div className="text-xs text-muted-foreground">
-              Basisinformatie over uw website (aanbevolen)
-            </div>
-          </div>
-        </label>
-
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors cursor-pointer">
-          <Checkbox
-            checked={selectedSchemas.organization}
-            onCheckedChange={(checked) =>
-              setSelectedSchemas(prev => ({ ...prev, organization: checked as boolean }))
-            }
-          />
-          <div className="flex-1">
-            <div className="font-medium">Organization Schema</div>
-            <div className="text-xs text-muted-foreground">
-              Bedrijfsinformatie en contactgegevens
-            </div>
-          </div>
-        </label>
-
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors cursor-pointer">
-          <Checkbox
-            checked={selectedSchemas.breadcrumb}
-            onCheckedChange={(checked) =>
-              setSelectedSchemas(prev => ({ ...prev, breadcrumb: checked as boolean }))
-            }
-          />
-          <div className="flex-1">
-            <div className="font-medium">BreadcrumbList Schema</div>
-            <div className="text-xs text-muted-foreground">
-              Navigatiestructuur voor deze pagina
-            </div>
-          </div>
-        </label>
-
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors cursor-pointer">
-          <Checkbox
-            checked={selectedSchemas.article}
-            onCheckedChange={(checked) =>
-              setSelectedSchemas(prev => ({ ...prev, article: checked as boolean }))
-            }
-          />
-          <div className="flex-1">
-            <div className="font-medium">Article Schema</div>
-            <div className="text-xs text-muted-foreground">
-              Voor artikelen, blog posts en nieuwsberichten
-            </div>
-          </div>
-        </label>
-
-        <label className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors cursor-pointer">
-          <Checkbox
-            checked={selectedSchemas.faqPage}
-            onCheckedChange={(checked) =>
-              setSelectedSchemas(prev => ({ ...prev, faqPage: checked as boolean }))
-            }
-            disabled={!faqs || faqs.length === 0}
-          />
-          <div className="flex-1">
-            <div className="font-medium">FAQPage Schema</div>
-            <div className="text-xs text-muted-foreground">
-              {faqs && faqs.length > 0 
-                ? `Voor veelgestelde vragen (${faqs.length} FAQ's beschikbaar)` 
-                : "Geen FAQ's beschikbaar"}
-            </div>
-          </div>
-        </label>
+        {[
+          { key: 'website', label: 'WebSite Schema', desc: 'Basisinformatie over uw website met sitelinks searchbox' },
+          { key: 'organization', label: 'Organization Schema', desc: 'Bedrijfsinformatie en contactgegevens' },
+          { key: 'breadcrumb', label: 'BreadcrumbList Schema', desc: 'Navigatiestructuur voor deze pagina' },
+          { key: 'article', label: 'Article Schema', desc: 'Voor artikelen, blog posts en nieuwsberichten' },
+          { key: 'faqPage', label: 'FAQPage Schema', desc: hasFaqs ? `Voor veelgestelde vragen (${faqs!.length} FAQ's beschikbaar)` : "Geen FAQ's beschikbaar", disabled: !hasFaqs },
+        ].map(({ key, label, desc, disabled }) => {
+          const isRecommended = recommended[key];
+          return (
+            <label
+              key={key}
+              className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
+                isRecommended
+                  ? 'border-primary/40 bg-primary/5 hover:bg-primary/10'
+                  : 'border-border hover:bg-secondary/30'
+              }`}
+            >
+              <Checkbox
+                checked={selectedSchemas[key as keyof typeof selectedSchemas]}
+                onCheckedChange={(checked) =>
+                  setSelectedSchemas(prev => ({ ...prev, [key]: checked as boolean }))
+                }
+                disabled={disabled}
+              />
+              <div className="flex-1">
+                <div className="font-medium flex items-center gap-2">
+                  {label}
+                  {isRecommended && (
+                    <Badge variant="default" className="text-[10px] px-1.5 py-0 h-5 gap-1">
+                      <Star className="h-3 w-3" />
+                      Aanbevolen
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {desc}
+                  {isRecommended && (
+                    <span className="ml-1 text-primary font-medium">
+                      — relevant voor dit paginatype
+                    </span>
+                  )}
+                </div>
+              </div>
+            </label>
+          );
+        })}
 
         <div className="h-px bg-border my-4" />
 
