@@ -149,6 +149,33 @@ const Admin = () => {
     }
   };
 
+  const resetCredits = async (userId: string) => {
+    setUpdatingUser(userId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=reset-credits`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Reset failed");
+
+      toast.success("AI-credits gereset voor deze maand");
+    } catch (error) {
+      console.error("Error resetting credits:", error);
+      toast.error("Kon credits niet resetten");
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
   const deleteUser = async (userId: string) => {
     setUpdatingUser(userId);
     try {
