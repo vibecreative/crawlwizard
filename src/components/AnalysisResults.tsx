@@ -520,7 +520,7 @@ export const AnalysisResults = ({
       {/* AI Ranking Check - Enterprise */}
       {userPlan === 'enterprise' ? (
         <AiRankingCheck
-          pageId=""
+          pageId={pageId || ""}
           domain={(() => { try { return new URL(data.url).hostname; } catch { return data.url; } })()}
           faqs={data.faqs}
           userPlan={userPlan}

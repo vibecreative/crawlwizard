@@ -644,6 +644,7 @@ const PageDetails = () => {
           onGenerateFaqs={handleGenerateFaqs}
           isGeneratingFaqs={isGeneratingFaqs}
           userPlan={userPlan}
+          pageId={pageData.id}
         />
       </main>
     </div>
