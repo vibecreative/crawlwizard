@@ -541,9 +541,8 @@ const Landing = () => {
             </Button>
             <Button 
               size="lg" 
-              variant="outline"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-base px-8 py-6 text-white border-white/30 hover:bg-white/10 hover:border-white/60 hover:text-white dark:text-white dark:border-white/20 dark:hover:bg-white/10 dark:hover:border-white/50"
+              className="text-base px-8 py-6 bg-transparent text-white border border-white/30 hover:bg-white/10 hover:border-white/60 rounded-md font-medium"
             >
               Bekijk de prijzen
             </Button>
