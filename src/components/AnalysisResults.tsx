@@ -109,7 +109,8 @@ export const AnalysisResults = ({
   isReanalyzing,
   onGenerateFaqs,
   isGeneratingFaqs,
-  userPlan
+  userPlan,
+  pageId
 }: AnalysisResultsProps) => {
   const navigate = useNavigate();
   const isFree = userPlan === 'free';
