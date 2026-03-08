@@ -190,6 +190,9 @@ export const AnalysisResults = ({
         </div>
       </div>
 
+      {/* AI Credits Display */}
+      <AiCreditsDisplay credits={credits} isLoading={creditsLoading} />
+
       {/* SEO Score - Prominent at top */}
       <HeadingStructureScore headings={data.headings} meta={data.meta} structuredData={data.structuredData} />
 
