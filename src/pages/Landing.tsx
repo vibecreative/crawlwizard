@@ -563,7 +563,7 @@ const Landing = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Voor snelle relevantie-analyses draait CrawlWizard een compact AI-model direct in jouw browser via WebGPU. Geen data verlaat je apparaat, er zijn geen credits nodig en het werkt onbeperkt – helemaal gratis.
+                      Voor snelle relevantie-analyses draait CrawlWizard een compact embedding-model (<span className="text-foreground font-medium">MiniLM</span>) rechtstreeks in jouw browser via WebGPU. Het model berekent de semantische overeenkomst tussen een FAQ-vraag en je pagina-inhoud met cosine similarity. Geen data verlaat je apparaat, er zijn geen credits nodig en het werkt onbeperkt.
                     </p>
                   </CardContent>
                 </Card>
