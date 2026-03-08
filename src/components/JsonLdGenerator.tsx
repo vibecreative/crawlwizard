@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Code2, Copy, CheckCircle2 } from "lucide-react";
+import { Code2, Copy, CheckCircle2, Star } from "lucide-react";
 import { toast } from "sonner";
 
 interface FaqItem {
