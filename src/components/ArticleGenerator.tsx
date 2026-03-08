@@ -17,10 +17,11 @@ interface ArticleGeneratorProps {
   question: string;
   answer: string;
   pageContent?: string;
+  brandContext?: string;
   onClose: () => void;
 }
 
-export const ArticleGenerator = ({ question, answer, pageContent, onClose }: ArticleGeneratorProps) => {
+export const ArticleGenerator = ({ question, answer, pageContent, brandContext, onClose }: ArticleGeneratorProps) => {
   const [article, setArticle] = useState<string | null>(null);
   const [detection, setDetection] = useState<AiDetection | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -36,6 +37,7 @@ export const ArticleGenerator = ({ question, answer, pageContent, onClose }: Art
           question,
           answer,
           pageContent,
+          brandContext,
           mode,
           ...(mode === "rewrite" && { articleText: article }),
         }

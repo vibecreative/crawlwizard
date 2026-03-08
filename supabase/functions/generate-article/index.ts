@@ -62,7 +62,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { question, answer, pageContent, mode } = body;
+    const { question, answer, pageContent, mode, brandContext } = body;
 
     if (!question || !answer) {
       return new Response(JSON.stringify({ error: 'Vraag en antwoord zijn vereist' }), {
@@ -85,6 +85,8 @@ serve(async (req) => {
 
     const isRewrite = mode === 'rewrite';
 
+    const brandInstruction = brandContext ? `\n\nBRAND CONTEXT - Schrijf in lijn met deze merkidentiteit:\n${brandContext}\n\nGebruik de tone of voice, terminologie en stijl van dit merk consequent.` : '';
+
     const systemPrompt = isRewrite
       ? `Je bent een ervaren Nederlandse contentschrijver en SEO-expert. Je herschrijft teksten zodat ze NIET herkend worden als AI-gegenereerd.
 
@@ -95,6 +97,7 @@ HERSCHRIJF-REGELS:
 - Gebruik onregelmatige alinealengtes
 - Schrijf alsof je een expert bent die informeel met een collega praat
 - Behoud ALLE inhoudelijke informatie en de heading-structuur
+${brandInstruction}
 
 Output: De volledige herschreven tekst in Markdown-formaat.`
       : `Je bent een ervaren Nederlandse contentschrijver en SEO-expert.
@@ -106,6 +109,7 @@ STRUCTUUR: H1 + 4-6 H2's + waar nodig H3's. Elke sectie 150-300 woorden.
 SCHRIJFSTIJL: Menselijk, gevarieerd, concreet. Geen AI-markers. B1-B2 niveau.
 
 SEO: Hoofdonderwerp in H1/eerste alinea/H2's. LSI-keywords. Featured snippet optimalisatie.
+${brandInstruction}
 
 OUTPUT: Markdown-formaat.`;
 

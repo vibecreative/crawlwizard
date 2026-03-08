@@ -22,6 +22,7 @@ interface FaqSuggestionsProps {
   onGenerateFaqs?: () => Promise<void>;
   isGeneratingFaqs?: boolean;
   userPlan?: string;
+  brandContext?: string;
 }
 
 interface AnalysisResult {
@@ -38,7 +39,8 @@ export const FaqSuggestions = ({
   onFaqsUpdate,
   onGenerateFaqs,
   isGeneratingFaqs = false,
-  userPlan = "free"
+  userPlan = "free",
+  brandContext = ""
 }: FaqSuggestionsProps) => {
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -271,7 +273,8 @@ export const FaqSuggestions = ({
         body: {
           html: pageContent,
           previousQuestion: faqs[index].question,
-          analysisExplanation: analysis.explanation
+          analysisExplanation: analysis.explanation,
+          brandContext
         }
       });
 
@@ -579,6 +582,7 @@ export const FaqSuggestions = ({
                     question={faq.question}
                     answer={faq.answer}
                     pageContent={pageContent}
+                    brandContext={brandContext}
                     onClose={() => setArticleOpenIndex(null)}
                   />
                 )}

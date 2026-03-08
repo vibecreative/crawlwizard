@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { BrandKnowledge } from "@/components/BrandKnowledge";
 import { 
   Plus, 
   Globe, 
@@ -21,7 +22,8 @@ import {
   ExternalLink,
   Trash2,
   Eye,
-  Shield
+  Shield,
+  Sparkles
 } from "lucide-react";
 
 interface ProjectPage {
@@ -484,10 +486,15 @@ const Dashboard = () => {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-sm text-muted-foreground text-center py-4">
+                        <p className="text-sm text-muted-foreground text-center py-4">
                             Geen pagina's geanalyseerd
                           </p>
                         )}
+
+                        {/* Brand Knowledge Section */}
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <BrandKnowledge projectId={project.id} />
+                        </div>
                       </div>
                     )}
                   </CardContent>

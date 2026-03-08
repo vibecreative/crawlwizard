@@ -77,6 +77,7 @@ interface AnalysisResultsProps {
   userPlan?: string;
   pageId?: string;
   userId?: string;
+  brandContext?: string;
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
@@ -114,7 +115,8 @@ export const AnalysisResults = ({
   isGeneratingFaqs,
   userPlan,
   pageId,
-  userId
+  userId,
+  brandContext
 }: AnalysisResultsProps) => {
   const navigate = useNavigate();
   const isFree = userPlan === 'free';
@@ -515,6 +517,7 @@ export const AnalysisResults = ({
           onGenerateFaqs={onGenerateFaqs}
           isGeneratingFaqs={isGeneratingFaqs}
           userPlan={userPlan}
+          brandContext={brandContext}
         />
       ) : (
         <LockedFeatureCard 

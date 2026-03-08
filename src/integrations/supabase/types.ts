@@ -154,6 +154,59 @@ export type Database = {
         }
         Relationships: []
       }
+      project_brand_knowledge: {
+        Row: {
+          avoided_terms: string | null
+          company_description: string | null
+          created_at: string
+          example_texts: string | null
+          id: string
+          key_messages: string | null
+          preferred_terms: string | null
+          project_id: string
+          target_audience: string | null
+          tone_of_voice: string | null
+          updated_at: string
+          usps: string | null
+        }
+        Insert: {
+          avoided_terms?: string | null
+          company_description?: string | null
+          created_at?: string
+          example_texts?: string | null
+          id?: string
+          key_messages?: string | null
+          preferred_terms?: string | null
+          project_id: string
+          target_audience?: string | null
+          tone_of_voice?: string | null
+          updated_at?: string
+          usps?: string | null
+        }
+        Update: {
+          avoided_terms?: string | null
+          company_description?: string | null
+          created_at?: string
+          example_texts?: string | null
+          id?: string
+          key_messages?: string | null
+          preferred_terms?: string | null
+          project_id?: string
+          target_audience?: string | null
+          tone_of_voice?: string | null
+          updated_at?: string
+          usps?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_brand_knowledge_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_pages: {
         Row: {
           analysis_data: Json | null

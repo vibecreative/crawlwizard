@@ -56,6 +56,7 @@ const PageDetails = () => {
   const { user } = useAuth();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
+  const [brandContext, setBrandContext] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isReanalyzing, setIsReanalyzing] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
@@ -94,6 +95,27 @@ const PageDetails = () => {
 
       if (!projectError && project) {
         setProjectData(project);
+      }
+
+      // Fetch brand knowledge for this project
+      const { data: brand } = await supabase
+        .from("project_brand_knowledge" as any)
+        .select("*")
+        .eq("project_id", page.project_id)
+        .maybeSingle();
+
+      if (brand) {
+        const b = brand as any;
+        const parts: string[] = [];
+        if (b.company_description) parts.push(`Bedrijf: ${b.company_description}`);
+        if (b.tone_of_voice) parts.push(`Tone of voice: ${b.tone_of_voice}`);
+        if (b.target_audience) parts.push(`Doelgroep: ${b.target_audience}`);
+        if (b.usps) parts.push(`USPs: ${b.usps}`);
+        if (b.key_messages) parts.push(`Kernboodschappen: ${b.key_messages}`);
+        if (b.preferred_terms) parts.push(`Gebruik deze termen: ${b.preferred_terms}`);
+        if (b.avoided_terms) parts.push(`Vermijd deze termen: ${b.avoided_terms}`);
+        if (b.example_texts) parts.push(`Voorbeeldtekst (qua stijl): ${b.example_texts.substring(0, 2000)}`);
+        setBrandContext(parts.join("\n\n"));
       }
     } catch (err: any) {
       console.error("Error fetching page data:", err);
@@ -464,7 +486,7 @@ const PageDetails = () => {
       toast.info("FAQs worden gegenereerd...");
 
       const { data, error } = await supabase.functions.invoke('generate-faqs', {
-        body: { html: htmlContent }
+        body: { html: htmlContent, brandContext }
       });
 
       if (error) throw error;
@@ -646,6 +668,7 @@ const PageDetails = () => {
           userPlan={userPlan}
           pageId={pageData.id}
           userId={user?.id}
+          brandContext={brandContext}
         />
       </main>
     </div>

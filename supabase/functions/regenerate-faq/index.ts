@@ -58,7 +58,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { html, previousQuestion, analysisExplanation } = body;
+    const { html, previousQuestion, analysisExplanation, brandContext } = body;
     
     if (!html || typeof html !== 'string') {
       return new Response(JSON.stringify({ error: 'HTML content is required' }),
@@ -112,6 +112,7 @@ KRITISCHE REGELS:
 - Vraag: Algemeen over het hoofdonderwerp/productcategorie (8-15 woorden)
 - Antwoord: Gebaseerd op concrete pagina-content (75-150 woorden)
 - Vermijd vragen over details die NIET op de pagina staan
+${brandContext ? `\nBRAND CONTEXT - Pas het antwoord aan op deze merkidentiteit:\n${brandContext}\n\nGebruik de tone of voice en terminologie van dit merk.` : ''}
 
 Genereer 1 FAQ item. Schrijf in het Nederlands.`
           },
