@@ -62,6 +62,15 @@ interface AdminUser {
   roles: string[];
 }
 
+interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 const Admin = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
