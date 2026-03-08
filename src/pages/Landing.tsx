@@ -331,9 +331,26 @@ const Landing = () => {
                   </div>
                   <p className="text-muted-foreground mt-2 font-medium">{plan.description}</p>
                   {plan.subtitle && <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>}
-                  <Badge variant="secondary" className="mt-3 gap-1">
-                    ⚡ {plan.credits}
-                  </Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="mt-3 gap-1 cursor-help">
+                          ⚡ {plan.credits}
+                          <Info className="w-3 h-3 ml-1 text-muted-foreground" />
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs text-left">
+                        <p className="font-semibold mb-1">Credit-verbruik per actie:</p>
+                        <ul className="text-xs space-y-0.5">
+                          <li>• FAQ Analyse: 1 credit</li>
+                          <li>• FAQ Regeneratie: 1 credit</li>
+                          <li>• FAQ Generatie: 2 credits</li>
+                          <li>• Artikel Generator: 3 credits</li>
+                          <li>• AI Ranking Check: 4 credits/vraag</li>
+                        </ul>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col">
                   <ul className="space-y-3 flex-1">
