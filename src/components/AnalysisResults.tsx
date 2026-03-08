@@ -515,6 +515,22 @@ export const AnalysisResults = ({
         />
       )}
 
+      {/* AI Ranking Check - Enterprise */}
+      {userPlan === 'enterprise' ? (
+        <AiRankingCheck
+          pageId=""
+          domain={(() => { try { return new URL(data.url).hostname; } catch { return data.url; } })()}
+          faqs={data.faqs}
+          userPlan={userPlan}
+        />
+      ) : (
+        <LockedFeatureCard 
+          title="AI Ranking Check" 
+          description="Controleer of je website wordt genoemd door ChatGPT, Gemini en andere AI-modellen. Ontdek je positie en sentiment per model."
+          onUpgrade={() => navigate('/#pricing')}
+        />
+      )}
+
       {/* JSON-LD Generator - Scale+ */}
       {!isFree ? (
         <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
