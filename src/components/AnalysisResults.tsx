@@ -520,9 +520,9 @@ export const AnalysisResults = ({
       )}
 
       {/* Placeholder Cards for DR/UR and Keywords */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="p-4 sm:p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
             Domain & URL Rating
           </h3>
