@@ -332,13 +332,15 @@ const Landing = () => {
                   </div>
                   <p className="text-muted-foreground mt-2 font-medium">{plan.description}</p>
                   {plan.subtitle && <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>}
-                  <TooltipProvider>
+                  <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge variant="secondary" className="mt-3 gap-1 cursor-help">
-                          ⚡ {plan.credits}
-                          <Info className="w-3 h-3 ml-1 text-muted-foreground" />
-                        </Badge>
+                        <button type="button" className="inline-flex cursor-help mt-3">
+                          <Badge variant="secondary" className="gap-1 pointer-events-none">
+                            ⚡ {plan.credits}
+                            <Info className="w-3 h-3 ml-1 text-muted-foreground" />
+                          </Badge>
+                        </button>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="max-w-xs text-left">
                         <p className="font-semibold mb-1">Credit-verbruik per actie:</p>
