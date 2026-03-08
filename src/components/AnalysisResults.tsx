@@ -14,7 +14,7 @@ import { AiRankingCheck } from "./AiRankingCheck";
 import { AiCreditsDisplay } from "./AiCreditsDisplay";
 import { MetaTagSuggestions } from "./MetaTagSuggestions";
 import { useAiCredits } from "@/hooks/useAiCredits";
-import type { AnalysisData, FaqItem } from "@/types/analysis";
+import type { AnalysisData, FaqItem, HeadingInfo } from "@/types/analysis";
 
 interface AnalysisResultsProps {
   data: AnalysisData;
