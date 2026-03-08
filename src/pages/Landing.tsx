@@ -65,7 +65,7 @@ const Landing = () => {
     },
     {
       name: 'Scale', monthlyPrice: '€17,95', yearlyPrice: '€14,95', period: 'per maand',
-      description: 'Voor serieuze websites', subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
+      description: 'Voor ambitieuze websites', subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
       credits: '50 AI-credits/maand',
       features: ['Volledige website-analyse', 'Tot 100 pagina\'s per scan', '1 project opslaan', 'AI FAQ Generator', 'Keyword analyse', 'Structured data analyse', '50 AI-credits per maand', 'Browser AI (onbeperkt, gratis)'],
       cta: 'Start met Scale', popular: true, variant: 'default' as const
