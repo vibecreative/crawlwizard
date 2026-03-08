@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, TrendingUp, TrendingDown, CheckCircle, Lightbulb } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface KeywordScore {
   keyword: string;
@@ -15,20 +16,22 @@ interface KeywordAnalysisProps {
 }
 
 export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
+  const { t } = useTranslation();
+
   if (keywords.length === 0) {
     return null;
   }
 
   const getDensityStatus = (density: number) => {
-    if (density > 3) return { label: "Te hoog (keyword stuffing)", color: "destructive", icon: TrendingUp };
-    if (density >= 1 && density <= 3) return { label: "Optimaal", color: "default", icon: CheckCircle };
-    return { label: "Te laag", color: "secondary", icon: TrendingDown };
+    if (density > 3) return { label: t("keyword.tooHigh"), color: "destructive", icon: TrendingUp };
+    if (density >= 1 && density <= 3) return { label: t("keyword.optimal"), color: "default", icon: CheckCircle };
+    return { label: t("keyword.tooLow"), color: "secondary", icon: TrendingDown };
   };
 
   const getRelevanceStatus = (relevance: number) => {
-    if (relevance >= 70) return { label: "Hoog", color: "default" };
-    if (relevance >= 40) return { label: "Gemiddeld", color: "secondary" };
-    return { label: "Laag", color: "destructive" };
+    if (relevance >= 70) return { label: t("keyword.high"), color: "default" };
+    if (relevance >= 40) return { label: t("keyword.medium"), color: "secondary" };
+    return { label: t("keyword.low"), color: "destructive" };
   };
 
   return (
@@ -38,9 +41,9 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
           <AlertCircle className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1">
-          <h2 className="text-xl font-semibold mb-1">Keyword Analyse</h2>
+          <h2 className="text-xl font-semibold mb-1">{t("keyword.title")}</h2>
           <p className="text-sm text-muted-foreground">
-            Analyse van keyword density en relevantie ten opzichte van de content
+            {t("keyword.subtitle")}
           </p>
         </div>
       </div>
@@ -57,7 +60,7 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
                 <div>
                   <h3 className="font-semibold text-lg mb-1">{kw.keyword}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Gevonden: {kw.count} keer
+                    {t("keyword.found", { count: kw.count })}
                   </p>
                 </div>
               </div>
@@ -65,7 +68,7 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Keyword Density</span>
+                    <span className="text-sm font-medium">{t("keyword.density")}</span>
                     <Badge variant={densityStatus.color as any} className="flex items-center gap-1">
                       <DensityIcon className="h-3 w-3" />
                       {kw.density.toFixed(2)}%
@@ -78,7 +81,7 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Relevantie Score</span>
+                    <span className="text-sm font-medium">{t("keyword.relevanceScore")}</span>
                     <Badge variant={relevanceStatus.color as any}>
                       {kw.relevance.toFixed(0)}%
                     </Badge>
@@ -93,7 +96,7 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
                 <div className="mt-4 p-3 rounded-lg bg-muted/30 border border-border/50">
                   <div className="flex items-start gap-2 mb-2">
                     <Lightbulb className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <h4 className="font-medium text-sm">Contentvoorstellen</h4>
+                    <h4 className="font-medium text-sm">{t("keyword.contentSuggestions")}</h4>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 ml-6">
                     {kw.suggestions.map((suggestion, idx) => (
@@ -108,11 +111,11 @@ export const KeywordAnalysis = ({ keywords }: KeywordAnalysisProps) => {
       </div>
 
       <div className="mt-6 p-4 rounded-lg bg-muted/50">
-        <h4 className="font-medium mb-2 text-sm">Wat betekenen deze scores?</h4>
+        <h4 className="font-medium mb-2 text-sm">{t("keyword.whatDoScoresMean")}</h4>
         <ul className="text-xs text-muted-foreground space-y-1">
-          <li>• <strong>Keyword Density:</strong> Percentage van het totale aantal woorden. Optimaal is tussen 1-3%.</li>
-          <li>• <strong>Relevantie Score:</strong> Hoe goed het keyword past bij de context waarin het voorkomt.</li>
-          <li>• <strong>Keyword Stuffing:</strong> Te hoge density (&gt;3%) kan door zoekmachines als spam worden gezien.</li>
+          <li>• <strong>{t("keyword.density")}:</strong> {t("keyword.densityExplanation")}</li>
+          <li>• <strong>{t("keyword.relevanceScore")}:</strong> {t("keyword.relevanceExplanation")}</li>
+          <li>• <strong>Keyword Stuffing:</strong> {t("keyword.stuffingExplanation")}</li>
         </ul>
       </div>
     </Card>
