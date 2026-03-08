@@ -396,6 +396,16 @@ const Admin = () => {
                               Maak admin
                             </Button>
                           )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs"
+                            disabled={updatingUser === u.id}
+                            onClick={() => resetCredits(u.id)}
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Reset credits
+                          </Button>
                           {u.id !== user?.id && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
