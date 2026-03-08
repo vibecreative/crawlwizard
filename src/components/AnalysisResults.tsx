@@ -14,58 +14,7 @@ import { AiRankingCheck } from "./AiRankingCheck";
 import { AiCreditsDisplay } from "./AiCreditsDisplay";
 import { MetaTagSuggestions } from "./MetaTagSuggestions";
 import { useAiCredits } from "@/hooks/useAiCredits";
-
-interface HeadingInfo {
-  level: number;
-  text: string;
-  position: { top: number; left: number };
-  content?: string;
-}
-
-interface StructuredDataItem {
-  type: string;
-  data: any;
-}
-
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
-interface KeywordScore {
-  keyword: string;
-  density: number;
-  count: number;
-  relevance: number;
-}
-
-interface KeywordPlacementAnalysis {
-  keyword: string;
-  inUrl: boolean;
-  inH1: boolean;
-  inIntroText: boolean;
-  url: string;
-  h1Text?: string;
-  introText?: string;
-}
-
-interface AnalysisData {
-  url: string;
-  screenshot?: string;
-  headings: HeadingInfo[];
-  meta: {
-    title?: string;
-    description?: string;
-    ogTitle?: string;
-    ogDescription?: string;
-    ogImage?: string;
-  };
-  structuredData: StructuredDataItem[];
-  html: string;
-  faqs?: FaqItem[];
-  keywords?: KeywordScore[];
-  keywordPlacement?: KeywordPlacementAnalysis;
-}
+import type { AnalysisData, FaqItem, HeadingInfo } from "@/types/analysis";
 
 interface AnalysisResultsProps {
   data: AnalysisData;
