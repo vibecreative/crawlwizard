@@ -171,9 +171,9 @@ export const AnalysisResults = ({
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ gridTemplateRows: '1fr' }}>
         {/* Heading Structure */}
-        <Card className="p-4 sm:p-6 shadow-soft flex flex-col overflow-hidden">
+        <Card className="p-4 sm:p-6 shadow-soft flex flex-col overflow-hidden" style={{ maxHeight: 'inherit', minHeight: 0 }}>
           <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
             Heading Structuur
