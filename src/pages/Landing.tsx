@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import heroBg from '@/assets/hero-bg.jpg';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -137,8 +138,13 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative pt-28 pb-24 px-4 overflow-hidden">
-        <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
+        {/* Hero background image */}
+        <div className="absolute inset-0 z-0">
+          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-20 dark:opacity-15" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        </div>
+        <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl z-0" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/3 rounded-full blur-3xl z-0" />
         <motion.div 
           className="absolute top-32 right-12 w-20 h-20 border-4 border-primary/20 rounded-lg rotate-12 hidden lg:block"
           animate={{ rotate: [12, 18, 12], y: [0, -8, 0] }}
@@ -537,7 +543,7 @@ const Landing = () => {
               size="lg" 
               variant="outline"
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-base px-8 py-6 border-white/20 text-white hover:bg-white/10 hover:text-white"
+              className="text-base px-8 py-6 border-white/20 dark:text-white dark:hover:bg-white/10 dark:hover:text-white text-foreground border-foreground/20 hover:bg-foreground/10"
             >
               Bekijk de prijzen
             </Button>
