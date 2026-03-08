@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 import type { CookiePreferences } from '@/hooks/useCookieConsent';
 
 const Privacy = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { preferences, hasConsented, savePreferences, resetConsent } = useCookieConsent();
   const [localPrefs, setLocalPrefs] = useState<CookiePreferences>(preferences);
