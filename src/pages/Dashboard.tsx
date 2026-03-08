@@ -412,17 +412,17 @@ const Dashboard = () => {
                                 key={page.id}
                                 className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                               >
-                                <div 
-                                  className="flex-1 min-w-0 mr-3 cursor-pointer hover:text-primary transition-colors"
-                                  onClick={() => navigate(`/page/${page.id}`)}
-                                >
-                                  <p className="text-xs font-medium truncate">
-                                    {page.title || new URL(page.url).pathname || "/"}
-                                  </p>
-                                  <p className="text-[11px] text-muted-foreground truncate">
-                                    {page.url}
-                                  </p>
-                                </div>
+                              <div 
+                                className="flex-1 min-w-0 mr-2 sm:mr-3 cursor-pointer hover:text-primary transition-colors"
+                                onClick={() => navigate(`/page/${page.id}`)}
+                              >
+                                <p className="text-[11px] sm:text-xs font-medium truncate">
+                                  {page.title || new URL(page.url).pathname || "/"}
+                                </p>
+                                <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
+                                  {page.url}
+                                </p>
+                              </div>
                                 <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                   <div className="hidden sm:flex items-center gap-1.5">
                                     <Badge variant={page.has_h1 ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">H1</Badge>

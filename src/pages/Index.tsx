@@ -308,14 +308,14 @@ const Index = () => {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen py-12 px-4">
+    <div className="min-h-screen pt-16 sm:pt-12 pb-12 px-3 sm:px-4">
       <SEOHead title="Analyse" noindex />
       <div className="container mx-auto">
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-          <span className="text-sm text-muted-foreground hidden sm:inline">
+        <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 flex items-center gap-1.5 sm:gap-2 bg-background/80 backdrop-blur-sm rounded-lg px-2 py-1.5 border border-border/50">
+          <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[150px]">
             {user?.email}
           </span>
-          <Button variant="ghost" size="icon" onClick={handleSignOut} title="Uitloggen">
+          <Button variant="ghost" size="icon" onClick={handleSignOut} title="Uitloggen" className="h-8 w-8">
             <LogOut className="h-4 w-4" />
           </Button>
           <ThemeToggle />

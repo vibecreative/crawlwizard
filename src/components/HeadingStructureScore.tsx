@@ -204,24 +204,24 @@ export const HeadingStructureScore = ({ headings, meta, structuredData }: Headin
   const structuredIssues = issues.filter(i => i.category === "structured");
 
   return (
-    <Card className="p-6 shadow-elegant border-2 border-primary/20">
-      <div className="flex items-start justify-between mb-6">
+    <Card className="p-4 sm:p-6 shadow-elegant border-2 border-primary/20">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-xl font-semibold flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
             Paginastructuur score
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Analyse van headings, meta tags en structured data
           </p>
         </div>
-        <div className="text-center">
-          <div className={`text-5xl font-bold ${getScoreColor(score)}`}>
+        <div className="flex sm:flex-col items-center sm:items-center gap-3 sm:gap-0 sm:text-center">
+          <div className={`text-4xl sm:text-5xl font-bold ${getScoreColor(score)}`}>
             {score}
           </div>
           <Badge 
             variant={score >= 80 ? "default" : score >= 60 ? "secondary" : "destructive"}
-            className="mt-2"
+            className="sm:mt-2"
           >
             {getScoreLabel(score)}
           </Badge>

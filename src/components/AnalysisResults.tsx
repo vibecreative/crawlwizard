@@ -546,8 +546,8 @@ export const AnalysisResults = ({
           </div>
         </Card>
 
-        <Card className="p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <Card className="p-4 sm:p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
             Keyword Rankings
           </h3>

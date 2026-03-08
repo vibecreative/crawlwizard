@@ -312,11 +312,12 @@ const PageDetails = () => {
       <SEOHead title={pageData.title || "Pagina details"} noindex />
       <AppHeader showUser />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={handleBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Terug naar {projectData?.name || "Dashboard"}
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <Button variant="ghost" onClick={handleBack} size="sm" className="text-xs sm:text-sm">
+            <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Terug naar {projectData?.name || "Dashboard"}</span>
+            <span className="sm:hidden">Terug</span>
           </Button>
         </div>
 
