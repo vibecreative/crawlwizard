@@ -3,8 +3,22 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+const CREDITS_REQUIRED = 2; // article generation + detection
+
+async function checkCredits(supabase: any, userId: string, creditsNeeded: number) {
+  const { data, error } = await supabase.rpc('get_remaining_credits', { _user_id: userId });
+  if (error) throw new Error('Kon credits niet controleren');
+  const credits = typeof data === 'string' ? JSON.parse(data) : data;
+  if (credits.remaining < creditsNeeded) return { allowed: false, ...credits };
+  return { allowed: true, ...credits };
+}
+
+async function logCreditUsage(supabase: any, userId: string, actionType: string, credits: number) {
+  await supabase.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,15 +26,11 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get('Authorization') ?? '';
     const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
-
     if (!jwt) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const supabaseClient = createClient(
@@ -32,23 +42,23 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Check ENTERPRISE plan
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('plan')
-      .eq('id', user.id)
-      .single();
-
+    const { data: profile } = await supabaseClient.from('profiles').select('plan').eq('id', user.id).single();
     if (!profile || profile.plan !== 'enterprise') {
-      return new Response(JSON.stringify({ error: 'Deze functie is alleen beschikbaar voor Enterprise abonnees.' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(JSON.stringify({ error: 'Enterprise plan vereist' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Credit check
+    const creditCheck = await checkCredits(supabaseClient, user.id, CREDITS_REQUIRED);
+    if (!creditCheck.allowed) {
+      return new Response(JSON.stringify({ 
+        error: 'credits_exhausted',
+        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used}/${creditCheck.limit} gebruikt.`,
+        credits: creditCheck
+      }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const body = await req.json();
@@ -56,17 +66,12 @@ serve(async (req) => {
 
     if (!question || !answer) {
       return new Response(JSON.stringify({ error: 'Vraag en antwoord zijn vereist' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
+    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured');
 
-    // Extract text from page content for context
     let contextText = '';
     if (pageContent) {
       contextText = pageContent
@@ -84,63 +89,33 @@ serve(async (req) => {
       ? `Je bent een ervaren Nederlandse contentschrijver en SEO-expert. Je herschrijft teksten zodat ze NIET herkend worden als AI-gegenereerd.
 
 HERSCHRIJF-REGELS:
-- Varieer zinslengte drastisch: mix korte krachtige zinnen met langere, complexere zinnen
+- Varieer zinslengte drastisch
 - Gebruik af en toe spreektaal, tussenwerpsels of retorische vragen
-- Voeg persoonlijke meningen, ervaringen of anekdotes toe waar passend
+- Voeg persoonlijke meningen toe waar passend
 - Gebruik onregelmatige alinealengtes
-- Vermijd perfecte opsommingen - maak ze soms onvolledig of in lopende tekst
-- Gebruik af en toe een onverwachte woordkeuze of metafoor
-- Begin niet elke alinea met het onderwerp - varieer de openingszinnen
-- Laat af en toe een kleine imperfectie staan (niet grammaticaal, maar stilistisch)
 - Schrijf alsof je een expert bent die informeel met een collega praat
 - Behoud ALLE inhoudelijke informatie en de heading-structuur
 
-Output: De volledige herschreven tekst in Markdown-formaat met dezelfde structuur.`
-      : `Je bent een ervaren Nederlandse contentschrijver en SEO-expert die diepgaande, waardevolle artikelen schrijft.
+Output: De volledige herschreven tekst in Markdown-formaat.`
+      : `Je bent een ervaren Nederlandse contentschrijver en SEO-expert.
 
-DOEL: Schrijf een uitgebreid artikel (1200-1800 woorden) dat de FAQ-vraag als uitgangspunt neemt en uitbreidt tot een compleet, informatief artikel.
+DOEL: Schrijf een uitgebreid artikel (1200-1800 woorden) dat de FAQ-vraag uitbreidt tot een compleet artikel.
 
-STRUCTUUR-EISEN:
-- Begin met een H1 die de kernvraag van de lezer beantwoordt (niet de letterlijke FAQ-vraag)
-- Gebruik 4-6 H2 subkoppen die logisch het onderwerp opdelen
-- Gebruik waar nodig H3 subkoppen voor verdere detaillering
-- Elke sectie moet 150-300 woorden bevatten
-- Sluit af met een praktische conclusie/samenvatting
+STRUCTUUR: H1 + 4-6 H2's + waar nodig H3's. Elke sectie 150-300 woorden.
 
-SCHRIJFSTIJL - CRUCIAAL:
-- Schrijf alsof je een ervaren vakman/expert bent die informeel maar kundig vertelt
-- Varieer zinslengte: mix korte krachtige zinnen met langere uitleg
-- Gebruik af en toe een retorische vraag of direct de lezer aanspreken
-- Vermijd perfecte, voorspelbare structuren - wees menselijk
-- Gebruik concrete voorbeelden, cijfers en praktijksituaties
-- Geen generieke filler-tekst: elke zin moet waarde toevoegen
-- Schrijf op B1-B2 niveau, conversational maar professioneel
-- Gebruik GEEN woorden als "cruciaal", "essentieel", "in de huidige tijd" of andere typische AI-markers
-- Begin alinea's NIET steeds met hetzelfde patroon
+SCHRIJFSTIJL: Menselijk, gevarieerd, concreet. Geen AI-markers. B1-B2 niveau.
 
-SEO-OPTIMALISATIE:
-- Verwerk het hoofdonderwerp natuurlijk in H1, eerste alinea, en H2's
-- Gebruik LSI-keywords (gerelateerde termen) door de tekst
-- Schrijf voor featured snippets: beantwoord vragen direct in de eerste 2-3 zinnen van relevante secties
-- Voeg interne linking suggesties toe als [link: onderwerp] markers
+SEO: Hoofdonderwerp in H1/eerste alinea/H2's. LSI-keywords. Featured snippet optimalisatie.
 
-OUTPUT: Markdown-formaat met juiste heading-hiërarchie (# H1, ## H2, ### H3).`;
+OUTPUT: Markdown-formaat.`;
 
     const userPrompt = isRewrite
-      ? `Herschrijf de volgende tekst zodat deze menselijker klinkt en niet als AI-gegenereerd wordt herkend. Behoud de volledige inhoud en structuur:\n\n${body.articleText}`
-      : `FAQ Vraag: ${question}
-FAQ Antwoord: ${answer}
-
-${contextText ? `Context van de bronpagina:\n${contextText}` : ''}
-
-Schrijf een uitgebreid artikel (1200-1800 woorden) gebaseerd op deze FAQ. Het artikel moet veel dieper gaan dan het FAQ-antwoord en echte waarde bieden aan de lezer.`;
+      ? `Herschrijf:\n\n${body.articleText}`
+      : `FAQ Vraag: ${question}\nFAQ Antwoord: ${answer}\n\n${contextText ? `Context:\n${contextText}` : ''}\n\nSchrijf een uitgebreid artikel (1200-1800 woorden).`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'openai/gpt-5-mini',
         messages: [
@@ -151,16 +126,8 @@ Schrijf een uitgebreid artikel (1200-1800 woorden) gebaseerd op deze FAQ. Het ar
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit bereikt, probeer het later opnieuw.' }), {
-          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'Credits opgebruikt. Voeg credits toe aan je workspace.' }), {
-          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+      if (response.status === 429) return new Response(JSON.stringify({ error: 'Rate limit bereikt.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (response.status === 402) return new Response(JSON.stringify({ error: 'Credits opgebruikt.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       const errorText = await response.text();
       console.error('AI gateway error:', response.status, errorText);
       throw new Error('AI gateway error');
@@ -168,63 +135,30 @@ Schrijf een uitgebreid artikel (1200-1800 woorden) gebaseerd op deze FAQ. Het ar
 
     const data = await response.json();
     const article = data.choices?.[0]?.message?.content;
+    if (!article) throw new Error('Geen artikel ontvangen van AI');
 
-    if (!article) {
-      throw new Error('Geen artikel ontvangen van AI');
-    }
-
-    // Now check AI detection score
     const detectionResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'openai/gpt-5-mini',
         messages: [
-          {
-            role: 'system',
-            content: `Je bent een AI-detectie expert. Analyseer de gegeven tekst en bepaal hoe waarschijnlijk het is dat deze door een mens is geschreven.
-
-Beoordeel op basis van:
-1. Zinsvariatie (lengte, structuur, complexiteit)
-2. Natuurlijk taalgebruik (spreektaal, idioom, onregelmatigheden)
-3. Persoonlijke stem (meningen, ervaringen, unieke perspectieven)
-4. Onvoorspelbaarheid (verrassende woordkeuzes, onverwachte wendingen)
-5. Structuurvariatie (niet-perfecte opsommingen, wisselende alinealengtes)`
-          },
-          {
-            role: 'user',
-            content: `Analyseer deze tekst op menselijkheid:\n\n${article.substring(0, 5000)}`
-          }
+          { role: 'system', content: `Je bent een AI-detectie expert. Analyseer hoe waarschijnlijk de tekst door een mens is geschreven.` },
+          { role: 'user', content: `Analyseer:\n\n${article.substring(0, 5000)}` }
         ],
         tools: [
           {
             type: "function",
             function: {
               name: "ai_detection_result",
-              description: "Geef het AI-detectie resultaat",
+              description: "AI-detectie resultaat",
               parameters: {
                 type: "object",
                 properties: {
-                  human_score: {
-                    type: "number",
-                    description: "Score van 0-100. 0 = zeker AI, 100 = zeker mens"
-                  },
-                  verdict: {
-                    type: "string",
-                    enum: ["menselijk", "waarschijnlijk_menselijk", "onzeker", "waarschijnlijk_ai", "ai_gegenereerd"]
-                  },
-                  improvements: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "3-5 concrete suggesties om de tekst menselijker te maken"
-                  },
-                  explanation: {
-                    type: "string",
-                    description: "Korte uitleg van de beoordeling in 2-3 zinnen"
-                  }
+                  human_score: { type: "number", description: "0-100. 0=AI, 100=mens" },
+                  verdict: { type: "string", enum: ["menselijk", "waarschijnlijk_menselijk", "onzeker", "waarschijnlijk_ai", "ai_gegenereerd"] },
+                  improvements: { type: "array", items: { type: "string" }, description: "3-5 suggesties" },
+                  explanation: { type: "string", description: "Korte uitleg" }
                 },
                 required: ["human_score", "verdict", "improvements", "explanation"],
                 additionalProperties: false
@@ -240,10 +174,11 @@ Beoordeel op basis van:
     if (detectionResponse.ok) {
       const detectionData = await detectionResponse.json();
       const toolCall = detectionData.choices?.[0]?.message?.tool_calls?.[0];
-      if (toolCall) {
-        detection = JSON.parse(toolCall.function.arguments);
-      }
+      if (toolCall) detection = JSON.parse(toolCall.function.arguments);
     }
+
+    // Log credit usage after successful completion
+    await logCreditUsage(supabaseClient, user.id, 'article_generation', CREDITS_REQUIRED);
 
     return new Response(JSON.stringify({ article, detection }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

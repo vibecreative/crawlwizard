@@ -11,6 +11,8 @@ import { FaqSuggestions } from "./FaqSuggestions";
 import { KeywordAnalysis } from "./KeywordAnalysis";
 import { KeywordPlacementAdvice } from "./KeywordPlacementAdvice";
 import { AiRankingCheck } from "./AiRankingCheck";
+import { AiCreditsDisplay } from "./AiCreditsDisplay";
+import { useAiCredits } from "@/hooks/useAiCredits";
 
 interface HeadingInfo {
   level: number;
@@ -74,6 +76,7 @@ interface AnalysisResultsProps {
   isGeneratingFaqs?: boolean;
   userPlan?: string;
   pageId?: string;
+  userId?: string;
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
@@ -110,11 +113,12 @@ export const AnalysisResults = ({
   onGenerateFaqs,
   isGeneratingFaqs,
   userPlan,
-  pageId
+  pageId,
+  userId
 }: AnalysisResultsProps) => {
   const navigate = useNavigate();
   const isFree = userPlan === 'free';
-  
+  const { credits, isLoading: creditsLoading, refetchCredits } = useAiCredits(userId);
   const getHeadingColor = (level: number) => {
     const colors = {
       1: "bg-heading-h1",
@@ -185,6 +189,9 @@ export const AnalysisResults = ({
           )}
         </div>
       </div>
+
+      {/* AI Credits Display */}
+      <AiCreditsDisplay credits={credits} isLoading={creditsLoading} />
 
       {/* SEO Score - Prominent at top */}
       <HeadingStructureScore headings={data.headings} meta={data.meta} structuredData={data.structuredData} />

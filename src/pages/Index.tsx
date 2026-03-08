@@ -957,6 +957,7 @@ const Index = () => {
               onGenerateFaqs={generateFaqs}
               isGeneratingFaqs={isGeneratingFaqs}
               userPlan={userPlan}
+              userId={user?.id}
             />
           </div>
         )}

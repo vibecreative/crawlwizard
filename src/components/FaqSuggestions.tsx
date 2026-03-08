@@ -105,6 +105,12 @@ export const FaqSuggestions = ({
       return null;
     }
 
+    // Check for credits_exhausted error in response
+    if (data?.error === 'credits_exhausted') {
+      toast.error(data.message || 'Je AI-credits zijn op voor deze maand.');
+      throw new Error('credits_exhausted');
+    }
+
     return data ? { ...data, source: "cloud" as const } : null;
   };
 

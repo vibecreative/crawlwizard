@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_credit_usage: {
+        Row: {
+          action_type: string
+          created_at: string
+          credits_used: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          credits_used?: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          credits_used?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_ranking_checks: {
         Row: {
           created_at: string
@@ -265,6 +289,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_remaining_credits: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
