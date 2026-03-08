@@ -548,7 +548,7 @@ const Landing = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Voor zware taken zoals FAQ-generatie, artikelen schrijven en AI Ranking Checks schakelt CrawlWizard krachtige AI-modellen in op onze servers. Hiervoor gebruik je AI-credits – het aantal hangt af van je plan.
+                      Voor zware taken zoals FAQ-generatie, artikelen schrijven en AI Ranking Checks schakelt CrawlWizard krachtige large language models (LLM's) in op onze servers — denk aan modellen van OpenAI en Google Gemini. Je pagina-inhoud wordt als context meegestuurd, waarna het model geoptimaliseerde output genereert. Hiervoor gebruik je AI-credits; het aantal hangt af van je plan.
                     </p>
                   </CardContent>
                 </Card>
