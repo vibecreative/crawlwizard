@@ -22,6 +22,7 @@ interface FaqSuggestionsProps {
   onGenerateFaqs?: () => Promise<void>;
   isGeneratingFaqs?: boolean;
   userPlan?: string;
+  brandContext?: string;
 }
 
 interface AnalysisResult {
