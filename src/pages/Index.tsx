@@ -18,59 +18,17 @@ import { SitemapUrl } from "@/lib/api/sitemap";
 import { FileText, Globe, LogOut, Save, Loader2, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-interface HeadingInfo {
-  level: number;
-  text: string;
-  position: { top: number; left: number };
-  content?: string;
-}
-
-interface StructuredDataItem {
-  type: string;
-  data: any;
-}
-
-interface FaqItem {
-  question: string;
-  answer: string;
-}
-
-interface KeywordScore {
-  keyword: string;
-  density: number;
-  count: number;
-  relevance: number;
-  suggestions?: string[];
-}
-
-interface KeywordPlacementAnalysis {
-  keyword: string;
-  inUrl: boolean;
-  inH1: boolean;
-  inIntroText: boolean;
-  url: string;
-  h1Text?: string;
-  introText?: string;
-}
-
-interface AnalysisData {
-  url: string;
-  screenshot?: string;
-  headings: HeadingInfo[];
-  meta: {
-    title?: string;
-    description?: string;
-    ogTitle?: string;
-    ogDescription?: string;
-    ogImage?: string;
-  };
-  structuredData: StructuredDataItem[];
-  html: string;
-  faqs?: FaqItem[];
-  keywords?: KeywordScore[];
-  keywordPlacement?: KeywordPlacementAnalysis;
-}
+import type { AnalysisData, FaqItem } from "@/types/analysis";
+import {
+  parseHeadings,
+  parseMeta,
+  parseStructuredData,
+  analyzeKeywords,
+  analyzeKeywordPlacement,
+  calculateSeoScore,
+  calculateHeadingIssues,
+  fetchPageHtml,
+} from "@/lib/htmlParser";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -90,461 +48,23 @@ const Index = () => {
   const shouldStopAnalysisRef = useRef(false);
   const [userPlan, setUserPlan] = useState<string>("free");
 
-  const parseHeadings = (html: string): HeadingInfo[] => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const headings: HeadingInfo[] = [];
+  const { signOut, user } = useAuth();
 
-    const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    const headingElements = Array.from(doc.querySelectorAll('h1, h2, h3, h4, h5, h6'));
-    const allElements = Array.from(doc.body.querySelectorAll('*'));
-    
-    headingElements.forEach((el, index) => {
-      const tagName = el.tagName.toLowerCase();
-      const level = parseInt(tagName.substring(1));
-      const text = el.textContent?.trim() || '';
-      
-      if (!text) return;
-      
-      const style = el.getAttribute('style') || '';
-      const isHidden = 
-        el.getAttribute('hide') === 'true' ||
-        style.includes('display: none') ||
-        style.includes('display:none') ||
-        style.includes('visibility: hidden') ||
-        style.includes('visibility:hidden') ||
-        el.getAttribute('aria-hidden') === 'true' ||
-        (el.getAttribute('class') || '').includes('hidden') ||
-        (el.getAttribute('class') || '').includes('sr-only');
-      
-      if (isHidden) return;
-      
-      let content = "";
-      const headingIndex = allElements.indexOf(el);
-      const nextHeadingIndex = headingElements
-        .slice(index + 1)
-        .map(h => allElements.indexOf(h))
-        .find(idx => idx > headingIndex);
-      
-      const contentElements: string[] = [];
-      const seenTexts = new Set<string>();
-      
-      for (let i = headingIndex + 1; i < (nextHeadingIndex || allElements.length); i++) {
-        const element = allElements[i];
-
-        if (element.matches('h1, h2, h3, h4, h5, h6')) break;
-
-        // If a container includes a (next) heading, its textContent will “swallow” that next section.
-        // We skip those containers and rely on their inner elements instead.
-        if (element.querySelector('h1, h2, h3, h4, h5, h6')) continue;
-
-        const isLeafElement = !element.querySelector(
-          'p, div, span, li, td, th, a, button, h1, h2, h3, h4, h5, h6'
-        );
-
-        if (
-          element.matches('p, li, td, th, a, button') ||
-          (element.matches('div, span') && isLeafElement)
-        ) {
-          const elementText = element.textContent?.trim() || '';
-          if (!elementText || elementText.length <= 10) continue;
-
-          // Remove exact heading text from the start of content blocks to avoid duplication.
-          // Use a word-boundary approach to prevent partial character matches.
-          let cleanedText = elementText;
-          if (cleanedText.toLowerCase().startsWith(text.toLowerCase())) {
-            cleanedText = cleanedText.slice(text.length).trim();
-          } else {
-            // Also try removing with the regex approach for minor whitespace differences
-            const headingPrefixRe = new RegExp(`^\\s*${escapeRegExp(text)}\\s*`, 'i');
-            cleanedText = elementText.replace(headingPrefixRe, '').trim();
-          }
-          if (!cleanedText || cleanedText.length <= 10) continue;
-
-          if (!seenTexts.has(cleanedText)) {
-            const hasOverlap = contentElements.some(
-              (existing) => existing.includes(cleanedText) || cleanedText.includes(existing)
-            );
-
-            if (!hasOverlap) {
-              contentElements.push(cleanedText);
-              seenTexts.add(cleanedText);
-            }
-          }
-        }
-      }
-      
-      content = contentElements.join('\n\n');
-      
-      headings.push({
-        level,
-        text,
-        position: { top: index, left: 0 },
-        content: content.trim() || undefined,
-      });
-    });
-
-    return headings;
-  };
-
-  const parseMeta = (html: string) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    const getMetaContent = (selector: string) => {
-      const element = doc.querySelector(selector);
-      return element?.getAttribute('content') || undefined;
-    };
-
-    const titleElement = doc.querySelector('title');
-    const rawTitle = titleElement?.textContent?.trim() || undefined;
-
-    return {
-      title: rawTitle,
-      description: getMetaContent('meta[name="description"]'),
-      ogTitle: getMetaContent('meta[property="og:title"]'),
-      ogDescription: getMetaContent('meta[property="og:description"]'),
-      ogImage: getMetaContent('meta[property="og:image"]'),
-    };
-  };
-
-  const parseStructuredData = (html: string): StructuredDataItem[] => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const typeMap = new Map<string, any>();
-
-    const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
-    
-    jsonLdScripts.forEach((script) => {
-      try {
-        const data = JSON.parse(script.textContent || '');
-        
-        const extractTypes = (obj: any, depth: number = 0): void => {
-          if (Array.isArray(obj)) {
-            obj.forEach(item => extractTypes(item, depth));
-          } else if (obj && typeof obj === 'object') {
-            if (obj['@graph'] && Array.isArray(obj['@graph']) && depth === 0) {
-              obj['@graph'].forEach((item: any) => extractTypes(item, depth + 1));
-            } else if (obj['@type']) {
-              const types = Array.isArray(obj['@type']) ? obj['@type'] : [obj['@type']];
-              types.forEach((type: string) => {
-                const typeLabel = `JSON-LD: ${type}`;
-                if (!typeMap.has(typeLabel)) {
-                  typeMap.set(typeLabel, obj);
-                }
-              });
-            }
-          }
-        };
-        
-        extractTypes(data);
-      } catch (e) {
-        console.error('Failed to parse JSON-LD:', e);
-      }
-    });
-
-    const structuredData: StructuredDataItem[] = Array.from(typeMap.entries()).map(([type, data]) => ({
-      type,
-      data
-    }));
-
-    const itemScopes = doc.querySelectorAll('[itemscope]');
-    const microdataTypes = new Set<string>();
-    itemScopes.forEach((element) => {
-      const itemType = element.getAttribute('itemtype');
-      if (itemType) {
-        microdataTypes.add(itemType.split('/').pop() || 'Unknown');
-      }
-    });
-    
-    if (microdataTypes.size > 0) {
-      structuredData.push({ 
-        type: 'Microdata', 
-        data: Array.from(microdataTypes) 
-      });
+  useEffect(() => {
+    if (user?.id) {
+      supabase.from('profiles').select('plan').eq('id', user.id).single()
+        .then(({ data }) => { if (data) setUserPlan(data.plan); });
     }
+  }, [user?.id]);
 
-    return structuredData;
-  };
+  // ── Single Page Analysis ─────────────────────────────────────────────────
 
-  const analyzeKeywords = (html: string, keywords: string[]): KeywordScore[] => {
-    if (keywords.length === 0) return [];
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const bodyText = doc.body.textContent?.toLowerCase() || '';
-    const words = bodyText.split(/\s+/).filter(w => w.length > 0);
-    const totalWords = words.length;
-
-    return keywords.map(keyword => {
-      const keywordLower = keyword.toLowerCase();
-      const regex = new RegExp(`\\b${keywordLower}\\b`, 'gi');
-      const matches = bodyText.match(regex) || [];
-      const count = matches.length;
-      const density = totalWords > 0 ? (count / totalWords) * 100 : 0;
-
-      const title = doc.querySelector('title');
-      const inTitle = title?.textContent?.toLowerCase().includes(keywordLower) || false;
-
-      const metaDesc = doc.querySelector('meta[name="description"]');
-      const inMetaDesc = metaDesc?.getAttribute('content')?.toLowerCase().includes(keywordLower) || false;
-
-      const h1Elements = doc.querySelectorAll('h1');
-      const inH1 = Array.from(h1Elements).some(h => h.textContent?.toLowerCase().includes(keywordLower));
-
-      const h2Elements = doc.querySelectorAll('h2');
-      const inH2 = Array.from(h2Elements).some(h => h.textContent?.toLowerCase().includes(keywordLower));
-
-      let relevanceScore = 0;
-      if (inTitle) relevanceScore += 25;
-      if (inMetaDesc) relevanceScore += 15;
-      if (inH1) relevanceScore += 20;
-      if (inH2) relevanceScore += 10;
-      relevanceScore += Math.min(count * 2, 30);
-
-      const suggestions: string[] = [];
-      
-      if (!inTitle) {
-        suggestions.push(`Voeg "${keyword}" toe aan de title tag voor betere vindbaarheid`);
-      }
-      
-      if (!inMetaDesc) {
-        suggestions.push(`Voeg "${keyword}" toe aan de meta description`);
-      }
-      
-      if (!inH1) {
-        suggestions.push(`Gebruik "${keyword}" in minimaal één H1 heading`);
-      }
-      
-      if (density > 3) {
-        suggestions.push(`Verlaag de keyword density (nu ${density.toFixed(2)}%) om keyword stuffing te voorkomen`);
-      } else if (density < 1 && count > 0) {
-        suggestions.push(`Overweeg "${keyword}" vaker te gebruiken in de content (huidige density: ${density.toFixed(2)}%)`);
-      } else if (count === 0) {
-        suggestions.push(`Dit keyword komt niet voor op de pagina. Voeg relevante content toe met "${keyword}"`);
-      }
-
-      if (!inH2 && count > 0) {
-        suggestions.push(`Versterk de structuur door "${keyword}" ook in H2 headings te gebruiken`);
-      }
-
-      return {
-        keyword,
-        density,
-        count,
-        relevance: Math.min(relevanceScore, 100),
-        suggestions: suggestions.length > 0 ? suggestions : undefined
-      };
-    });
-  };
-
-  const normalizeForMatching = (text: string): string => {
-    const stopwords = ['in', 'de', 'het', 'een', 'van', 'en', 'op', 'te', 'voor', 'met', 'naar', 'aan', 'om', 'bij'];
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .filter(word => !stopwords.includes(word))
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-
-  const fuzzyKeywordMatch = (text: string, keyword: string): boolean => {
-    const normalizedText = normalizeForMatching(text);
-    const normalizedKeyword = normalizeForMatching(keyword);
-    
-    if (normalizedText.includes(normalizedKeyword)) {
-      return true;
-    }
-    
-    const textWithoutSpaces = normalizedText.replace(/\s/g, '');
-    const keywordWithoutSpaces = normalizedKeyword.replace(/\s/g, '');
-    if (textWithoutSpaces.includes(keywordWithoutSpaces)) {
-      return true;
-    }
-    
-    const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
-    const textWords = normalizedText.split(' ');
-    
-    if (keywordParts.length === 0) return false;
-    
-    const allPartsFound = keywordParts.every(part => {
-      const foundInWord = textWords.some(word => word.includes(part));
-      const foundInContinuous = textWithoutSpaces.includes(part);
-      return foundInWord || foundInContinuous;
-    });
-    
-    return allPartsFound;
-  };
-
-  const analyzeKeywordPlacement = (html: string, url: string, primaryKeyword: string): KeywordPlacementAnalysis | undefined => {
-    if (!primaryKeyword) return undefined;
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    const urlLower = url.toLowerCase();
-    const keywordForUrl = primaryKeyword.toLowerCase().replace(/\s+/g, '-');
-    const keywordNoSpaces = primaryKeyword.toLowerCase().replace(/\s+/g, '');
-    const inUrl = urlLower.includes(keywordForUrl) || 
-                  urlLower.includes(keywordNoSpaces) ||
-                  fuzzyKeywordMatch(urlLower.replace(/-/g, ' '), primaryKeyword);
-
-    const h1Element = doc.querySelector('h1');
-    const h1Text = h1Element?.textContent?.trim() || '';
-    const inH1 = fuzzyKeywordMatch(h1Text, primaryKeyword);
-
-    let introText = '';
-    if (h1Element) {
-      const introTexts: string[] = [];
-      
-      // Strategy 1: Direct siblings of H1
-      let sibling = h1Element.nextElementSibling;
-      let elementsChecked = 0;
-      
-      while (sibling && elementsChecked < 15) {
-        if (sibling.matches('h1, h2, h3, h4, h5, h6')) break;
-        
-        if (sibling.matches('p, div, span, section, article')) {
-          const text = sibling.textContent?.trim() || '';
-          if (text.length > 20) {
-            introTexts.push(text);
-            if (introTexts.join(' ').length > 300) break;
-          }
-        }
-        
-        sibling = sibling.nextElementSibling;
-        elementsChecked++;
-      }
-      
-      // Strategy 2: Parent's next siblings (H1 is in a container like <header>)
-      if (introTexts.length === 0 && h1Element.parentElement) {
-        const parent = h1Element.parentElement;
-        const children = Array.from(parent.children);
-        const h1Index = children.indexOf(h1Element);
-        
-        for (let i = h1Index + 1; i < Math.min(h1Index + 10, children.length); i++) {
-          const child = children[i];
-          if (child.matches('h1, h2, h3, h4, h5, h6')) break;
-          
-          const text = child.textContent?.trim() || '';
-          if (text.length > 20) {
-            introTexts.push(text);
-            if (introTexts.join(' ').length > 300) break;
-          }
-        }
-      }
-      
-      // Strategy 3: Walk up to find next section/container after H1's container
-      if (introTexts.length === 0) {
-        let container: Element | null = h1Element.parentElement;
-        while (container && introTexts.length === 0) {
-          let nextContainer = container.nextElementSibling;
-          let containerChecks = 0;
-          
-          while (nextContainer && containerChecks < 5) {
-            if (nextContainer.matches('h1, h2, h3, h4, h5, h6')) break;
-            
-            const text = nextContainer.textContent?.trim() || '';
-            if (text.length > 20) {
-              introTexts.push(text);
-              if (introTexts.join(' ').length > 300) break;
-            }
-            
-            nextContainer = nextContainer.nextElementSibling;
-            containerChecks++;
-          }
-          
-          // Move up one level if still nothing found
-          if (introTexts.length === 0 && container.parentElement && 
-              container.parentElement !== doc.body) {
-            container = container.parentElement;
-          } else {
-            break;
-          }
-        }
-      }
-      
-      // Strategy 4: Use TreeWalker for document order traversal as last resort
-      if (introTexts.length === 0) {
-        const walker = doc.createTreeWalker(
-          doc.body,
-          NodeFilter.SHOW_ELEMENT,
-          null
-        );
-        
-        // Find the H1 in the tree
-        let foundH1 = false;
-        let elementsAfterH1 = 0;
-        
-        while (walker.nextNode()) {
-          const node = walker.currentNode as Element;
-          
-          if (node === h1Element) {
-            foundH1 = true;
-            continue;
-          }
-          
-          if (foundH1) {
-            if (node.matches('h1, h2, h3, h4, h5, h6')) break;
-            
-            if (node.matches('p') && !node.closest('nav, header, footer, aside')) {
-              const text = node.textContent?.trim() || '';
-              if (text.length > 30) {
-                introTexts.push(text);
-                if (introTexts.join(' ').length > 300) break;
-              }
-            }
-            
-            elementsAfterH1++;
-            if (elementsAfterH1 > 100) break;
-          }
-        }
-      }
-      
-      introText = introTexts.join(' ').substring(0, 500);
-    }
-    
-    const inIntroText = introText.length > 0 && fuzzyKeywordMatch(introText, primaryKeyword);
-
-    return {
-      keyword: primaryKeyword,
-      inUrl,
-      inH1,
-      inIntroText,
-      url,
-      h1Text: h1Text || undefined,
-      introText: introText || undefined,
-    };
-  };
-
-  const fetchWithRetry = async (url: string): Promise<string> => {
-    console.log('Fetching page via backend:', url);
-    
-    const { data, error } = await supabase.functions.invoke('fetch-page', {
-      body: { url },
-    });
-
-    if (error) {
-      console.error('Edge function error:', error);
-      throw new Error('Kon de website niet ophalen. Probeer het later opnieuw.');
-    }
-
-    if (!data?.success || !data?.html) {
-      throw new Error(data?.error || 'Geen HTML ontvangen van de server');
-    }
-
-    return data.html;
-  };
-
-  const analyzeUrl = async (url: string, primaryKeyword: string = '', secondaryKeywords: string[] = []) => {
+  const analyzeUrl = async (url: string, primaryKeyword = '', secondaryKeywords: string[] = []) => {
     setIsLoading(true);
     setAnalysisData(null);
 
     try {
-      const html = await fetchWithRetry(url);
+      const html = await fetchPageHtml(url);
       const headings = parseHeadings(html);
       const meta = parseMeta(html);
       const structuredData = parseStructuredData(html);
@@ -553,14 +73,11 @@ const Index = () => {
         ? [primaryKeyword, ...secondaryKeywords] 
         : secondaryKeywords;
       const keywordScores = analyzeKeywords(html, allKeywords);
-      
       const keywordPlacement = analyzeKeywordPlacement(html, url, primaryKeyword);
-
-      const screenshotPlaceholder = undefined;
 
       const data: AnalysisData = {
         url,
-        screenshot: screenshotPlaceholder,
+        screenshot: undefined,
         headings,
         meta,
         structuredData,
@@ -572,12 +89,9 @@ const Index = () => {
       setAnalysisData(data);
       toast.success("Analyse voltooid!");
       
-      // Scroll to analysis results section
       setTimeout(() => {
         document.getElementById('analysis-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
-      
-      // FAQs are now generated on-demand via button in FaqSuggestions component
       
       setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -589,6 +103,8 @@ const Index = () => {
       setIsLoading(false);
     }
   };
+
+  // ── FAQ Generation ───────────────────────────────────────────────────────
 
   const generateFaqs = async () => {
     if (!analysisData?.html) {
@@ -604,10 +120,7 @@ const Index = () => {
 
       if (error) throw error;
 
-      setAnalysisData({
-        ...analysisData,
-        faqs: data.faqs
-      });
+      setAnalysisData({ ...analysisData, faqs: data.faqs });
       toast.success("FAQ suggesties gegenereerd!");
     } catch (error) {
       console.error('FAQ generatie fout:', error);
@@ -624,37 +137,20 @@ const Index = () => {
 
   const handleFaqsUpdate = (updatedFaqs: FaqItem[]) => {
     if (analysisData) {
-      setAnalysisData({
-        ...analysisData,
-        faqs: updatedFaqs
-      });
+      setAnalysisData({ ...analysisData, faqs: updatedFaqs });
     }
   };
+
+  // ── Website Analysis ─────────────────────────────────────────────────────
 
   const handleUrlsDiscovered = (baseUrl: string, urls: SitemapUrl[]) => {
     setWebsiteBaseUrl(baseUrl);
     setDiscoveredUrls(urls);
-    // Set default project name from hostname
     try {
-      const urlObj = new URL(baseUrl);
-      setProjectName(urlObj.hostname);
+      setProjectName(new URL(baseUrl).hostname);
     } catch {
       setProjectName(baseUrl);
     }
-  };
-
-  const calculateSeoScore = (
-    hasH1: boolean, 
-    hasMetaDesc: boolean, 
-    hasStructuredData: boolean, 
-    headingIssues: number
-  ): number => {
-    let score = 0;
-    if (hasH1) score += 25;
-    if (hasMetaDesc) score += 25;
-    if (hasStructuredData) score += 25;
-    score += Math.max(0, 25 - (headingIssues * 5));
-    return Math.max(0, Math.min(100, score));
   };
 
   const analyzePageForWebsite = (html: string, url: string): PageAnalysisResult => {
@@ -665,23 +161,10 @@ const Index = () => {
     const hasH1 = headings.some(h => h.level === 1);
     const hasMetaDescription = !!meta.description;
     const hasStructuredDataFlag = structuredData.length > 0;
-    
-    // Calculate heading issues
-    let headingIssues = 0;
-    const h1Count = headings.filter(h => h.level === 1).length;
-    if (h1Count === 0) headingIssues++;
-    if (h1Count > 1) headingIssues++;
-    
-    // Check for skipped levels
-    const levels = headings.map(h => h.level).sort((a, b) => a - b);
-    for (let i = 1; i < levels.length; i++) {
-      if (levels[i] - levels[i-1] > 1) headingIssues++;
-    }
-    
+    const headingIssues = calculateHeadingIssues(headings);
     const seoScore = calculateSeoScore(hasH1, hasMetaDescription, hasStructuredDataFlag, headingIssues);
     
-    // Create full analysis data for storage
-    const analysisData: AnalysisData = {
+    const pageAnalysisData: AnalysisData = {
       url,
       headings,
       meta,
@@ -698,7 +181,7 @@ const Index = () => {
       hasMetaDescription,
       hasStructuredData: hasStructuredDataFlag,
       headingIssues,
-      analysisData,
+      analysisData: pageAnalysisData,
     };
   };
 
@@ -715,7 +198,6 @@ const Index = () => {
     let wasStopped = false;
     
     for (let i = 0; i < urls.length; i++) {
-      // Check if analysis should be stopped
       if (shouldStopAnalysisRef.current) {
         wasStopped = true;
         break;
@@ -723,10 +205,8 @@ const Index = () => {
       
       const url = urls[i];
       try {
-        console.log(`Analyzing page ${i + 1}/${urls.length}: ${url}`);
-        const html = await fetchWithRetry(url);
-        const result = analyzePageForWebsite(html, url);
-        results.push(result);
+        const html = await fetchPageHtml(url);
+        results.push(analyzePageForWebsite(html, url));
       } catch (error) {
         console.error(`Failed to analyze ${url}:`, error);
         results.push({
@@ -743,7 +223,6 @@ const Index = () => {
       setAnalyzedPagesCount(i + 1);
       setWebsiteResults([...results]);
       
-      // Small delay between requests
       if (i < urls.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
@@ -765,23 +244,15 @@ const Index = () => {
   };
 
   const handleViewPageDetails = async (url: string) => {
-    // Analyze single page in detail
     await analyzeUrl(url);
   };
-
-  const { signOut, user } = useAuth();
-
-  useEffect(() => {
-    if (user?.id) {
-      supabase.from('profiles').select('plan').eq('id', user.id).single()
-        .then(({ data }) => { if (data) setUserPlan(data.plan); });
-    }
-  }, [user?.id]);
 
   const handleSignOut = async () => {
     await signOut();
     toast.success("Uitgelogd");
   };
+
+  // ── Save Project ─────────────────────────────────────────────────────────
 
   const handleSaveProject = async () => {
     if (!user || websiteResults.length === 0 || !projectName.trim()) return;
@@ -789,7 +260,6 @@ const Index = () => {
     setIsSavingProject(true);
     
     try {
-      // Create project
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
@@ -805,7 +275,6 @@ const Index = () => {
       
       if (projectError) throw projectError;
       
-      // Create project pages - map status to valid database values
       const pagesToInsert = websiteResults.map(result => ({
         project_id: project.id,
         url: result.url,
@@ -835,6 +304,8 @@ const Index = () => {
       setIsSavingProject(false);
     }
   };
+
+  // ── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen py-12 px-4">
