@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, FileText, Hash, TrendingUp, RotateCcw, ChevronDown, RefreshCw, Loader2, Lock, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { HeadingStructureScore } from "./HeadingStructureScore";
 import { StructuredDataAnalysis } from "./StructuredDataAnalysis";
@@ -30,7 +31,7 @@ interface AnalysisResultsProps {
   brandContext?: string;
 }
 
-const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
+const LockedFeatureCard = ({ title, description, onUpgrade, upgradeLabel }: { title: string; description: string; onUpgrade: () => void; upgradeLabel: string }) => (
   <Card className="p-4 sm:p-6 shadow-soft border-dashed border-2 border-muted-foreground/20 bg-muted/30 relative overflow-hidden">
     <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
       <div className="flex items-start gap-3">
@@ -48,7 +49,7 @@ const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; d
         className="shrink-0 gap-1.5 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground self-start sm:self-auto"
         onClick={onUpgrade}
       >
-        Upgraden
+        {upgradeLabel}
         <ArrowUpRight className="h-3.5 w-3.5" />
       </Button>
     </div>
@@ -68,6 +69,7 @@ export const AnalysisResults = ({
   userId,
   brandContext
 }: AnalysisResultsProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isFree = userPlan === 'free';
   const { credits, isLoading: creditsLoading, refetchCredits } = useAiCredits(userId);
@@ -97,7 +99,7 @@ export const AnalysisResults = ({
             <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-xl sm:text-2xl font-bold">Analyse Resultaten</h2>
+            <h2 className="text-xl sm:text-2xl font-bold">{t('analysis.analysisResults')}</h2>
             <a 
               href={data.url} 
               target="_blank" 
@@ -120,14 +122,14 @@ export const AnalysisResults = ({
               {isReanalyzing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="hidden sm:inline">Analyseren...</span>
-                  <span className="sm:hidden">Bezig...</span>
+                  <span className="hidden sm:inline">{t('analysis.reanalyzing')}</span>
+                  <span className="sm:hidden">{t('analysis.reanalyzingShort')}</span>
                 </>
               ) : (
                 <>
                   <RefreshCw className="h-4 w-4" />
-                  <span className="hidden sm:inline">Pagina opnieuw analyseren</span>
-                  <span className="sm:hidden">Heranalyse</span>
+                  <span className="hidden sm:inline">{t('analysis.reanalyze')}</span>
+                  <span className="sm:hidden">{t('analysis.reanalyzeShort')}</span>
                 </>
               )}
             </Button>
@@ -140,8 +142,8 @@ export const AnalysisResults = ({
               size="sm"
             >
               <RotateCcw className="h-4 w-4" />
-              <span className="hidden sm:inline">Nieuwe analyse</span>
-              <span className="sm:hidden">Nieuw</span>
+              <span className="hidden sm:inline">{t('analysis.newAnalysis')}</span>
+              <span className="sm:hidden">{t('analysis.newShort')}</span>
             </Button>
           )}
         </div>
@@ -158,7 +160,7 @@ export const AnalysisResults = ({
         <Card className="p-6 shadow-soft">
           <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
-            Heading Structuur Visualisatie
+            {t('analysis.headingStructureVisualization')}
           </h3>
           <div className="relative inline-block max-w-full">
             <img 
@@ -166,7 +168,6 @@ export const AnalysisResults = ({
               alt="Website screenshot" 
               className="rounded-lg border border-border w-full"
             />
-            {/* Note: In a real implementation, we would overlay heading markers on the screenshot */}
           </div>
         </Card>
       )}
@@ -176,7 +177,7 @@ export const AnalysisResults = ({
         <Card className="p-4 sm:p-6 shadow-soft flex flex-col lg:h-0 lg:min-h-full overflow-hidden">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
-            Heading Structuur
+            {t('analysis.headingStructure')}
           </h3>
           
           <div className="space-y-3 mb-6 shrink-0">
@@ -200,63 +201,37 @@ export const AnalysisResults = ({
 
           <div className="space-y-4 min-h-0 flex-1 overflow-y-auto">
             {(() => {
-              // First, sort headings by their position on the page (top to bottom)
               const sortedHeadings = [...data.headings].sort((a, b) => a.position.top - b.position.top);
               
-              console.log('Sorted headings:', sortedHeadings.map(h => ({ 
-                level: h.level, 
-                text: h.text.substring(0, 50), 
-                top: h.position.top 
-              })));
-              
-              // Group headings by H2 sections
               const groups: Array<{ h2?: HeadingInfo; children: HeadingInfo[] }> = [];
               let currentGroup: { h2?: HeadingInfo; children: HeadingInfo[] } | null = null;
               
-              sortedHeadings.forEach((heading, idx) => {
-                console.log(`Processing heading ${idx}: H${heading.level} - ${heading.text.substring(0, 30)}`);
-                
+              sortedHeadings.forEach((heading) => {
                 if (heading.level === 1) {
-                  // Save current group if exists
                   if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
-                    console.log('Saving H2 group before H1:', currentGroup.h2?.text);
                     groups.push(currentGroup);
                   }
-                  // H1 gets its own standalone display
                   groups.push({ children: [heading] });
                   currentGroup = null;
                 } else if (heading.level === 2) {
-                  // Save previous H2 group if exists
                   if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
-                    console.log('Saving previous H2 group:', currentGroup.h2?.text, 'with', currentGroup.children.length, 'children');
                     groups.push(currentGroup);
                   }
-                  // Start new H2 group
-                  console.log('Starting new H2 group:', heading.text);
                   currentGroup = { h2: heading, children: [] };
                 } else {
-                  // H3, H4, H5, H6 - add to current group
                   if (!currentGroup) {
-                    // If no H2 group exists yet, create orphan group
-                    console.log('Creating orphan group for:', heading.text);
                     currentGroup = { children: [heading] };
                   } else {
-                    console.log('Adding to current H2 group:', heading.text);
                     currentGroup.children.push(heading);
                   }
                 }
               });
               
-              // Push last group
               if (currentGroup && (currentGroup.h2 || currentGroup.children.length > 0)) {
-                console.log('Saving final group:', currentGroup.h2?.text, 'with', currentGroup.children.length, 'children');
                 groups.push(currentGroup);
               }
               
-              console.log('Total groups created:', groups.length);
-              
               return groups.map((group, groupIdx) => {
-                // Handle H1 standalone
                 if (group.children.length === 1 && group.children[0].level === 1) {
                   const h1 = group.children[0];
                   return (
@@ -283,12 +258,10 @@ export const AnalysisResults = ({
                   );
                 }
                 
-                // Handle H2 groups
                 if (!group.h2) return null;
                 
                 return (
                   <div key={`group-${groupIdx}`} className="border border-border/50 rounded-lg p-3 bg-secondary/20">
-                    {/* H2 Header */}
                     <Collapsible>
                       <CollapsibleTrigger className="w-full">
                         <div className="flex items-start gap-3 p-2 rounded-lg bg-secondary/50 hover:bg-secondary/60 transition-colors group">
@@ -310,11 +283,10 @@ export const AnalysisResults = ({
                       )}
                     </Collapsible>
                     
-                    {/* Children (H3, H4, etc.) */}
                     {group.children.length > 0 && (
                       <div className="ml-4 space-y-2 mt-2">
                         {group.children.map((child, childIdx) => {
-                          const indentLevel = Math.max(0, child.level - 3); // H3 = 0, H4 = 1, etc.
+                          const indentLevel = Math.max(0, child.level - 3);
                           const marginLeft = indentLevel * 20;
                           
                           return (
@@ -359,10 +331,9 @@ export const AnalysisResults = ({
         <Card className="p-4 sm:p-6 shadow-soft">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            Meta Informatie
+            {t('analysis.metaInformation')}
           </h3>
 
-          {/* AI Meta Tag Suggestions - bovenaan */}
           {!isFree && (
             <MetaTagSuggestions
               url={data.url}
@@ -376,13 +347,13 @@ export const AnalysisResults = ({
             {data.meta.title && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Title Tag
+                  {t('analysis.titleTag')}
                 </label>
                 <p className="mt-1 text-sm p-3 bg-secondary rounded-lg">
                   {data.meta.title}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Lengte: {data.meta.title.length} karakters {data.meta.title.length > 60 && "(⚠️ Te lang)"}
+                  {t('analysis.length')}: {data.meta.title.length} {t('analysis.characters')} {data.meta.title.length > 60 && `(⚠️ ${t('analysis.tooLong')})`}
                 </p>
               </div>
             )}
@@ -390,13 +361,13 @@ export const AnalysisResults = ({
             {data.meta.description && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Meta Description
+                  {t('analysis.metaDescription')}
                 </label>
                 <p className="mt-1 text-sm p-3 bg-secondary rounded-lg">
                   {data.meta.description}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Lengte: {data.meta.description.length} karakters {data.meta.description.length > 160 && "(⚠️ Te lang)"}
+                  {t('analysis.length')}: {data.meta.description.length} {t('analysis.characters')} {data.meta.description.length > 160 && `(⚠️ ${t('analysis.tooLong')})`}
                 </p>
               </div>
             )}
@@ -404,7 +375,7 @@ export const AnalysisResults = ({
             {data.meta.ogTitle && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Open Graph Title
+                  {t('analysis.ogTitle')}
                 </label>
                 <p className="mt-1 text-sm p-3 bg-secondary rounded-lg">
                   {data.meta.ogTitle}
@@ -415,7 +386,7 @@ export const AnalysisResults = ({
             {data.meta.ogDescription && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Open Graph Description
+                  {t('analysis.ogDescription')}
                 </label>
                 <p className="mt-1 text-sm p-3 bg-secondary rounded-lg">
                   {data.meta.ogDescription}
@@ -426,7 +397,7 @@ export const AnalysisResults = ({
             {data.meta.ogImage && (
               <div>
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Open Graph Image
+                  {t('analysis.ogImage')}
                 </label>
                 <img 
                   src={data.meta.ogImage} 
@@ -445,9 +416,10 @@ export const AnalysisResults = ({
         <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
       ) : (
         <LockedFeatureCard 
-          title="Rich Snippets & Structured Data" 
-          description="Ontdek welke structured data je pagina bevat en welke je mist voor betere zichtbaarheid in zoekresultaten."
+          title={t('analysis.richSnippets')} 
+          description={t('analysis.lockedStructuredData')}
           onUpgrade={() => navigate('/#pricing')}
+          upgradeLabel={t('analysis.upgrade')}
         />
       )}
 
@@ -456,9 +428,10 @@ export const AnalysisResults = ({
         <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
       ) : (
         <LockedFeatureCard 
-          title="JSON-LD Generator" 
-          description="Genereer automatisch het juiste JSON-LD schema voor je pagina, klaar om te implementeren."
+          title={t('jsonLd.title')} 
+          description={t('analysis.lockedJsonLd')}
           onUpgrade={() => navigate('/#pricing')}
+          upgradeLabel={t('analysis.upgrade')}
         />
       )}
 
@@ -467,9 +440,10 @@ export const AnalysisResults = ({
         data.keywordPlacement && <KeywordPlacementAdvice analysis={data.keywordPlacement} />
       ) : (
         <LockedFeatureCard 
-          title="Keyword Plaatsing Advies" 
-          description="Controleer of je primaire keyword op de juiste plekken staat: URL, H1 en introductietekst."
+          title={t('keywordPlacement.title')} 
+          description={t('analysis.lockedKeywordPlacement')}
           onUpgrade={() => navigate('/#pricing')}
+          upgradeLabel={t('analysis.upgrade')}
         />
       )}
 
@@ -478,9 +452,10 @@ export const AnalysisResults = ({
         data.keywords && data.keywords.length > 0 && <KeywordAnalysis keywords={data.keywords} />
       ) : (
         <LockedFeatureCard 
-          title="Keyword Analyse" 
-          description="Analyseer keyword-dichtheid, plaatsing en krijg concrete verbetersugesties per keyword."
+          title={t('keyword.title')} 
+          description={t('analysis.lockedKeywordAnalysis')}
           onUpgrade={() => navigate('/#pricing')}
+          upgradeLabel={t('analysis.upgrade')}
         />
       )}
 
@@ -498,9 +473,10 @@ export const AnalysisResults = ({
         />
       ) : (
         <LockedFeatureCard 
-          title="FAQ Suggesties" 
-          description="Genereer AI-gestuurde FAQ's geoptimaliseerd voor featured snippets en AI-zoekmachines."
+          title={t('faq.title')} 
+          description={t('analysis.lockedFaq')}
           onUpgrade={() => navigate('/#pricing')}
+          upgradeLabel={t('analysis.upgrade')}
         />
       )}
 
@@ -514,35 +490,35 @@ export const AnalysisResults = ({
         />
       ) : (
         <LockedFeatureCard 
-          title="AI Ranking Check" 
-          description="Controleer of je website wordt genoemd door ChatGPT, Gemini en andere AI-modellen. Ontdek je positie en sentiment per model."
+          title={t('aiRanking.title')} 
+          description={t('analysis.lockedAiRanking')}
           onUpgrade={() => navigate('/#pricing')}
+          upgradeLabel={t('analysis.upgrade')}
         />
       )}
-
 
       {/* Placeholder Cards for DR/UR and Keywords */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card className="p-4 sm:p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            Domain & URL Rating
+            {t('analysis.domainUrlRating')}
           </h3>
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-2">
-              DR/UR data vereist externe API integratie
+              {t('analysis.drUrRequiresApi')}
             </p>
             <p className="text-sm text-muted-foreground">
-              (Ahrefs, Moz, of SEMrush)
+              {t('analysis.drUrApis')}
             </p>
             <div className="mt-6 flex gap-4 justify-center">
               <div className="text-center">
                 <div className="text-4xl font-bold gradient-text">--</div>
-                <div className="text-xs text-muted-foreground mt-1">Domain Rating</div>
+                <div className="text-xs text-muted-foreground mt-1">{t('analysis.domainRating')}</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold gradient-text">--</div>
-                <div className="text-xs text-muted-foreground mt-1">URL Rating</div>
+                <div className="text-xs text-muted-foreground mt-1">{t('analysis.urlRating')}</div>
               </div>
             </div>
           </div>
@@ -551,14 +527,14 @@ export const AnalysisResults = ({
         <Card className="p-4 sm:p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
-            Keyword Rankings
+            {t('analysis.keywordRankings')}
           </h3>
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-2">
-              Keyword ranking data vereist externe API integratie
+              {t('analysis.keywordRankingsRequiresApi')}
             </p>
             <p className="text-sm text-muted-foreground">
-              (Google Search Console, Ahrefs, of SEMrush)
+              {t('analysis.keywordRankingsApis')}
             </p>
           </div>
         </Card>

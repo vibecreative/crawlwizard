@@ -61,7 +61,7 @@ const MODEL_ORDER = [
 ];
 
 export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }: AiRankingCheckProps) => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const isEnterprise = userPlan === "enterprise";
   const [isRunning, setIsRunning] = useState(false);
@@ -81,9 +81,9 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
               <Lock className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-muted-foreground">AI Ranking Check</h3>
+              <h3 className="text-lg font-semibold text-muted-foreground">{t('aiRanking.title')}</h3>
               <p className="text-sm text-muted-foreground/70 mt-1 max-w-lg">
-                Controleer of je website wordt genoemd door de belangrijkste AI-modellen. Ontdek je positie, vermelding en sentiment per model.
+                {t('aiRanking.lockedDescription')}
               </p>
             </div>
           </div>
@@ -93,7 +93,7 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
             className="shrink-0 gap-1.5 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground"
             onClick={() => navigate("/#pricing")}
           >
-            Upgraden
+            {t('analysis.upgrade')}
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -105,14 +105,14 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
     const next = new Set(selectedFaqIndices);
     if (next.has(index)) next.delete(index);
     else if (next.size + customQuestions.length < 5) next.add(index);
-    else toast.error("Maximaal 5 vragen tegelijk");
+    else toast.error(t('aiRanking.maxQuestions'));
     setSelectedFaqIndices(next);
   };
 
   const addCustomQuestion = () => {
     if (!newQuestion.trim()) return;
     if (selectedFaqIndices.size + customQuestions.length >= 5) {
-      toast.error("Maximaal 5 vragen tegelijk");
+      toast.error(t('aiRanking.maxQuestions'));
       return;
     }
     setCustomQuestions([...customQuestions, newQuestion.trim()]);
@@ -130,7 +130,7 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
     ];
 
     if (questions.length === 0) {
-      toast.error("Selecteer minimaal één vraag");
+      toast.error(t('aiRanking.selectMinOne'));
       return;
     }
 
@@ -145,17 +145,17 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
       if (error) throw error;
 
       if (data?.error === 'credits_exhausted') {
-        toast.error(data.message || 'Je AI-credits zijn op voor deze maand.');
+        toast.error(t('faq.creditsExhausted'));
         return;
       }
 
       if (data?.results) {
         setResults(data.results);
-        toast.success("AI Ranking Check voltooid!");
+        toast.success(t('aiRanking.completed'));
       }
     } catch (err: any) {
       console.error("AI Ranking Check error:", err);
-      toast.error("Fout bij AI Ranking Check: " + (err.message || "Onbekende fout"));
+      toast.error(`${t('aiRanking.error')}: ${err.message || t('aiRanking.unknownError')}`);
     } finally {
       setIsRunning(false);
     }
@@ -193,9 +193,9 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
           <Bot className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h3 className="text-xl font-semibold">AI Ranking Check</h3>
+          <h3 className="text-xl font-semibold">{t('aiRanking.title')}</h3>
           <p className="text-sm text-muted-foreground">
-            Controleer of <span className="font-medium text-foreground">{domain}</span> wordt genoemd door AI-modellen
+            {t('aiRanking.checkDescription', { domain }).replace('<1>', '').replace('</1>', '')}
           </p>
         </div>
       </div>
@@ -203,10 +203,9 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
       {/* Question Selection */}
       {results.length === 0 && (
         <div className="space-y-4 mb-6">
-          {/* FAQ selection */}
           {faqs.length > 0 && (
             <div>
-              <p className="text-sm font-medium mb-2">Selecteer FAQ vragen (max 5 totaal):</p>
+              <p className="text-sm font-medium mb-2">{t('aiRanking.selectFaqQuestions')}</p>
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
                 {faqs.map((faq, i) => (
                   <label
@@ -234,9 +233,8 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
             </div>
           )}
 
-          {/* Custom questions */}
           <div>
-            <p className="text-sm font-medium mb-2">Of voeg eigen vragen toe:</p>
+            <p className="text-sm font-medium mb-2">{t('aiRanking.addCustomQuestions')}</p>
             {customQuestions.map((q, i) => (
               <div key={i} className="flex items-center gap-2 mb-1.5">
                 <span className="text-sm flex-1 p-2 bg-muted/30 rounded-lg truncate">{q}</span>
@@ -247,7 +245,7 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
             ))}
             <div className="flex gap-2">
               <Input
-                placeholder="Typ je eigen vraag..."
+                placeholder={t('aiRanking.typeQuestion')}
                 value={newQuestion}
                 onChange={(e) => setNewQuestion(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addCustomQuestion()}
@@ -263,28 +261,28 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
             {isRunning ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                AI-modellen bevragen... Dit kan even duren
+                {t('aiRanking.running')}
               </>
             ) : (
               <>
                 <Bot className="h-4 w-4" />
-                Start AI Ranking Check
+                {t('aiRanking.startCheck')}
               </>
             )}
           </Button>
 
           <div className="rounded-lg bg-muted/40 border border-border/50 p-4 text-xs text-muted-foreground space-y-2">
             <p>
-              <span className="font-semibold text-foreground">Welke modellen?</span>{" "}
-              Elke vraag wordt parallel voorgelegd aan 4 AI-modellen: Gemini Pro, Gemini Flash, GPT-5 en GPT-5 Mini.
+              <span className="font-semibold text-foreground">{t('aiRanking.whichModels')}</span>{" "}
+              {t('aiRanking.whichModelsDesc')}
             </p>
             <p>
-              <span className="font-semibold text-foreground">Wat wordt gecheckt?</span>{" "}
-              Per model analyseren we of je domein wordt <em>genoemd</em>, op welke <em>positie</em> het verschijnt en wat het <em>sentiment</em> is (positief, neutraal of negatief).
+              <span className="font-semibold text-foreground">{t('aiRanking.whatIsChecked')}</span>{" "}
+              {t('aiRanking.whatIsCheckedDesc')}
             </p>
             <p>
-              <span className="font-semibold text-foreground">Waarom max. 5 vragen?</span>{" "}
-              Elke vraag genereert 4 AI-aanvragen (één per model). Om het creditverbruik beheersbaar te houden is het maximum 5 vragen per check (= 20 AI-calls).
+              <span className="font-semibold text-foreground">{t('aiRanking.whyMaxQuestions')}</span>{" "}
+              {t('aiRanking.whyMaxQuestionsDesc')}
             </p>
           </div>
         </div>
@@ -293,25 +291,23 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
       {/* Results */}
       {results.length > 0 && (
         <div className="space-y-6">
-          {/* Summary */}
           {summary && (
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center p-3 rounded-lg bg-muted/30">
                 <p className="text-2xl font-bold text-primary">{summary.pct}%</p>
-                <p className="text-xs text-muted-foreground">Vermeldingspercentage</p>
+                <p className="text-xs text-muted-foreground">{t('aiRanking.mentionPercentage')}</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-muted/30">
                 <p className="text-2xl font-bold text-green-500">{summary.mentioned}</p>
-                <p className="text-xs text-muted-foreground">Vermeldingen</p>
+                <p className="text-xs text-muted-foreground">{t('aiRanking.mentions')}</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-muted/30">
                 <p className="text-2xl font-bold">{summary.total}</p>
-                <p className="text-xs text-muted-foreground">Totaal checks</p>
+                <p className="text-xs text-muted-foreground">{t('aiRanking.totalChecks')}</p>
               </div>
             </div>
           )}
 
-          {/* Results per question */}
           <ScrollArea className="max-h-[600px]">
             <div className="space-y-4">
               {getQuestions().map((question, qIdx) => (
@@ -344,8 +340,8 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
                                 )}
                                 <span className="text-xs">
                                   {result.is_mentioned
-                                    ? `#${result.mention_position || "?"} genoemd`
-                                    : "Niet genoemd"}
+                                    ? t('aiRanking.mentioned', { position: result.mention_position || "?" })
+                                    : t('aiRanking.notMentioned')}
                                 </span>
                               </div>
                               {result.is_mentioned && (
@@ -370,10 +366,9 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
             </div>
           </ScrollArea>
 
-          {/* Run again button */}
           <Button variant="outline" onClick={() => setResults([])} className="w-full gap-2">
             <Bot className="h-4 w-4" />
-            Nieuwe check uitvoeren
+            {t('aiRanking.newCheck')}
           </Button>
         </div>
       )}
