@@ -78,7 +78,7 @@ const Landing = () => {
   ];
 
   const stats = [
-    { value: '500+', label: 'Pagina\'s per scan' },
+    { value: 'tot 500', label: 'Pagina\'s per scan' },
     { value: '6', label: 'SEO-checks per pagina' },
     { value: '4', label: 'AI-modellen' },
     { value: '< 30s', label: 'Gemiddelde scantijd' },
