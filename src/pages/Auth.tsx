@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,12 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Search, Mail, Lock, User, CheckCircle2 } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { z } from 'zod';
 
-const emailSchema = z.string().email('Voer een geldig e-mailadres in');
-const passwordSchema = z.string().min(6, 'Wachtwoord moet minimaal 6 karakters zijn');
-
 const Auth = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -27,6 +27,9 @@ const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const emailSchema = z.string().email(t('auth.invalidEmail'));
+  const passwordSchema = z.string().min(6, t('auth.passwordMinLength'));
 
   useEffect(() => {
     if (!loading && user) {
@@ -49,12 +52,12 @@ const Auth = () => {
     const { error } = await signIn(email, password);
     setIsLoading(false);
     if (error) {
-      let message = 'Er is een fout opgetreden bij het inloggen.';
-      if (error.message.includes('Invalid login credentials')) message = 'Ongeldige e-mail of wachtwoord.';
-      else if (error.message.includes('Email not confirmed')) message = 'Bevestig eerst je e-mailadres.';
-      toast({ title: 'Inloggen mislukt', description: message, variant: 'destructive' });
+      let message = t('auth.loginError');
+      if (error.message.includes('Invalid login credentials')) message = t('auth.invalidCredentials');
+      else if (error.message.includes('Email not confirmed')) message = t('auth.confirmEmail');
+      toast({ title: t('auth.loginFailed'), description: message, variant: 'destructive' });
     } else {
-      toast({ title: 'Welkom terug!', description: 'Je bent succesvol ingelogd.' });
+      toast({ title: t('auth.welcomeBack'), description: t('auth.loginSuccess') });
     }
   };
 
@@ -65,9 +68,9 @@ const Auth = () => {
     const { error } = await signUp(email, password, fullName);
     setIsLoading(false);
     if (error) {
-      let message = 'Er is een fout opgetreden bij het registreren.';
-      if (error.message.includes('User already registered')) message = 'Dit e-mailadres is al geregistreerd.';
-      toast({ title: 'Registratie mislukt', description: message, variant: 'destructive' });
+      let message = t('auth.registerError');
+      if (error.message.includes('User already registered')) message = t('auth.userExists');
+      toast({ title: t('auth.registerFailed'), description: message, variant: 'destructive' });
     } else {
       setRegisteredEmail(email);
       setShowConfirmDialog(true);
@@ -86,12 +89,14 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden p-4">
       <SEOHead
-        title="Inloggen"
-        description="Log in of maak een account aan bij CrawlWizard om je website te analyseren op SEO en AI-vindbaarheid."
+        title={t('auth.title')}
+        description={t('auth.description')}
         canonical="/auth"
         noindex
       />
-      {/* Background accents */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSwitcher />
+      </div>
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
       
@@ -104,44 +109,44 @@ const Auth = () => {
           </div>
           <h1 className="text-2xl font-bold font-display">CrawlWizard</h1>
           <p className="text-sm text-muted-foreground">
-            Analyseer en optimaliseer je website
+            {t('auth.subtitle')}
           </p>
         </div>
 
         <Card className="border-border/50 shadow-card">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-lg font-display">Account</CardTitle>
+            <CardTitle className="text-lg font-display">{t('auth.account')}</CardTitle>
             <CardDescription className="text-xs">
-              Log in of maak een account aan
+              {t('auth.accountDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-5 h-9">
-                <TabsTrigger value="login" className="text-xs">Inloggen</TabsTrigger>
-                <TabsTrigger value="register" className="text-xs">Registreren</TabsTrigger>
+                <TabsTrigger value="login" className="text-xs">{t('auth.loginTab')}</TabsTrigger>
+                <TabsTrigger value="register" className="text-xs">{t('auth.registerTab')}</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
                 <form onSubmit={handleSignIn} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="login-email" className="text-xs">E-mailadres</Label>
+                    <Label htmlFor="login-email" className="text-xs">{t('auth.email')}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input id="login-email" type="email" placeholder="naam@voorbeeld.nl" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
+                      <Input id="login-email" type="email" placeholder={t('auth.emailPlaceholder')} value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
                     </div>
                     {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="login-password" className="text-xs">Wachtwoord</Label>
+                    <Label htmlFor="login-password" className="text-xs">{t('auth.password')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
+                      <Input id="login-password" type="password" placeholder={t('auth.passwordPlaceholder')} value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
                     </div>
                     {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                   </div>
                   <Button type="submit" className="w-full gradient-primary text-primary-foreground h-9 text-sm" disabled={isLoading}>
-                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Inloggen...</> : 'Inloggen'}
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('auth.loggingIn')}</> : t('auth.loginButton')}
                   </Button>
                 </form>
               </TabsContent>
@@ -149,30 +154,30 @@ const Auth = () => {
               <TabsContent value="register">
                 <form onSubmit={handleSignUp} className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="register-name" className="text-xs">Volledige naam (optioneel)</Label>
+                    <Label htmlFor="register-name" className="text-xs">{t('auth.fullName')}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input id="register-name" type="text" placeholder="Jan Jansen" value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
+                      <Input id="register-name" type="text" placeholder={t('auth.fullNamePlaceholder')} value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="register-email" className="text-xs">E-mailadres</Label>
+                    <Label htmlFor="register-email" className="text-xs">{t('auth.email')}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input id="register-email" type="email" placeholder="naam@voorbeeld.nl" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
+                      <Input id="register-email" type="email" placeholder={t('auth.emailPlaceholder')} value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
                     </div>
                     {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="register-password" className="text-xs">Wachtwoord</Label>
+                    <Label htmlFor="register-password" className="text-xs">{t('auth.password')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input id="register-password" type="password" placeholder="Minimaal 6 karakters" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
+                      <Input id="register-password" type="password" placeholder={t('auth.passwordMin')} value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 h-9 text-sm" disabled={isLoading} />
                     </div>
                     {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                   </div>
                   <Button type="submit" className="w-full gradient-primary text-primary-foreground h-9 text-sm" disabled={isLoading}>
-                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Registreren...</> : 'Account aanmaken'}
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('auth.registering')}</> : t('auth.registerButton')}
                   </Button>
                 </form>
               </TabsContent>
@@ -189,18 +194,18 @@ const Auth = () => {
                 <CheckCircle2 className="h-7 w-7 text-primary" />
               </div>
             </div>
-            <DialogTitle className="text-lg font-display">Controleer je inbox!</DialogTitle>
+            <DialogTitle className="text-lg font-display">{t('auth.checkInbox')}</DialogTitle>
             <DialogDescription className="text-sm pt-2">
-              We hebben een verificatiemail gestuurd naar{' '}
+              {t('auth.verificationSent')}{' '}
               <span className="font-semibold text-foreground">{registeredEmail}</span>.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <p className="text-xs text-muted-foreground text-center">
-              Klik op de link in de e-mail om je account te activeren.
+              {t('auth.clickLink')}
             </p>
             <Button className="w-full h-9 text-sm" variant="outline" onClick={() => setShowConfirmDialog(false)}>
-              Begrepen
+              {t('auth.understood')}
             </Button>
           </div>
         </DialogContent>

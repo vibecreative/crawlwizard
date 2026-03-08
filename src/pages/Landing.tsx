@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { SEOHead } from '@/components/SEOHead';
 import heroBg from '@/assets/hero-bg.jpg';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -43,47 +45,48 @@ const scaleIn = {
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isYearly, setIsYearly] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const features = [
-    { icon: Layers, title: 'Heading Analyse', description: 'Ontdek in één oogopslag of je heading-structuur klopt – de basis van elke goed geïndexeerde pagina.' },
-    { icon: FileText, title: 'Meta & Structured Data', description: 'Structured data is de sleutel tot rich snippets én tot hoe AI-tools jouw content begrijpen. Wij maken het inzichtelijk.' },
-    { icon: Gauge, title: 'SEO Score', description: 'Geen vaag rapportcijfer, maar een concrete score met exacte verbeterpunten. Weet precies wat je morgen moet aanpakken.' },
-    { icon: Globe, title: 'Website Analyse', description: 'Scan je hele website in één keer. Tot 500 pagina\'s geanalyseerd, geen enkel probleem over het hoofd gezien.' },
-    { icon: Bot, title: 'AI FAQ Generator', description: 'FAQ\'s zijn goud voor rich snippets én voor AI-antwoorden. Genereer direct relevante vragen die jouw doelgroep stelt.' },
-    { icon: Target, title: 'Keyword Analyse', description: 'Schrijf je té veel of te weinig over je kernonderwerp? Wij laten het zien – per pagina, per keyword.' }
+    { icon: Layers, title: t('features.headingAnalysis.title'), description: t('features.headingAnalysis.description') },
+    { icon: FileText, title: t('features.metaStructured.title'), description: t('features.metaStructured.description') },
+    { icon: Gauge, title: t('features.seoScore.title'), description: t('features.seoScore.description') },
+    { icon: Globe, title: t('features.websiteAnalysis.title'), description: t('features.websiteAnalysis.description') },
+    { icon: Bot, title: t('features.aiFaqGenerator.title'), description: t('features.aiFaqGenerator.description') },
+    { icon: Target, title: t('features.keywordAnalysis.title'), description: t('features.keywordAnalysis.description') }
   ];
 
   const plans = [
     {
-      name: 'Free', monthlyPrice: '€0', yearlyPrice: '€0', period: 'voor altijd',
-      description: 'Gratis verkennen', subtitle: 'Analyseer je eerste pagina\'s en ontdek wat er beter kan.',
-      credits: '10 AI-credits/maand',
-      features: ['1 pagina per analyse', 'Tot 10 analyses', 'SEO-score per pagina', 'Heading-structuur analyse', 'Meta-informatie overzicht', '10 AI-credits per maand', 'Browser AI (onbeperkt, gratis)'],
-      cta: 'Gratis starten', popular: false, variant: 'outline' as const
+      name: 'Free', monthlyPrice: '€0', yearlyPrice: '€0', period: t('pricing.plans.free.period'),
+      description: t('pricing.plans.free.description'), subtitle: t('pricing.plans.free.subtitle'),
+      credits: t('pricing.plans.free.credits'),
+      features: t('pricing.plans.free.features', { returnObjects: true }) as string[],
+      cta: t('pricing.plans.free.cta'), popular: false, variant: 'outline' as const
     },
     {
-      name: 'Scale', monthlyPrice: '€17,95', yearlyPrice: '€14,95', period: 'per maand',
-      description: 'Voor ambitieuze websites', subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
-      credits: '50 AI-credits/maand',
-      features: ['Volledige website-analyse', 'Tot 100 pagina\'s per scan', '1 project opslaan', 'AI FAQ Generator', 'Keyword analyse', 'Structured data analyse', '50 AI-credits per maand', 'Browser AI (onbeperkt, gratis)'],
-      cta: 'Start met Scale', popular: true, variant: 'default' as const
+      name: 'Scale', monthlyPrice: '€17,95', yearlyPrice: '€14,95', period: t('pricing.perMonth'),
+      description: t('pricing.plans.scale.description'), subtitle: t('pricing.plans.scale.subtitle'),
+      credits: t('pricing.plans.scale.credits'),
+      features: t('pricing.plans.scale.features', { returnObjects: true }) as string[],
+      cta: t('pricing.plans.scale.cta'), popular: true, variant: 'default' as const
     },
     {
-      name: 'Enterprise', monthlyPrice: '€39,95', yearlyPrice: '€35', period: 'per maand',
-      description: 'Voor écht serieuze websites & bureau\'s', subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
-      credits: '200 AI-credits/maand',
-      features: ['Alles uit Scale', 'Tot 500 pagina\'s per scan', '3 projecten opslaan', 'AI Ranking Check (4 modellen)', 'AI Artikel Generator', '200 AI-credits per maand', 'Browser AI (onbeperkt, gratis)', 'Prioriteit support'],
-      cta: 'Start met Enterprise', popular: false, variant: 'outline' as const
+      name: 'Enterprise', monthlyPrice: '€39,95', yearlyPrice: '€35', period: t('pricing.perMonth'),
+      description: t('pricing.plans.enterprise.description'), subtitle: t('pricing.plans.enterprise.subtitle'),
+      credits: t('pricing.plans.enterprise.credits'),
+      features: t('pricing.plans.enterprise.features', { returnObjects: true }) as string[],
+      cta: t('pricing.plans.enterprise.cta'), popular: false, variant: 'outline' as const
     }
   ];
 
   const stats = [
-    { value: 'tot 500', label: 'Pagina\'s per scan' },
-    { value: '6', label: 'SEO-checks per pagina' },
-    { value: '4', label: 'AI-modellen' },
-    { value: '< 30s', label: 'Gemiddelde scantijd' },
+    { value: 'tot 500', label: t('stats.pagesPerScan') },
+    { value: '6', label: t('stats.seoChecks') },
+    { value: '4', label: t('stats.aiModels') },
+    { value: '< 30s', label: t('stats.avgScanTime') },
   ];
 
   return (
@@ -109,17 +112,19 @@ const Landing = () => {
             <span className="text-xl font-bold font-display">CrawlWizard</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
-            <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Prijzen</a>
-            <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Hoe het werkt</a>
+            <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.features')}</a>
+            <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.pricing')}</a>
+            <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('nav.howItWorks')}</a>
           </div>
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
             <ThemeToggle />
-            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>Inloggen</Button>
-            <Button size="sm" onClick={() => navigate('/auth')} className="gradient-primary text-primary-foreground">Gratis starten</Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>{t('nav.login')}</Button>
+            <Button size="sm" onClick={() => navigate('/auth')} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
           </div>
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
+            <LanguageSwitcher />
             <ThemeToggle />
             <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -137,12 +142,12 @@ const Landing = () => {
               className="md:hidden overflow-hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
             >
               <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">Features</a>
-                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">Prijzen</a>
-                <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">Hoe het werkt</a>
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">{t('nav.features')}</a>
+                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">{t('nav.pricing')}</a>
+                <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">{t('nav.howItWorks')}</a>
                 <div className="border-t border-border/50 pt-3 flex flex-col gap-2">
-                  <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>Inloggen</Button>
-                  <Button size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }} className="gradient-primary text-primary-foreground">Gratis starten</Button>
+                  <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>{t('nav.login')}</Button>
+                  <Button size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
                 </div>
               </div>
             </motion.div>
@@ -152,7 +157,6 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative pt-28 pb-24 px-4 overflow-hidden">
-        {/* Hero background image */}
         <div className="absolute inset-0 z-0">
           <img src={heroBg} alt="CrawlWizard SEO analyse dashboard achtergrond" className="w-full h-full object-cover opacity-25 dark:opacity-30" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
@@ -183,7 +187,7 @@ const Landing = () => {
               className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-primary/8 border border-primary/15 text-sm font-medium text-primary"
             >
               <Zap className="w-4 h-4" />
-              Nu met AI-gedreven FAQ Generator
+              {t('hero.badge')}
               <ChevronRight className="w-3.5 h-3.5" />
             </motion.div>
             <motion.h1 
@@ -191,16 +195,16 @@ const Landing = () => {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-5xl md:text-7xl font-bold font-display mb-6 leading-[1.08] tracking-tight"
             >
-              Word gevonden door{' '}
-              <span className="gradient-text">zoekmachines</span>
-              <br />én door AI
+              {t('hero.title1')}{' '}
+              <span className="gradient-text">{t('hero.titleHighlight')}</span>
+              <br />{t('hero.title2')}
             </motion.h1>
             <motion.p 
               variants={fadeUp} 
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Analyseer je volledige websitestructuur en krijg actionable inzichten om de bron te zijn in Google én in ChatGPT, Perplexity en AI Overviews.
+              {t('hero.subtitle')}
             </motion.p>
             <motion.div 
               variants={fadeUp} 
@@ -212,7 +216,7 @@ const Landing = () => {
                 onClick={() => navigate('/auth')}
                 className="gradient-primary text-primary-foreground text-base px-8 py-6 shadow-glow hover:shadow-[0_0_50px_hsl(14_90%_52%_/_0.25)] transition-shadow"
               >
-                Gratis starten
+                {t('nav.getStarted')}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button 
@@ -221,7 +225,7 @@ const Landing = () => {
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
                 className="text-base px-8 py-6"
               >
-                Bekijk features
+                {t('hero.viewFeatures')}
               </Button>
             </motion.div>
           </motion.div>
@@ -272,9 +276,9 @@ const Landing = () => {
             <div className="pt-11 p-6 md:p-8">
               <div className="grid md:grid-cols-3 gap-4">
                 {[
-                  { label: 'SEO Score', value: '87', extra: '+12 sinds vorige analyse', gradient: true },
-                  { label: "Pagina's", value: '24', extra: 'van 30 totaal', gradient: false },
-                  { label: 'Verbeterpunten', value: '8', extra: 'actionable tips', primary: true },
+                  { label: t('demo.seoScore'), value: '87', extra: t('demo.sinceLastAnalysis'), gradient: true },
+                  { label: t('demo.pages'), value: '24', extra: t('demo.ofTotal'), gradient: false },
+                  { label: t('demo.improvements'), value: '8', extra: t('demo.actionableTips'), primary: true },
                 ].map((card, i) => (
                   <Card key={i} className="shadow-soft border-border/50">
                     <CardHeader className="pb-2">
@@ -303,13 +307,13 @@ const Landing = () => {
             variants={stagger}
           >
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-semibold uppercase tracking-wider text-primary">
-              Features
+              {t('features.label')}
             </motion.div>
-            <motion.h2 variants={fadeUp} transition={{ duration: 0.5 }} className="text-3xl md:text-5xl font-bold font-display mb-4">
-              Alles wat je nodig hebt om<br />gevonden te worden
+            <motion.h2 variants={fadeUp} transition={{ duration: 0.5 }} className="text-3xl md:text-5xl font-bold font-display mb-4 whitespace-pre-line">
+              {t('features.title')}
             </motion.h2>
             <motion.p variants={fadeUp} transition={{ duration: 0.5 }} className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Door zoekmachines. Door AI-tools. Door je doelgroep.
+              {t('features.subtitle')}
             </motion.p>
           </motion.div>
           <motion.div 
@@ -349,10 +353,10 @@ const Landing = () => {
             variants={stagger}
           >
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-semibold uppercase tracking-wider text-primary">
-              Hoe het werkt
+              {t('howItWorks.label')}
             </motion.div>
             <motion.h2 variants={fadeUp} transition={{ duration: 0.5 }} className="text-3xl md:text-5xl font-bold font-display mb-4">
-              In 3 stappen naar betere vindbaarheid
+              {t('howItWorks.title')}
             </motion.h2>
           </motion.div>
           <motion.div 
@@ -363,9 +367,9 @@ const Landing = () => {
             variants={stagger}
           >
             {[
-              { step: '01', title: 'Voer je URL in', desc: 'Plak de URL van je website en wij crawlen automatisch al je pagina\'s.' },
-              { step: '02', title: 'Bekijk je analyse', desc: 'Ontvang een compleet SEO-rapport met scores, problemen en kansen.' },
-              { step: '03', title: 'Optimaliseer', desc: 'Gebruik onze AI-tools om content te verbeteren en hoger te scoren.' },
+              { step: '01', title: t('howItWorks.step1.title'), desc: t('howItWorks.step1.desc') },
+              { step: '02', title: t('howItWorks.step2.title'), desc: t('howItWorks.step2.desc') },
+              { step: '03', title: t('howItWorks.step3.title'), desc: t('howItWorks.step3.desc') },
             ].map((item, i) => (
               <motion.div key={i} className="relative text-center" variants={fadeUp} transition={{ duration: 0.5 }}>
                 <div className="text-6xl font-bold font-display text-primary/10 mb-3">{item.step}</div>
@@ -393,16 +397,16 @@ const Landing = () => {
             variants={stagger}
           >
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-semibold uppercase tracking-wider text-primary">
-              Prijzen
+              {t('pricing.label')}
             </motion.div>
             <motion.h2 variants={fadeUp} transition={{ duration: 0.5 }} className="text-3xl md:text-5xl font-bold font-display mb-4">
-              Transparante prijzen
+              {t('pricing.title')}
             </motion.h2>
             <motion.p variants={fadeUp} transition={{ duration: 0.5 }} className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Begin gratis. Geen creditcard, geen verborgen kosten.
+              {t('pricing.subtitle')}
             </motion.p>
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-8">
-              <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Maandelijks</span>
+              <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>{t('pricing.monthly')}</span>
               <button
                 type="button"
                 onClick={() => setIsYearly(!isYearly)}
@@ -410,9 +414,9 @@ const Landing = () => {
               >
                 <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isYearly ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
-              <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Jaarlijks</span>
+              <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>{t('pricing.yearly')}</span>
               {isYearly && (
-                <span className="text-[10px] sm:text-xs font-semibold text-primary bg-primary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap">Bespaar tot 17%</span>
+                <span className="text-[10px] sm:text-xs font-semibold text-primary bg-primary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap">{t('pricing.saveUpTo')}</span>
               )}
             </motion.div>
           </motion.div>
@@ -428,16 +432,16 @@ const Landing = () => {
                 <Card className={`relative flex flex-col h-full transition-all duration-300 ${plan.popular ? 'border-primary shadow-glow scale-[1.02]' : 'border-border/50 hover:border-primary/20 hover:shadow-card'}`}>
                   {plan.popular && (
                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                      <span className="gradient-primary text-primary-foreground px-4 py-1 rounded-full text-xs font-semibold">Meest gekozen</span>
+                      <span className="gradient-primary text-primary-foreground px-4 py-1 rounded-full text-xs font-semibold">{t('pricing.mostChosen')}</span>
                     </div>
                   )}
                   <CardHeader className="text-center pb-4 pt-8">
                     <CardTitle className="text-lg font-display">{plan.name}</CardTitle>
                     <div className="mt-4">
                       <span className="text-4xl font-bold font-display">{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</span>
-                      <span className="text-muted-foreground text-sm ml-1">{plan.name === 'Free' ? plan.period : '/maand'}</span>
-                      {isYearly && plan.name !== 'Free' && <p className="text-[11px] text-muted-foreground mt-1">Jaarlijks gefactureerd</p>}
-                      {!isYearly && plan.name !== 'Free' && plan.monthlyPrice !== plan.yearlyPrice && <p className="text-[11px] text-primary mt-1">Bespaar met jaarlijks abonnement</p>}
+                      <span className="text-muted-foreground text-sm ml-1">{plan.name === 'Free' ? plan.period : t('pricing.perMonth')}</span>
+                      {isYearly && plan.name !== 'Free' && <p className="text-[11px] text-muted-foreground mt-1">{t('pricing.billedYearly')}</p>}
+                      {!isYearly && plan.name !== 'Free' && plan.monthlyPrice !== plan.yearlyPrice && <p className="text-[11px] text-primary mt-1">{t('pricing.saveWithYearly')}</p>}
                     </div>
                     <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
                     <TooltipProvider delayDuration={0}>
@@ -451,13 +455,13 @@ const Landing = () => {
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="max-w-xs text-left">
-                          <p className="font-semibold mb-1">Credit-verbruik per actie:</p>
+                          <p className="font-semibold mb-1">{t('pricing.creditUsageTitle')}</p>
                           <ul className="text-xs space-y-0.5">
-                            <li>• FAQ Analyse: 1 credit</li>
-                            <li>• FAQ Regeneratie: 1 credit</li>
-                            <li>• FAQ Generatie: 2 credits</li>
-                            <li>• Artikel Generator: 3 credits</li>
-                            <li>• AI Ranking Check: 4 credits/vraag</li>
+                            <li>• {t('pricing.creditActions.faqAnalysis')}</li>
+                            <li>• {t('pricing.creditActions.faqRegeneration')}</li>
+                            <li>• {t('pricing.creditActions.faqGeneration')}</li>
+                            <li>• {t('pricing.creditActions.articleGenerator')}</li>
+                            <li>• {t('pricing.creditActions.aiRankingCheck')}</li>
                           </ul>
                         </TooltipContent>
                       </Tooltip>
@@ -484,7 +488,7 @@ const Landing = () => {
               </motion.div>
             ))}
           </motion.div>
-          <p className="text-center text-xs text-muted-foreground mt-6">Alle prijzen zijn exclusief btw.</p>
+          <p className="text-center text-xs text-muted-foreground mt-6">{t('pricing.allPricesExVat')}</p>
         </div>
       </section>
 
@@ -499,10 +503,10 @@ const Landing = () => {
             variants={stagger}
           >
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-xs font-semibold uppercase tracking-wider text-primary">
-              Achtergrond
+              {t('aiExplainer.label')}
             </motion.div>
             <motion.h2 variants={fadeUp} transition={{ duration: 0.5 }} className="text-3xl md:text-5xl font-bold font-display">
-              Hoe werkt een AI-tool eigenlijk?
+              {t('aiExplainer.title')}
             </motion.h2>
           </motion.div>
           <motion.div 
@@ -513,16 +517,16 @@ const Landing = () => {
             variants={stagger}
           >
             <motion.p variants={fadeUp} transition={{ duration: 0.5 }}>
-              Als jij een vraag stelt aan ChatGPT of Google AI, krijg je geen lijst met links – je krijgt gewoon een antwoord. Maar dat antwoord komt ergens vandaan: AI-tools zijn getraind op een enorme mix van bronnen – Wikipedia, nieuwssites, wetenschappelijke artikelen, forums én gewone websites zoals die van jou.
+              {t('aiExplainer.p1')}
             </motion.p>
             <motion.p variants={fadeUp} transition={{ duration: 0.5 }}>
-              De meeste AI-tools leerden het internet kennen tot een bepaalde datum – ze crawlen niet continu real-time. Maar dat betekent niet dat jouw website er niet toe doet. Tools zoals Google AI Overviews en Perplexity crawlen wél actief en actueel.
+              {t('aiExplainer.p2')}
             </motion.p>
             <motion.p variants={fadeUp} transition={{ duration: 0.5 }}>
-              CrawlWizard laat je zien wat zo'n bot ziet als hij jouw website bezoekt. Kloppen je koppen? Begrijpt een machine je content? Heb je de juiste structured data? Wij maken het inzichtelijk.
+              {t('aiExplainer.p3')}
             </motion.p>
             <motion.blockquote variants={fadeUp} transition={{ duration: 0.5 }} className="font-semibold text-foreground italic border-l-4 border-primary pl-6 py-2 font-display text-lg">
-              Goede structuur is de taal die zoekmachines én AI spreken. CrawlWizard helpt jou dit inzichtelijker te maken.
+              {t('aiExplainer.quote')}
             </motion.blockquote>
           </motion.div>
 
@@ -535,7 +539,7 @@ const Landing = () => {
             variants={stagger}
           >
             <motion.h3 variants={fadeUp} transition={{ duration: 0.5 }} className="text-2xl md:text-3xl font-bold font-display mb-6 text-center">
-              Hoe CrawlWizard AI inzet
+              {t('aiExplainer.howWeUseAi')}
             </motion.h3>
             <div className="grid md:grid-cols-2 gap-8">
               <motion.div variants={fadeUp} transition={{ duration: 0.5 }}>
@@ -544,11 +548,11 @@ const Landing = () => {
                     <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                       <Zap className="w-5 h-5 text-primary" />
                     </div>
-                    <CardTitle className="text-base font-display">Server AI</CardTitle>
+                    <CardTitle className="text-base font-display">{t('aiExplainer.serverAi.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Voor zware taken zoals FAQ-generatie, artikelen schrijven en AI Ranking Checks schakelt CrawlWizard krachtige large language models (LLM's) in op onze servers — denk aan modellen van OpenAI en Google Gemini. Je pagina-inhoud wordt als context meegestuurd, waarna het model geoptimaliseerde output genereert. Hiervoor gebruik je AI-credits; het aantal hangt af van je plan.
+                      {t('aiExplainer.serverAi.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -559,11 +563,11 @@ const Landing = () => {
                     <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                       <Globe className="w-5 h-5 text-primary" />
                     </div>
-                    <CardTitle className="text-base font-display">Browser AI</CardTitle>
+                    <CardTitle className="text-base font-display">{t('aiExplainer.browserAi.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Voor snelle relevantie-analyses draait CrawlWizard een compact embedding-model (<span className="text-foreground font-medium">MiniLM</span>) rechtstreeks in jouw browser via WebGPU. Het model berekent de semantische overeenkomst tussen een FAQ-vraag en je pagina-inhoud met cosine similarity. Geen data verlaat je apparaat, er zijn geen credits nodig en het werkt onbeperkt.
+                      {t('aiExplainer.browserAi.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -585,15 +589,15 @@ const Landing = () => {
           >
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center gap-2.5 text-sm text-muted-foreground">
               <span className="text-lg">🇪🇺</span>
-              <span>Data opgeslagen in de <strong className="text-foreground">EU (Frankfurt, Duitsland)</strong></span>
+              <span>{t('trust.euData')} <strong className="text-foreground">{t('trust.euLocation')}</strong></span>
             </motion.div>
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center gap-2.5 text-sm text-muted-foreground">
               <Shield className="w-4 h-4 text-primary" />
-              <span><strong className="text-foreground">AVG/GDPR</strong> compliant</span>
+              <span><strong className="text-foreground">AVG/GDPR</strong> {t('trust.gdpr')}</span>
             </motion.div>
             <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center gap-2.5 text-sm text-muted-foreground">
               <Lock className="w-4 h-4 text-primary" />
-              <span>Versleutelde verbinding <strong className="text-foreground">(SSL/TLS)</strong></span>
+              <span>{t('trust.ssl')} <strong className="text-foreground">(SSL/TLS)</strong></span>
             </motion.div>
           </motion.div>
         </div>
@@ -611,10 +615,10 @@ const Landing = () => {
           variants={stagger}
         >
           <motion.h2 variants={fadeUp} transition={{ duration: 0.6 }} className="text-3xl md:text-5xl font-bold font-display mb-6">
-            Wordt jouw website de bron die geciteerd wordt?
+            {t('cta.title')}
           </motion.h2>
           <motion.p variants={fadeUp} transition={{ duration: 0.6 }} className="text-lg text-white/60 mb-10 max-w-2xl mx-auto">
-            Analyseer jouw website gratis en ontdek wat er beter kan voor Google én AI-tools.
+            {t('cta.subtitle')}
           </motion.p>
           <motion.div variants={fadeUp} transition={{ duration: 0.6 }} className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button 
@@ -622,7 +626,7 @@ const Landing = () => {
               onClick={() => navigate('/auth')}
               className="gradient-primary text-primary-foreground text-base px-8 py-6 shadow-glow hover:shadow-[0_0_50px_hsl(14_90%_52%_/_0.3)] transition-shadow"
             >
-              Analyseer mijn website gratis
+              {t('cta.button')}
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
             <Button 
@@ -630,7 +634,7 @@ const Landing = () => {
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
               className="text-base px-8 py-6 bg-transparent text-white border border-white/30 hover:bg-white/10 hover:border-white/60 rounded-md font-medium"
             >
-              Bekijk de prijzen
+              {t('cta.viewPricing')}
             </Button>
           </motion.div>
         </motion.div>
@@ -647,10 +651,10 @@ const Landing = () => {
               <span className="font-semibold font-display text-sm">CrawlWizard</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-              <a href="#pricing" className="hover:text-foreground transition-colors">Prijzen</a>
-              <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors">Privacybeleid</button>
-              <button onClick={() => navigate('/auth')} className="hover:text-foreground transition-colors">Inloggen</button>
+              <a href="#features" className="hover:text-foreground transition-colors">{t('nav.features')}</a>
+              <a href="#pricing" className="hover:text-foreground transition-colors">{t('nav.pricing')}</a>
+              <button onClick={() => navigate('/privacy')} className="hover:text-foreground transition-colors">{t('nav.privacy')}</button>
+              <button onClick={() => navigate('/auth')} className="hover:text-foreground transition-colors">{t('nav.login')}</button>
             </div>
             <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} CrawlWizard</p>
           </div>
