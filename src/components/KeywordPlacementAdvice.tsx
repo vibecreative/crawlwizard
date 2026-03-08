@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Target, Link, FileText, AlignLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface KeywordPlacementAnalysis {
   keyword: string;
@@ -17,38 +18,40 @@ interface KeywordPlacementAdviceProps {
 }
 
 export const KeywordPlacementAdvice = ({ analysis }: KeywordPlacementAdviceProps) => {
+  const { t } = useTranslation();
+
   if (!analysis) return null;
 
   const checkItems = [
     {
-      label: "URL",
-      description: "Het hoofdzoekwoord komt voor in de URL",
+      label: t("keywordPlacement.urlLabel"),
+      description: t("keywordPlacement.urlDescription"),
       icon: Link,
       passed: analysis.inUrl,
       detail: analysis.url,
       advice: analysis.inUrl
-        ? "Het zoekwoord is opgenomen in de URL. Dit helpt zoekmachines begrijpen waar de pagina over gaat."
-        : `Overweeg de URL aan te passen om "${analysis.keyword}" op te nemen. Een keyword-rijke URL versterkt de relevantie voor zoekmachines.`,
+        ? t("keywordPlacement.urlPass")
+        : t("keywordPlacement.urlFail", { keyword: analysis.keyword }),
     },
     {
-      label: "H1 Tag",
-      description: "Het hoofdzoekwoord komt voor in de H1 heading",
+      label: t("keywordPlacement.h1Label"),
+      description: t("keywordPlacement.h1Description"),
       icon: FileText,
       passed: analysis.inH1,
       detail: analysis.h1Text,
       advice: analysis.inH1
-        ? "Het zoekwoord is opgenomen in de H1. Dit is cruciaal voor SEO omdat de H1 de belangrijkste heading van de pagina is."
-        : `Voeg "${analysis.keyword}" toe aan de H1 heading. Dit is een van de belangrijkste on-page SEO factoren.`,
+        ? t("keywordPlacement.h1Pass")
+        : t("keywordPlacement.h1Fail", { keyword: analysis.keyword }),
     },
     {
-      label: "Introtekst",
-      description: "Het hoofdzoekwoord komt voor in de eerste alinea onder de H1",
+      label: t("keywordPlacement.introLabel"),
+      description: t("keywordPlacement.introDescription"),
       icon: AlignLeft,
       passed: analysis.inIntroText,
       detail: analysis.introText ? (analysis.introText.length > 150 ? analysis.introText.substring(0, 150) + "..." : analysis.introText) : undefined,
       advice: analysis.inIntroText
-        ? "Het zoekwoord staat in de introtekst. Dit versterkt direct de context voor zoekmachines en gebruikers."
-        : `Verwerk "${analysis.keyword}" in de eerste alinea direct onder de H1. Dit geeft zoekmachines direct context over het onderwerp.`,
+        ? t("keywordPlacement.introPass")
+        : t("keywordPlacement.introFail", { keyword: analysis.keyword }),
     },
   ];
 
@@ -76,9 +79,9 @@ export const KeywordPlacementAdvice = ({ analysis }: KeywordPlacementAdviceProps
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold mb-1">Keyword Plaatsing Advies</h2>
+              <h2 className="text-xl font-semibold mb-1">{t("keywordPlacement.title")}</h2>
               <p className="text-sm text-muted-foreground">
-                Controleer of "{analysis.keyword}" op de juiste posities staat
+                {t("keywordPlacement.checkPosition", { keyword: analysis.keyword })}
               </p>
             </div>
             <div className="text-right">
@@ -104,16 +107,8 @@ export const KeywordPlacementAdvice = ({ analysis }: KeywordPlacementAdviceProps
               }`}
             >
               <div className="flex items-start gap-3">
-                <div
-                  className={`p-2 rounded-lg ${
-                    item.passed ? "bg-green-500/10" : "bg-red-500/10"
-                  }`}
-                >
-                  <Icon
-                    className={`h-5 w-5 ${
-                      item.passed ? "text-green-500" : "text-red-500"
-                    }`}
-                  />
+                <div className={`p-2 rounded-lg ${item.passed ? "bg-green-500/10" : "bg-red-500/10"}`}>
+                  <Icon className={`h-5 w-5 ${item.passed ? "text-green-500" : "text-red-500"}`} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -124,19 +119,11 @@ export const KeywordPlacementAdvice = ({ analysis }: KeywordPlacementAdviceProps
                       <XCircle className="h-4 w-4 text-red-500" />
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {item.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
                   {item.detail && (
-                    <div className="p-2 rounded bg-muted/50 text-xs font-mono mb-2 break-all">
-                      {item.detail}
-                    </div>
+                    <div className="p-2 rounded bg-muted/50 text-xs font-mono mb-2 break-all">{item.detail}</div>
                   )}
-                  <p
-                    className={`text-sm ${
-                      item.passed ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                    }`}
-                  >
+                  <p className={`text-sm ${item.passed ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                     {item.advice}
                   </p>
                 </div>
@@ -149,18 +136,12 @@ export const KeywordPlacementAdvice = ({ analysis }: KeywordPlacementAdviceProps
       <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border/50">
         <h4 className="font-medium mb-2 text-sm flex items-center gap-2">
           <Target className="h-4 w-4 text-primary" />
-          Waarom zijn deze posities belangrijk?
+          {t("keywordPlacement.whyImportant")}
         </h4>
         <ul className="text-xs text-muted-foreground space-y-2">
-          <li>
-            <strong>URL:</strong> Een keyword in de URL is een sterke relevantiesignaal voor zoekmachines en verbetert de click-through rate in zoekresultaten.
-          </li>
-          <li>
-            <strong>H1 Tag:</strong> De H1 is de belangrijkste heading en vertelt zoekmachines direct waar de pagina over gaat. Er mag maar één H1 per pagina zijn.
-          </li>
-          <li>
-            <strong>Introtekst:</strong> De eerste alinea wordt door zoekmachines extra zwaar gewogen. Het keyword hier plaatsen versterkt de topical relevantie.
-          </li>
+          <li><strong>{t("keywordPlacement.urlLabel")}:</strong> {t("keywordPlacement.urlImportance")}</li>
+          <li><strong>{t("keywordPlacement.h1Label")}:</strong> {t("keywordPlacement.h1Importance")}</li>
+          <li><strong>{t("keywordPlacement.introLabel")}:</strong> {t("keywordPlacement.introImportance")}</li>
         </ul>
       </div>
     </Card>
