@@ -19,8 +19,11 @@ import {
   Info
 } from 'lucide-react';
 
+import { useState } from 'react';
+
 const Landing = () => {
   const navigate = useNavigate();
+  const [isYearly, setIsYearly] = useState(true);
 
   const features = [
     {
