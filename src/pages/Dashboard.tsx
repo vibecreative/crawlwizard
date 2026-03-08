@@ -423,30 +423,30 @@ const Dashboard = () => {
                                     {page.url}
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                   <div className="hidden sm:flex items-center gap-1.5">
                                     <Badge variant={page.has_h1 ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">H1</Badge>
                                     <Badge variant={page.has_meta_description ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">Meta</Badge>
                                     <Badge variant={page.has_structured_data ? "default" : "secondary"} className="text-[10px] h-5 px-1.5">Schema</Badge>
                                   </div>
-                                  <div className={`w-9 text-center py-0.5 rounded ${getScoreBg(page.seo_score)}`}>
-                                    <span className={`text-xs font-bold ${getScoreColor(page.seo_score)}`}>
+                                  <div className={`w-8 sm:w-9 text-center py-0.5 rounded ${getScoreBg(page.seo_score)}`}>
+                                    <span className={`text-[10px] sm:text-xs font-bold ${getScoreColor(page.seo_score)}`}>
                                       {page.seo_score ?? "-"}
                                     </span>
                                   </div>
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-7 text-[10px] px-2"
+                                    className="h-7 text-[10px] px-1.5 sm:px-2"
                                     onClick={() => navigate(`/page/${page.id}`)}
                                   >
-                                    <Eye className="h-3 w-3 mr-1" />
-                                    Details
+                                    <Eye className="h-3 w-3 sm:mr-1" />
+                                    <span className="hidden sm:inline">Details</span>
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7"
+                                    className="h-7 w-7 hidden sm:flex"
                                     onClick={() => window.open(page.url, "_blank")}
                                   >
                                     <ExternalLink className="h-3 w-3" />
