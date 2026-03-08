@@ -645,6 +645,7 @@ const PageDetails = () => {
           isGeneratingFaqs={isGeneratingFaqs}
           userPlan={userPlan}
           pageId={pageData.id}
+          userId={user?.id}
         />
       </main>
     </div>
