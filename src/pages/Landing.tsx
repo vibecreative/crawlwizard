@@ -354,8 +354,14 @@ const Landing = () => {
                 <CardHeader className="text-center pb-4">
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground ml-2">{plan.period}</span>
+                    <span className="text-4xl font-bold">{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</span>
+                    <span className="text-muted-foreground ml-2">{plan.name === 'Free' ? plan.period : 'per maand'}</span>
+                    {isYearly && plan.name !== 'Free' && (
+                      <p className="text-xs text-muted-foreground mt-1">Jaarlijks gefactureerd</p>
+                    )}
+                    {!isYearly && plan.name !== 'Free' && plan.monthlyPrice !== plan.yearlyPrice && (
+                      <p className="text-xs text-primary mt-1">Bespaar met jaarlijks abonnement</p>
+                    )}
                   </div>
                   <p className="text-muted-foreground mt-2 font-medium">{plan.description}</p>
                   {plan.subtitle && <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>}
