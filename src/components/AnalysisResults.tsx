@@ -73,6 +73,7 @@ interface AnalysisResultsProps {
   onGenerateFaqs?: () => Promise<void>;
   isGeneratingFaqs?: boolean;
   userPlan?: string;
+  pageId?: string;
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
