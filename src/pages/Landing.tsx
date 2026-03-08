@@ -16,9 +16,12 @@ import {
   Target,
   Layers,
   Bot,
-  Gauge
+  Gauge,
+  Menu,
+  X
 } from 'lucide-react';
 import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
