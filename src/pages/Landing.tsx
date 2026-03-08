@@ -443,7 +443,7 @@ const Landing = () => {
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button type="button" className="inline-flex cursor-help mt-3">
+                          <button type="button" className="inline-flex justify-center cursor-help mt-3 w-full">
                             <span className="text-xs bg-muted px-2.5 py-1 rounded-full inline-flex items-center gap-1">
                               ⚡ {plan.credits}
                               <Info className="w-3 h-3 text-muted-foreground" />
