@@ -323,30 +323,31 @@ const Index = () => {
         
         <div className="mb-16">
           <Tabs defaultValue="single" className="w-full max-w-4xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="single" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Enkele pagina
+            <TabsList className="grid w-full grid-cols-2 mb-8 h-auto">
+              <TabsTrigger value="single" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-2.5">
+                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span>Enkele pagina</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="website" 
-                className="flex items-center gap-2"
+                className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-2.5"
                 disabled={userPlan === 'free'}
                 title={userPlan === 'free' ? 'Upgrade naar Scale of Enterprise voor volledige website-analyse' : ''}
               >
-                <Globe className="h-4 w-4" />
-                Volledige website
+                <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span className="hidden sm:inline">Volledige website</span>
+                <span className="sm:hidden">Website</span>
                 {userPlan === 'free' && (
                   <Badge 
                     variant="secondary" 
-                    className="ml-1 text-[10px] px-1.5 py-0 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                    className="ml-0.5 sm:ml-1 text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate('/#pricing');
                       window.location.href = '/#pricing';
                     }}
                   >
-                    Upgraden
+                    Upgrade
                   </Badge>
                 )}
               </TabsTrigger>

@@ -401,18 +401,18 @@ const Landing = () => {
             <motion.p variants={fadeUp} transition={{ duration: 0.5 }} className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Begin gratis. Geen creditcard, geen verborgen kosten.
             </motion.p>
-            <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex items-center justify-center gap-3 mt-8">
-              <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Maandelijks</span>
+            <motion.div variants={fadeUp} transition={{ duration: 0.5 }} className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-8">
+              <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Maandelijks</span>
               <button
                 type="button"
                 onClick={() => setIsYearly(!isYearly)}
-                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${isYearly ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors shrink-0 ${isYearly ? 'bg-primary' : 'bg-muted-foreground/30'}`}
               >
                 <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${isYearly ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
-              <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Jaarlijks</span>
+              <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>Jaarlijks</span>
               {isYearly && (
-                <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">Bespaar tot 17%</span>
+                <span className="text-[10px] sm:text-xs font-semibold text-primary bg-primary/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full whitespace-nowrap">Bespaar tot 17%</span>
               )}
             </motion.div>
           </motion.div>
