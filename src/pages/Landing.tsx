@@ -60,12 +60,15 @@ const Landing = () => {
       period: 'voor altijd',
       description: 'Gratis verkennen',
       subtitle: 'Analyseer je eerste pagina\'s en ontdek wat er beter kan.',
+      credits: '10 AI-credits/maand',
       features: [
         '1 pagina per analyse',
         'Tot 10 analyses',
         'SEO-score per pagina',
         'Heading-structuur analyse',
-        'Meta-informatie overzicht'
+        'Meta-informatie overzicht',
+        '10 AI-credits per maand',
+        'Browser AI (onbeperkt, gratis)'
       ],
       cta: 'Gratis starten',
       popular: false,
@@ -77,13 +80,16 @@ const Landing = () => {
       period: 'per maand',
       description: 'Voor serieuze websites',
       subtitle: 'Analyseer je hele website en weet precies waar je winst ligt.',
+      credits: '50 AI-credits/maand',
       features: [
         'Volledige website-analyse',
         'Tot 100 pagina\'s per scan',
         '1 project opslaan',
         'AI FAQ Generator',
         'Keyword analyse',
-        'Structured data analyse'
+        'Structured data analyse',
+        '50 AI-credits per maand',
+        'Browser AI (onbeperkt, gratis)'
       ],
       cta: 'Start met Scale',
       popular: true,
@@ -95,13 +101,16 @@ const Landing = () => {
       period: 'per maand',
       description: 'Voor teams & bureaus',
       subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
+      credits: '200 AI-credits/maand',
       features: [
         'Alles uit Scale',
         'Tot 500 pagina\'s per scan',
         '3 projecten opslaan',
-        'Prioriteit support',
-        'Geavanceerde rapportages',
-        'Export functionaliteit'
+        'AI Ranking Check (4 modellen)',
+        'AI Artikel Generator',
+        '200 AI-credits per maand',
+        'Browser AI (onbeperkt, gratis)',
+        'Prioriteit support'
       ],
       cta: 'Start met Enterprise',
       popular: false,
