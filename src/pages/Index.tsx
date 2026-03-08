@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { SEOHead } from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { WebsiteAnalyzer } from "@/components/WebsiteAnalyzer";
