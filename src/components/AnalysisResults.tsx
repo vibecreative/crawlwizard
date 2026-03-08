@@ -11,6 +11,8 @@ import { FaqSuggestions } from "./FaqSuggestions";
 import { KeywordAnalysis } from "./KeywordAnalysis";
 import { KeywordPlacementAdvice } from "./KeywordPlacementAdvice";
 import { AiRankingCheck } from "./AiRankingCheck";
+import { AiCreditsDisplay } from "./AiCreditsDisplay";
+import { useAiCredits } from "@/hooks/useAiCredits";
 
 interface HeadingInfo {
   level: number;
