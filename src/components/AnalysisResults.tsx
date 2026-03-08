@@ -77,6 +77,7 @@ interface AnalysisResultsProps {
   userPlan?: string;
   pageId?: string;
   userId?: string;
+  brandContext?: string;
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
