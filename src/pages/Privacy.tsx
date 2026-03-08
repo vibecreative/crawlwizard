@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { SEOHead } from '@/components/SEOHead';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -60,6 +61,11 @@ const Privacy = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Privacybeleid & Cookies"
+        description="Lees het privacybeleid en cookiebeleid van CrawlWizard. Beheer je cookie-voorkeuren."
+        canonical="/privacy"
+      />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
