@@ -142,6 +142,11 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
 
       if (error) throw error;
 
+      if (data?.error === 'credits_exhausted') {
+        toast.error(data.message || 'Je AI-credits zijn op voor deze maand.');
+        return;
+      }
+
       if (data?.results) {
         setResults(data.results);
         toast.success("AI Ranking Check voltooid!");
