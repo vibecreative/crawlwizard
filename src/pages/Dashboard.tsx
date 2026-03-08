@@ -486,10 +486,15 @@ const Dashboard = () => {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-sm text-muted-foreground text-center py-4">
+                        <p className="text-sm text-muted-foreground text-center py-4">
                             Geen pagina's geanalyseerd
                           </p>
                         )}
+
+                        {/* Brand Knowledge Section */}
+                        <div className="mt-4 pt-4 border-t border-border">
+                          <BrandKnowledge projectId={project.id} />
+                        </div>
                       </div>
                     )}
                   </CardContent>
