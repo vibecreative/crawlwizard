@@ -98,12 +98,41 @@ const Landing = () => {
             <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Prijzen</a>
             <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Hoe het werkt</a>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>Inloggen</Button>
             <Button size="sm" onClick={() => navigate('/auth')} className="gradient-primary text-primary-foreground">Gratis starten</Button>
           </div>
+          {/* Mobile menu button */}
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
         </div>
+        {/* Mobile menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="md:hidden overflow-hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
+            >
+              <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">Features</a>
+                <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">Prijzen</a>
+                <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">Hoe het werkt</a>
+                <div className="border-t border-border/50 pt-3 flex flex-col gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>Inloggen</Button>
+                  <Button size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }} className="gradient-primary text-primary-foreground">Gratis starten</Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
