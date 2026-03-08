@@ -57,7 +57,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { html } = body;
+    const { html, brandContext } = body;
     if (!html || typeof html !== 'string') {
       return new Response(JSON.stringify({ error: 'HTML content is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
