@@ -15,10 +15,25 @@ const MODELS = [
   { id: "openai/gpt-5-mini", label: "GPT-5 Mini" },
 ];
 
+// Each question costs 4 credits (1 per model; analysis calls use cheap model and are free)
+const CREDITS_PER_QUESTION = 4;
+
 interface RankingRequest {
   questions: string[];
   domain: string;
   pageId: string;
+}
+
+async function checkCredits(supabase: any, userId: string, creditsNeeded: number) {
+  const { data, error } = await supabase.rpc('get_remaining_credits', { _user_id: userId });
+  if (error) throw new Error('Kon credits niet controleren');
+  const credits = typeof data === 'string' ? JSON.parse(data) : data;
+  if (credits.remaining < creditsNeeded) return { allowed: false, ...credits };
+  return { allowed: true, ...credits };
+}
+
+async function logCreditUsage(supabase: any, userId: string, actionType: string, credits: number) {
+  await supabase.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
 }
 
 async function askModel(
@@ -26,27 +41,15 @@ async function askModel(
   modelId: string,
   question: string,
   domain: string
-): Promise<{
-  response: string;
-  isMentioned: boolean;
-  mentionPosition: number | null;
-  sentiment: string;
-}> {
+) {
   try {
-    // Step 1: Ask the question naturally
     const questionResponse = await fetch(AI_GATEWAY_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: modelId,
         messages: [
-          {
-            role: "system",
-            content: "Je bent een behulpzame AI-assistent. Beantwoord de vraag van de gebruiker zo volledig mogelijk. Noem relevante websites, merken en bedrijven als je ze kent.",
-          },
+          { role: "system", content: "Je bent een behulpzame AI-assistent. Beantwoord de vraag zo volledig mogelijk. Noem relevante websites, merken en bedrijven als je ze kent." },
           { role: "user", content: question },
         ],
         max_tokens: 1000,
@@ -56,12 +59,8 @@ async function askModel(
     if (!questionResponse.ok) {
       const status = questionResponse.status;
       const body = await questionResponse.text();
-      if (status === 429) {
-        return { response: "Rate limit bereikt", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
-      }
-      if (status === 402) {
-        return { response: "Credits op", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
-      }
+      if (status === 429) return { response: "Rate limit bereikt", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
+      if (status === 402) return { response: "Credits op", isMentioned: false, mentionPosition: null, sentiment: "neutral" };
       console.error(`Model ${modelId} error: ${status} ${body}`);
       return { response: `Fout: ${status}`, isMentioned: false, mentionPosition: null, sentiment: "neutral" };
     }
@@ -69,47 +68,27 @@ async function askModel(
     const questionData = await questionResponse.json();
     const aiResponse = questionData.choices?.[0]?.message?.content || "";
 
-    // Step 2: Analyze the response for brand mentions using tool calling
     const analysisResponse = await fetch(AI_GATEWAY_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          {
-            role: "system",
-            content: `Analyseer het AI-antwoord en bepaal of het domein "${domain}" (of de merknaam/bedrijfsnaam die bij dit domein hoort) wordt genoemd. Check ook variaties zonder TLD.`,
-          },
-          {
-            role: "user",
-            content: `Domein: ${domain}\n\nAI Antwoord:\n${aiResponse}`,
-          },
+          { role: "system", content: `Analyseer het AI-antwoord en bepaal of het domein "${domain}" (of de merknaam/bedrijfsnaam die bij dit domein hoort) wordt genoemd.` },
+          { role: "user", content: `Domein: ${domain}\n\nAI Antwoord:\n${aiResponse}` },
         ],
         tools: [
           {
             type: "function",
             function: {
               name: "analyze_mention",
-              description: "Analyze if the domain/brand is mentioned in the AI response",
+              description: "Analyze if the domain/brand is mentioned",
               parameters: {
                 type: "object",
                 properties: {
-                  is_mentioned: {
-                    type: "boolean",
-                    description: "Whether the domain or brand is mentioned in the response",
-                  },
-                  mention_position: {
-                    type: "integer",
-                    description: "Position in list of mentioned brands/sites (1 = first mentioned, 2 = second, etc). Null if not mentioned.",
-                  },
-                  sentiment: {
-                    type: "string",
-                    enum: ["positive", "neutral", "negative"],
-                    description: "Sentiment of how the brand/domain is described",
-                  },
+                  is_mentioned: { type: "boolean" },
+                  mention_position: { type: "integer" },
+                  sentiment: { type: "string", enum: ["positive", "neutral", "negative"] },
                 },
                 required: ["is_mentioned", "mention_position", "sentiment"],
                 additionalProperties: false,
@@ -122,7 +101,6 @@ async function askModel(
     });
 
     if (!analysisResponse.ok) {
-      // Fallback: simple string matching
       const domainBase = domain.replace(/^www\./, "").split(".")[0].toLowerCase();
       const responseLower = aiResponse.toLowerCase();
       const isMentioned = responseLower.includes(domain.toLowerCase()) || responseLower.includes(domainBase);
@@ -131,7 +109,6 @@ async function askModel(
 
     const analysisData = await analysisResponse.json();
     const toolCall = analysisData.choices?.[0]?.message?.tool_calls?.[0];
-    
     if (toolCall?.function?.arguments) {
       const args = JSON.parse(toolCall.function.arguments);
       return {
@@ -142,7 +119,6 @@ async function askModel(
       };
     }
 
-    // Fallback
     const domainBase = domain.replace(/^www\./, "").split(".")[0].toLowerCase();
     const responseLower = aiResponse.toLowerCase();
     const isMentioned = responseLower.includes(domain.toLowerCase()) || responseLower.includes(domainBase);
@@ -173,51 +149,43 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Niet geautoriseerd" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Check enterprise plan
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("plan")
-      .eq("id", user.id)
-      .single();
-
+    const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
     if (!profile || profile.plan !== "enterprise") {
       return new Response(JSON.stringify({ error: "Enterprise plan vereist" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const { questions, domain, pageId }: RankingRequest = await req.json();
-
     if (!questions?.length || !domain || !pageId) {
       return new Response(JSON.stringify({ error: "Vragen, domein en pagina ID zijn vereist" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Limit to 5 questions
     const limitedQuestions = questions.slice(0, 5);
+    const totalCredits = limitedQuestions.length * CREDITS_PER_QUESTION;
 
-    // Create ranking check record
+    // Credit check
+    const creditCheck = await checkCredits(supabase, user.id, totalCredits);
+    if (!creditCheck.allowed) {
+      return new Response(JSON.stringify({ 
+        error: 'credits_exhausted',
+        message: `Onvoldoende credits. Deze check kost ${totalCredits} credits, je hebt er nog ${creditCheck.remaining}.`,
+        credits: creditCheck
+      }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { data: check, error: checkError } = await supabase
       .from("ai_ranking_checks")
       .insert({ user_id: user.id, page_id: pageId, domain })
       .select("id")
       .single();
-
     if (checkError) throw checkError;
 
-    // Process each question x model combination
     const results: any[] = [];
-
     for (const question of limitedQuestions) {
-      // Run all models in parallel for the same question
       const modelPromises = MODELS.map(async (model) => {
         const result = await askModel(LOVABLE_API_KEY, model.id, question, domain);
         return {
@@ -230,28 +198,18 @@ serve(async (req) => {
           sentiment: result.sentiment,
         };
       });
-
       const questionResults = await Promise.all(modelPromises);
       results.push(...questionResults);
-
-      // Small delay between questions to avoid rate limits
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
-    // Insert all results
-    const { error: insertError } = await supabase
-      .from("ai_ranking_results")
-      .insert(results);
+    const { error: insertError } = await supabase.from("ai_ranking_results").insert(results);
+    if (insertError) console.error("Insert error:", insertError);
 
-    if (insertError) {
-      console.error("Insert error:", insertError);
-    }
+    await supabase.from("ai_ranking_checks").update({ status: "completed" }).eq("id", check.id);
 
-    // Update check status
-    await supabase
-      .from("ai_ranking_checks")
-      .update({ status: "completed" })
-      .eq("id", check.id);
+    // Log credit usage after successful completion
+    await logCreditUsage(supabase, user.id, 'ai_ranking_check', totalCredits);
 
     return new Response(JSON.stringify({ checkId: check.id, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

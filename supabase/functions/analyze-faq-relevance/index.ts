@@ -3,18 +3,35 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Maximum content sizes
-const MAX_CONTENT_SIZE = 1_000_000; // 1MB
+const MAX_CONTENT_SIZE = 1_000_000;
 const MAX_QUESTION_LENGTH = 500;
 const MAX_URL_LENGTH = 2048;
+const CREDITS_REQUIRED = 1;
 
-// Validate URL format
 function validateUrl(url: string): boolean {
   const urlRegex = /^https?:\/\/[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(:[0-9]+)?(\/.*)?$/;
   return urlRegex.test(url);
+}
+
+async function checkCredits(supabase: any, userId: string, creditsNeeded: number) {
+  const { data, error } = await supabase.rpc('get_remaining_credits', { _user_id: userId });
+  if (error) throw new Error('Kon credits niet controleren');
+  const credits = typeof data === 'string' ? JSON.parse(data) : data;
+  if (credits.remaining < creditsNeeded) {
+    return { allowed: false, ...credits };
+  }
+  return { allowed: true, ...credits };
+}
+
+async function logCreditUsage(supabase: any, userId: string, actionType: string, credits: number) {
+  await supabase.from('ai_credit_usage').insert({
+    user_id: userId,
+    action_type: actionType,
+    credits_used: credits,
+  });
 }
 
 serve(async (req) => {
@@ -23,15 +40,12 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get('Authorization') ?? '';
     const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
 
     if (!jwt) {
-      console.warn('Missing Authorization header');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -43,76 +57,56 @@ serve(async (req) => {
 
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
     if (authError || !user) {
-      console.warn('Auth failed:', authError?.message ?? 'no_user');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('Authenticated user:', user.id);
+    // Credit check
+    const creditCheck = await checkCredits(supabaseClient, user.id, CREDITS_REQUIRED);
+    if (!creditCheck.allowed) {
+      return new Response(JSON.stringify({ 
+        error: 'credits_exhausted',
+        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used}/${creditCheck.limit} gebruikt.`,
+        credits: creditCheck
+      }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const body = await req.json();
     const { question, websiteUrl, pageContent } = body;
     
-    // Input validation for question
     if (!question || typeof question !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'question must be a non-empty string' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'question must be a non-empty string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
     if (question.length > MAX_QUESTION_LENGTH) {
-      return new Response(
-        JSON.stringify({ error: `question too long. Maximum ${MAX_QUESTION_LENGTH} characters.` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: `question too long. Maximum ${MAX_QUESTION_LENGTH} characters.` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    // Input validation for websiteUrl
     if (!websiteUrl || typeof websiteUrl !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'websiteUrl must be a non-empty string' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'websiteUrl must be a non-empty string' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
     if (websiteUrl.length > MAX_URL_LENGTH) {
-      return new Response(
-        JSON.stringify({ error: `websiteUrl too long. Maximum ${MAX_URL_LENGTH} characters.` }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: `websiteUrl too long. Maximum ${MAX_URL_LENGTH} characters.` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
     if (!validateUrl(websiteUrl)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid websiteUrl format' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Invalid websiteUrl format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Input validation for pageContent (optional)
     let pageContentToProcess = '';
     if (pageContent && typeof pageContent === 'string') {
-      pageContentToProcess = pageContent;
-      if (pageContentToProcess.length > MAX_CONTENT_SIZE) {
-        console.warn(
-          `pageContent too large (${pageContentToProcess.length} chars). Truncating to ${MAX_CONTENT_SIZE}.`
-        );
-        pageContentToProcess = pageContentToProcess.slice(0, MAX_CONTENT_SIZE);
-      }
+      pageContentToProcess = pageContent.length > MAX_CONTENT_SIZE 
+        ? pageContent.slice(0, MAX_CONTENT_SIZE) : pageContent;
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
+    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured');
 
-    console.log('Analyzing FAQ relevance for question:', question.substring(0, 100));
-
-    // Limit page content to avoid token limits
     const limitedContent = pageContentToProcess ? pageContentToProcess.substring(0, 5000) : 'Geen content beschikbaar';
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -167,21 +161,9 @@ Beoordeel hoe goed deze pagina als bron kan dienen voor een AI-antwoord op boven
               parameters: {
                 type: "object",
                 properties: {
-                  score: {
-                    type: "number",
-                    minimum: 0,
-                    maximum: 100,
-                    description: "Relevantiescore 0-100"
-                  },
-                  explanation: {
-                    type: "string",
-                    description: "Korte uitleg van de score (max 50 woorden)"
-                  },
-                  category: {
-                    type: "string",
-                    enum: ["high", "medium", "low"],
-                    description: "Relevantiecategorie"
-                  }
+                  score: { type: "number", minimum: 0, maximum: 100, description: "Relevantiescore 0-100" },
+                  explanation: { type: "string", description: "Korte uitleg van de score (max 50 woorden)" },
+                  category: { type: "string", enum: ["high", "medium", "low"], description: "Relevantiecategorie" }
                 },
                 required: ["score", "explanation", "category"],
                 additionalProperties: false
@@ -196,28 +178,23 @@ Beoordeel hoe goed deze pagina als bron kan dienen voor een AI-antwoord op boven
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Rate limit bereikt, probeer het later opnieuw.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: 'Credits opgebruikt. Voeg credits toe aan je workspace.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       const errorText = await response.text();
       console.error('AI gateway error:', response.status, errorText);
       throw new Error('AI gateway error');
     }
 
-    const data = await response.json();
-    console.log('AI Response:', JSON.stringify(data));
+    // Log credit usage after successful AI call
+    await logCreditUsage(supabaseClient, user.id, 'faq_analysis', CREDITS_REQUIRED);
 
+    const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      throw new Error('Geen tool call ontvangen van AI');
-    }
+    if (!toolCall) throw new Error('Geen tool call ontvangen van AI');
 
     const analysis = JSON.parse(toolCall.function.arguments);
 
@@ -226,10 +203,8 @@ Beoordeel hoe goed deze pagina als bron kan dienen voor een AI-antwoord op boven
     });
   } catch (error) {
     console.error('Error in analyze-faq-relevance function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
