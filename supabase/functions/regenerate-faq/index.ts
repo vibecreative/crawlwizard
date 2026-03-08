@@ -58,7 +58,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { html, previousQuestion, analysisExplanation } = body;
+    const { html, previousQuestion, analysisExplanation, brandContext } = body;
     
     if (!html || typeof html !== 'string') {
       return new Response(JSON.stringify({ error: 'HTML content is required' }),
