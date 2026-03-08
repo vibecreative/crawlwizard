@@ -273,7 +273,8 @@ export const FaqSuggestions = ({
         body: {
           html: pageContent,
           previousQuestion: faqs[index].question,
-          analysisExplanation: analysis.explanation
+          analysisExplanation: analysis.explanation,
+          brandContext
         }
       });
 
