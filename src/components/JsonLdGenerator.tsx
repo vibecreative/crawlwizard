@@ -26,12 +26,31 @@ interface JsonLdGeneratorProps {
 
 export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorProps) => {
   const [copied, setCopied] = useState(false);
+
+  // Page-type detection for smart recommendations
+  const urlPath = (() => {
+    try { return new URL(url).pathname.toLowerCase(); } catch { return '/'; }
+  })();
+  const isHomePage = urlPath === '/' || urlPath === '';
+  const isContactPage = urlPath.includes('contact');
+  const isAboutPage = urlPath.includes('over') || urlPath.includes('about');
+  const isBlogPage = urlPath.includes('blog') || urlPath.includes('artikel');
+  const hasFaqs = faqs && faqs.length > 0;
+
+  const recommended: Record<string, boolean> = {
+    website: true,
+    organization: isHomePage || isContactPage || isAboutPage,
+    breadcrumb: !isHomePage,
+    article: isBlogPage,
+    faqPage: !!hasFaqs,
+  };
+
   const [selectedSchemas, setSelectedSchemas] = useState({
     website: true,
-    organization: false,
-    breadcrumb: false,
-    article: false,
-    faqPage: false,
+    organization: recommended.organization,
+    breadcrumb: recommended.breadcrumb,
+    article: recommended.article,
+    faqPage: recommended.faqPage,
   });
 
   const allSelected = selectedSchemas.website && selectedSchemas.organization && 
