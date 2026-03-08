@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { CreditsDashboard } from "@/components/CreditsDashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -289,6 +290,14 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* AI Credits Dashboard */}
+        {user?.id && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">AI Credits</h2>
+            <CreditsDashboard userId={user.id} />
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center justify-between mb-6">
