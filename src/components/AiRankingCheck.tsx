@@ -261,10 +261,25 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
             ) : (
               <>
                 <Bot className="h-4 w-4" />
-                Start AI Ranking Check ({selectedFaqIndices.size + customQuestions.length} vragen × 4 modellen)
+                Start AI Ranking Check
               </>
             )}
           </Button>
+
+          <div className="rounded-lg bg-muted/40 border border-border/50 p-4 text-xs text-muted-foreground space-y-2">
+            <p>
+              <span className="font-semibold text-foreground">Welke modellen?</span>{" "}
+              Elke vraag wordt parallel voorgelegd aan 4 AI-modellen: Gemini Pro, Gemini Flash, GPT-5 en GPT-5 Mini.
+            </p>
+            <p>
+              <span className="font-semibold text-foreground">Wat wordt gecheckt?</span>{" "}
+              Per model analyseren we of je domein wordt <em>genoemd</em>, op welke <em>positie</em> het verschijnt en wat het <em>sentiment</em> is (positief, neutraal of negatief).
+            </p>
+            <p>
+              <span className="font-semibold text-foreground">Waarom max. 5 vragen?</span>{" "}
+              Elke vraag genereert 4 AI-aanvragen (één per model). Om het creditverbruik beheersbaar te houden is het maximum 5 vragen per check (= 20 AI-calls).
+            </p>
+          </div>
         </div>
       )}
 
