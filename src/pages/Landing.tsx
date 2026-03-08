@@ -330,6 +330,9 @@ const Landing = () => {
                   </div>
                   <p className="text-muted-foreground mt-2 font-medium">{plan.description}</p>
                   {plan.subtitle && <p className="text-sm text-muted-foreground mt-1">{plan.subtitle}</p>}
+                  <Badge variant="secondary" className="mt-3 gap-1">
+                    ⚡ {plan.credits}
+                  </Badge>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col">
                   <ul className="space-y-3 flex-1">
