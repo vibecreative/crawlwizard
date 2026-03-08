@@ -135,7 +135,49 @@ const Admin = () => {
     }
   };
 
-  const updateUser = async (userId: string, updates: { is_active?: boolean; plan?: string; role?: string }) => {
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("contact_messages")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const toggleMessageRead = async (id: string, currentRead: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .update({ is_read: !currentRead })
+        .eq("id", id);
+
+      if (error) throw error;
+      setMessages(prev => prev.map(m => m.id === id ? { ...m, is_read: !currentRead } : m));
+    } catch {
+      toast.error("Kon status niet bijwerken");
+    }
+  };
+
+  const deleteMessage = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("contact_messages")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      setMessages(prev => prev.filter(m => m.id !== id));
+      toast.success("Bericht verwijderd");
+    } catch {
+      toast.error("Kon bericht niet verwijderen");
+    }
+  };
+
     setUpdatingUser(userId);
     try {
       const response = await fetch(
