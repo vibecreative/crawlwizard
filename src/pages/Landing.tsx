@@ -72,7 +72,7 @@ const Landing = () => {
     },
     {
       name: 'Enterprise', monthlyPrice: '€39,95', yearlyPrice: '€35', period: 'per maand',
-      description: 'Voor teams & bureaus', subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
+      description: 'Voor écht serieuze websites & bureau\'s', subtitle: 'Beheer meerdere websites, rapporteer naar klanten, schaal zonder limieten.',
       credits: '200 AI-credits/maand',
       features: ['Alles uit Scale', 'Tot 500 pagina\'s per scan', '3 projecten opslaan', 'AI Ranking Check (4 modellen)', 'AI Artikel Generator', '200 AI-credits per maand', 'Browser AI (onbeperkt, gratis)', 'Prioriteit support'],
       cta: 'Start met Enterprise', popular: false, variant: 'outline' as const
