@@ -152,7 +152,7 @@ const Landing = () => {
       <section className="relative pt-28 pb-24 px-4 overflow-hidden">
         {/* Hero background image */}
         <div className="absolute inset-0 z-0">
-          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-25 dark:opacity-30" />
+          <img src={heroBg} alt="CrawlWizard SEO analyse dashboard achtergrond" className="w-full h-full object-cover opacity-25 dark:opacity-30" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
         </div>
         <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl z-0" />
