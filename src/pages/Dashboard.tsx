@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -203,12 +203,12 @@ const Dashboard = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <Link to="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-md gradient-primary flex items-center justify-center">
               <Search className="h-4 w-4 text-primary-foreground" />
             </div>
             <h1 className="text-lg font-bold font-display">CrawlWizard</h1>
-          </div>
+          </Link>
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground hidden sm:block">
               {user?.email}

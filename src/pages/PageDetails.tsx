@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { SEOHead } from "@/components/SEOHead";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -557,10 +557,10 @@ const PageDetails = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3">
               <Globe className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-bold">CrawlWizard</h1>
-            </div>
+            </Link>
             <ThemeToggle />
           </div>
         </header>
@@ -577,10 +577,10 @@ const PageDetails = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3">
               <Globe className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-bold">CrawlWizard</h1>
-            </div>
+            </Link>
             <ThemeToggle />
           </div>
         </header>
@@ -605,10 +605,10 @@ const PageDetails = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3">
               <Globe className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-bold">CrawlWizard</h1>
-            </div>
+            </Link>
             <ThemeToggle />
           </div>
         </header>
@@ -638,10 +638,10 @@ const PageDetails = () => {
       <SEOHead title={pageData.title || "Pagina details"} noindex />
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <Globe className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">CrawlWizard</h1>
-          </div>
+          </Link>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground hidden sm:block">
               {user?.email}

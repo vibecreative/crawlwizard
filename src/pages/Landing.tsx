@@ -102,12 +102,12 @@ const Landing = () => {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <a href="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center">
               <Search className="w-4 h-4 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold font-display">CrawlWizard</span>
-          </div>
+          </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
             <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Prijzen</a>
