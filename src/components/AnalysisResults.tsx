@@ -31,21 +31,21 @@ interface AnalysisResultsProps {
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade }: { title: string; description: string; onUpgrade: () => void }) => (
-  <Card className="p-6 shadow-soft border-dashed border-2 border-muted-foreground/20 bg-muted/30 relative overflow-hidden">
-    <div className="flex items-start justify-between">
+  <Card className="p-4 sm:p-6 shadow-soft border-dashed border-2 border-muted-foreground/20 bg-muted/30 relative overflow-hidden">
+    <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:justify-between">
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-muted">
+        <div className="p-2 rounded-lg bg-muted shrink-0">
           <Lock className="h-5 w-5 text-muted-foreground" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-muted-foreground">{title}</h3>
-          <p className="text-sm text-muted-foreground/70 mt-1 max-w-lg">{description}</p>
+          <h3 className="text-base sm:text-lg font-semibold text-muted-foreground">{title}</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground/70 mt-1 max-w-lg">{description}</p>
         </div>
       </div>
       <Button
         variant="outline"
         size="sm"
-        className="shrink-0 gap-1.5 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground"
+        className="shrink-0 gap-1.5 border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground self-start sm:self-auto"
         onClick={onUpgrade}
       >
         Upgraden
@@ -91,40 +91,43 @@ export const AnalysisResults = ({
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8">
       {/* Header with URL */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl gradient-primary">
-            <FileText className="h-6 w-6 text-white" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2.5 sm:p-3 rounded-xl gradient-primary shrink-0">
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold">Analyse Resultaten</h2>
+          <div className="min-w-0">
+            <h2 className="text-xl sm:text-2xl font-bold">Analyse Resultaten</h2>
             <a 
               href={data.url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-accent flex items-center gap-1 mt-1"
+              className="text-xs sm:text-sm text-muted-foreground hover:text-accent flex items-center gap-1 mt-1 truncate"
             >
-              {data.url}
-              <ExternalLink className="h-3 w-3" />
+              <span className="truncate">{data.url}</span>
+              <ExternalLink className="h-3 w-3 shrink-0" />
             </a>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           {onReanalyze && (
             <Button 
               onClick={onReanalyze}
               disabled={isReanalyzing}
-              className="gap-2 gradient-primary"
+              className="gap-2 gradient-primary text-sm"
+              size="sm"
             >
               {isReanalyzing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Analyseren...
+                  <span className="hidden sm:inline">Analyseren...</span>
+                  <span className="sm:hidden">Bezig...</span>
                 </>
               ) : (
                 <>
                   <RefreshCw className="h-4 w-4" />
-                  Pagina opnieuw analyseren
+                  <span className="hidden sm:inline">Pagina opnieuw analyseren</span>
+                  <span className="sm:hidden">Heranalyse</span>
                 </>
               )}
             </Button>
@@ -134,9 +137,11 @@ export const AnalysisResults = ({
               onClick={onReset}
               variant="outline"
               className="gap-2"
+              size="sm"
             >
               <RotateCcw className="h-4 w-4" />
-              Nieuwe analyse
+              <span className="hidden sm:inline">Nieuwe analyse</span>
+              <span className="sm:hidden">Nieuw</span>
             </Button>
           )}
         </div>
@@ -168,8 +173,8 @@ export const AnalysisResults = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Heading Structure */}
-        <Card className="p-6 shadow-soft">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <Card className="p-4 sm:p-6 shadow-soft">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
             Heading Structuur
           </h3>
@@ -351,8 +356,8 @@ export const AnalysisResults = ({
         </Card>
 
         {/* Meta Information */}
-        <Card className="p-6 shadow-soft">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <Card className="p-4 sm:p-6 shadow-soft">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
             Meta Informatie
           </h3>
@@ -515,9 +520,9 @@ export const AnalysisResults = ({
       )}
 
       {/* Placeholder Cards for DR/UR and Keywords */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="p-4 sm:p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
             Domain & URL Rating
           </h3>
@@ -541,8 +546,8 @@ export const AnalysisResults = ({
           </div>
         </Card>
 
-        <Card className="p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <Card className="p-4 sm:p-6 shadow-soft bg-gradient-to-br from-card to-secondary/20">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary" />
             Keyword Rankings
           </h3>
