@@ -86,6 +86,17 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        canonical="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "CrawlWizard - Word gevonden door zoekmachines én AI",
+          "description": "Analyseer je volledige websitestructuur en krijg actionable inzichten om gevonden te worden in Google én in ChatGPT, Perplexity en AI Overviews.",
+          "url": "https://crawlwizard.nl/",
+          "isPartOf": { "@id": "https://crawlwizard.nl/#website" }
+        }}
+      />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
