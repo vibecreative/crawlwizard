@@ -571,6 +571,11 @@ const Index = () => {
       setAnalysisData(data);
       toast.success("Analyse voltooid!");
       
+      // Scroll to analysis results section
+      setTimeout(() => {
+        document.getElementById('analysis-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      
       // FAQs are now generated on-demand via button in FaqSuggestions component
       
       setTimeout(() => {
@@ -949,7 +954,7 @@ const Index = () => {
         </div>
 
         {analysisData && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+          <div id="analysis-results" className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
             <AnalysisResults 
               data={analysisData} 
               onReset={handleReset}
