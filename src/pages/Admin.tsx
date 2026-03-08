@@ -178,6 +178,7 @@ const Admin = () => {
     }
   };
 
+  const updateUser = async (userId: string, updates: { is_active?: boolean; plan?: string; role?: string }) => {
     setUpdatingUser(userId);
     try {
       const response = await fetch(
