@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { SEOHead } from "@/components/SEOHead";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { CreditsDashboard } from "@/components/CreditsDashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +56,7 @@ interface Project {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,7 +112,7 @@ const Dashboard = () => {
       setProjects(data || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      toast.error("Kon projecten niet laden");
+      toast.error(t('dashboard.loadProjectsFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -129,7 +132,7 @@ const Dashboard = () => {
       ));
     } catch (error) {
       console.error("Error fetching pages:", error);
-      toast.error("Kon pagina's niet laden");
+      toast.error(t('dashboard.loadPagesFailed'));
     } finally {
       setLoadingPages(null);
     }
@@ -149,15 +152,15 @@ const Dashboard = () => {
 
   const handleDeleteProject = async (projectId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Weet je zeker dat je dit project wilt verwijderen?")) return;
+    if (!confirm(t('dashboard.deleteConfirm'))) return;
     try {
       const { error } = await supabase.from("projects").delete().eq("id", projectId);
       if (error) throw error;
       setProjects(prev => prev.filter(p => p.id !== projectId));
-      toast.success("Project verwijderd");
+      toast.success(t('dashboard.projectDeleted'));
     } catch (error) {
       console.error("Error deleting project:", error);
-      toast.error("Kon project niet verwijderen");
+      toast.error(t('dashboard.projectDeleteFailed'));
     }
   };
 
@@ -219,6 +222,7 @@ const Dashboard = () => {
                 Admin
               </Button>
             )}
+            <LanguageSwitcher />
             <ThemeToggle />
             <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8">
               <LogOut className="h-4 w-4" />
@@ -237,7 +241,7 @@ const Dashboard = () => {
                   <Globe className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Projecten</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.projects')}</p>
                   <p className="text-2xl font-bold font-display">{projects.length}</p>
                 </div>
               </div>
@@ -250,7 +254,7 @@ const Dashboard = () => {
                   <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Pagina's</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.pages')}</p>
                   <p className="text-2xl font-bold font-display">
                     {projects.reduce((acc, p) => acc + (p.analyzed_pages || 0), 0)}
                   </p>
@@ -265,7 +269,7 @@ const Dashboard = () => {
                   <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Gem. Score</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.avgScore')}</p>
                   <p className="text-2xl font-bold font-display">
                     {projects.length > 0 
                       ? Math.round(projects.reduce((acc, p) => {
@@ -282,10 +286,10 @@ const Dashboard = () => {
 
         {/* Actions */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold font-display">Mijn Projecten</h2>
+          <h2 className="text-base font-semibold font-display">{t('dashboard.myProjects')}</h2>
           <Button size="sm" onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground h-8 text-xs">
             <Plus className="h-3.5 w-3.5 mr-1.5" />
-            Nieuwe Analyse
+            {t('dashboard.newAnalysis')}
           </Button>
         </div>
 
@@ -312,13 +316,13 @@ const Dashboard = () => {
               <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
                 <Globe className="h-7 w-7 text-muted-foreground" />
               </div>
-              <h3 className="text-base font-semibold font-display mb-2">Geen projecten gevonden</h3>
+              <h3 className="text-base font-semibold font-display mb-2">{t('dashboard.noProjects')}</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Start je eerste website analyse om projecten aan te maken.
+                {t('dashboard.noProjectsDesc')}
               </p>
               <Button onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground">
                 <Plus className="h-4 w-4 mr-2" />
-                Nieuwe Analyse Starten
+                {t('dashboard.startNewAnalysis')}
               </Button>
             </CardContent>
           </Card>
@@ -341,8 +345,8 @@ const Dashboard = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <CardTitle className="text-sm font-display">{project.name}</CardTitle>
                           <Badge variant="outline" className="text-[10px] h-5 px-1.5">
-                            {project.status === "completed" ? "Voltooid" : 
-                             project.status === "analyzing" ? "Bezig..." : "In wachtrij"}
+                            {project.status === "completed" ? t('dashboard.completed') : 
+                             project.status === "analyzing" ? t('dashboard.analyzing') : t('dashboard.queued')}
                           </Badge>
                         </div>
                         <CardDescription className="flex items-center gap-1.5 text-xs">
@@ -371,18 +375,18 @@ const Dashboard = () => {
                     <div className="flex items-center gap-5 text-xs text-muted-foreground mb-3">
                       <span className="flex items-center gap-1">
                         <FileText className="h-3.5 w-3.5" />
-                        {project.analyzed_pages}/{project.total_pages} pagina's
+                        {project.analyzed_pages}/{project.total_pages} {t('dashboard.pages').toLowerCase()}
                       </span>
                       {issuesCount > 0 && (
                         <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                           <AlertTriangle className="h-3.5 w-3.5" />
-                          {issuesCount} problemen
+                          {issuesCount} {t('dashboard.issues')}
                         </span>
                       )}
                       {issuesCount === 0 && project.pages && project.pages.length > 0 && (
                         <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Geen problemen
+                          {t('dashboard.noIssues')}
                         </span>
                       )}
                     </div>
@@ -397,7 +401,7 @@ const Dashboard = () => {
                     {/* Expanded Pages View */}
                     {isExpanded && (
                       <div className="mt-4 pt-4 border-t border-border" onClick={e => e.stopPropagation()}>
-                        <h4 className="text-xs font-semibold font-display uppercase tracking-wider text-muted-foreground mb-3">Pagina Overzicht</h4>
+                        <h4 className="text-xs font-semibold font-display uppercase tracking-wider text-muted-foreground mb-3">{t('dashboard.pageOverview')}</h4>
                         
                         {loadingPages === project.id ? (
                           <div className="space-y-2">
@@ -441,7 +445,7 @@ const Dashboard = () => {
                                     onClick={() => navigate(`/page/${page.id}`)}
                                   >
                                     <Eye className="h-3 w-3 sm:mr-1" />
-                                    <span className="hidden sm:inline">Details</span>
+                                    <span className="hidden sm:inline">{t('dashboard.details')}</span>
                                   </Button>
                                   <Button
                                     variant="ghost"
@@ -457,7 +461,7 @@ const Dashboard = () => {
                           </div>
                         ) : (
                           <p className="text-xs text-muted-foreground text-center py-4">
-                            Geen pagina's geanalyseerd
+                            {t('dashboard.noPagesAnalyzed')}
                           </p>
                         )}
 
@@ -477,7 +481,7 @@ const Dashboard = () => {
         {/* AI Credits Dashboard */}
         {user?.id && (
           <div className="mt-8 mb-8">
-            <h2 className="text-base font-semibold font-display mb-4">AI Credits</h2>
+            <h2 className="text-base font-semibold font-display mb-4">{t('dashboard.aiCredits')}</h2>
             <CreditsDashboard userId={user.id} />
           </div>
         )}

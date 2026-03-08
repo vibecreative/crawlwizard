@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +26,7 @@ interface JsonLdGeneratorProps {
 }
 
 export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorProps) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   // Page-type detection for smart recommendations
@@ -53,25 +55,12 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
     faqPage: recommended.faqPage,
   });
 
-  const allSelected = selectedSchemas.website && selectedSchemas.organization && 
-                      selectedSchemas.breadcrumb && selectedSchemas.article && selectedSchemas.faqPage;
-
-  const handleSelectAll = (checked: boolean) => {
-    setSelectedSchemas({
-      website: checked,
-      organization: checked,
-      breadcrumb: checked,
-      article: checked,
-      faqPage: checked,
-    });
-  };
-
   const getDomainName = (url: string) => {
     try {
       const domain = new URL(url).hostname.replace('www.', '');
       return domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1);
     } catch {
-      return "Uw Bedrijf";
+      return "Your Company";
     }
   };
 
@@ -208,7 +197,6 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
 
     if (schemas.length === 0) return "";
 
-    // If multiple schemas, wrap in array
     const jsonLdContent = schemas.length === 1 ? schemas[0] : schemas;
     
     return `<script type="application/ld+json">
@@ -219,21 +207,29 @@ ${JSON.stringify(jsonLdContent, null, 2)}
   const handleCopy = async () => {
     const jsonLd = generateJsonLd();
     if (!jsonLd) {
-      toast.error("Selecteer minimaal één schema type");
+      toast.error(t('jsonLd.selectMinOne'));
       return;
     }
 
     try {
       await navigator.clipboard.writeText(jsonLd);
       setCopied(true);
-      toast.success("JSON-LD gekopieerd naar klembord!");
+      toast.success(t('jsonLd.copySuccess'));
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast.error("Kopiëren mislukt");
+      toast.error(t('jsonLd.copyFailed'));
     }
   };
 
   const selectedCount = Object.values(selectedSchemas).filter(Boolean).length;
+
+  const schemaItems = [
+    { key: 'website', label: t('jsonLd.websiteSchema'), desc: t('jsonLd.websiteDesc') },
+    { key: 'organization', label: t('jsonLd.organizationSchema'), desc: t('jsonLd.organizationDesc') },
+    { key: 'breadcrumb', label: t('jsonLd.breadcrumbSchema'), desc: t('jsonLd.breadcrumbDesc') },
+    { key: 'article', label: t('jsonLd.articleSchema'), desc: t('jsonLd.articleDesc') },
+    { key: 'faqPage', label: t('jsonLd.faqSchema'), desc: hasFaqs ? t('jsonLd.faqDescAvailable', { count: faqs!.length }) : t('jsonLd.faqDescUnavailable'), disabled: !hasFaqs },
+  ];
 
   return (
     <Card className="p-6 shadow-soft">
@@ -241,25 +237,19 @@ ${JSON.stringify(jsonLdContent, null, 2)}
         <div>
           <h3 className="text-xl font-semibold flex items-center gap-2 mb-2">
             <Code2 className="h-5 w-5 text-primary" />
-            JSON-LD Generator
+            {t('jsonLd.title')}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Genereer complete structured data voor uw website
+            {t('jsonLd.subtitle')}
           </p>
         </div>
         <Badge variant="secondary" className="ml-2">
-          {selectedCount} geselecteerd
+          {selectedCount} {t('jsonLd.selected')}
         </Badge>
       </div>
 
       <div className="space-y-4 mb-6">
-        {[
-          { key: 'website', label: 'WebSite Schema', desc: 'Basisinformatie over uw website met sitelinks searchbox' },
-          { key: 'organization', label: 'Organization Schema', desc: 'Bedrijfsinformatie en contactgegevens' },
-          { key: 'breadcrumb', label: 'BreadcrumbList Schema', desc: 'Navigatiestructuur voor deze pagina' },
-          { key: 'article', label: 'Article Schema', desc: 'Voor artikelen, blog posts en nieuwsberichten' },
-          { key: 'faqPage', label: 'FAQPage Schema', desc: hasFaqs ? `Voor veelgestelde vragen (${faqs!.length} FAQ's beschikbaar)` : "Geen FAQ's beschikbaar", disabled: !hasFaqs },
-        ].map(({ key, label, desc, disabled }) => {
+        {schemaItems.map(({ key, label, desc, disabled }) => {
           const isRecommended = recommended[key];
           return (
             <label
@@ -283,7 +273,7 @@ ${JSON.stringify(jsonLdContent, null, 2)}
                   {isRecommended && (
                     <Badge variant="default" className="text-[10px] px-1.5 py-0 h-5 gap-1">
                       <Star className="h-3 w-3" />
-                      Aanbevolen
+                      {t('jsonLd.recommended')}
                     </Badge>
                   )}
                 </div>
@@ -291,7 +281,7 @@ ${JSON.stringify(jsonLdContent, null, 2)}
                   {desc}
                   {isRecommended && (
                     <span className="ml-1 text-primary font-medium">
-                      — relevant voor dit paginatype
+                      {t('jsonLd.relevantForPage')}
                     </span>
                   )}
                 </div>
@@ -304,7 +294,7 @@ ${JSON.stringify(jsonLdContent, null, 2)}
 
         <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-primary">💡 Tip:</strong> Alle geselecteerde schema's worden automatisch samengevoegd tot één gecombineerde JSON-LD code die u kunt kopiëren.
+            <strong className="text-primary">💡 {t('jsonLd.tip')}</strong> {t('jsonLd.combinedTip')}
           </p>
         </div>
       </div>
@@ -325,20 +315,19 @@ ${JSON.stringify(jsonLdContent, null, 2)}
             {copied ? (
               <>
                 <CheckCircle2 className="h-4 w-4" />
-                Gekopieerd!
+                {t('jsonLd.copied')}
               </>
             ) : (
               <>
                 <Copy className="h-4 w-4" />
-                Kopieer JSON-LD Code
+                {t('jsonLd.copyButton')}
               </>
             )}
           </Button>
 
           <div className="p-4 bg-accent/10 rounded-lg border border-accent/20">
             <p className="text-sm text-muted-foreground">
-              <strong>💡 Tip:</strong> Plak deze code in de <code className="px-1.5 py-0.5 bg-secondary rounded text-xs">&lt;head&gt;</code> sectie van uw HTML, 
-              bij voorkeur vlak voor de sluitende <code className="px-1.5 py-0.5 bg-secondary rounded text-xs">&lt;/head&gt;</code> tag.
+              <strong>💡 {t('jsonLd.tip')}</strong> {t('jsonLd.headTip')}
             </p>
           </div>
         </div>
