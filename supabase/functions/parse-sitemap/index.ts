@@ -55,8 +55,28 @@ function validateUrl(url: string): { valid: boolean; error?: string } {
     }
   }
 
-  return { valid: true };
+
+const MAX_REDIRECTS = 5;
+
+async function safeFetch(url: string, options: RequestInit): Promise<Response> {
+  let currentUrl = url;
+  for (let i = 0; i < MAX_REDIRECTS; i++) {
+    const response = await fetch(currentUrl, { ...options, redirect: 'manual' });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) throw new Error('Redirect without location header');
+      const resolved = new URL(location, currentUrl).toString();
+      if (!validateUrl(resolved).valid) {
+        throw new Error('Redirect to blocked URL');
+      }
+      currentUrl = resolved;
+      continue;
+    }
+    return response;
+  }
+  throw new Error('Too many redirects');
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
