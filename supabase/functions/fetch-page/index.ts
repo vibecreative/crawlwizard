@@ -13,18 +13,28 @@ function validateUrl(url: string): boolean {
   return urlRegex.test(url);
 }
 
-// Block internal/private IPs (SSRF protection)
 function isPrivateUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    const hostname = parsed.hostname;
+    const hostname = parsed.hostname.toLowerCase();
     if (
       hostname === 'localhost' ||
       hostname === '127.0.0.1' ||
       hostname.startsWith('10.') ||
       hostname.startsWith('192.168.') ||
-      hostname.startsWith('172.') ||
+      hostname.startsWith('172.16.') || hostname.startsWith('172.17.') ||
+      hostname.startsWith('172.18.') || hostname.startsWith('172.19.') ||
+      hostname.startsWith('172.20.') || hostname.startsWith('172.21.') ||
+      hostname.startsWith('172.22.') || hostname.startsWith('172.23.') ||
+      hostname.startsWith('172.24.') || hostname.startsWith('172.25.') ||
+      hostname.startsWith('172.26.') || hostname.startsWith('172.27.') ||
+      hostname.startsWith('172.28.') || hostname.startsWith('172.29.') ||
+      hostname.startsWith('172.30.') || hostname.startsWith('172.31.') ||
+      hostname.startsWith('169.254.') ||
       hostname === '0.0.0.0' ||
+      hostname === '[::1]' ||
+      hostname.startsWith('fc00:') ||
+      hostname.startsWith('fe80:') ||
       hostname.endsWith('.local')
     ) {
       return true;
@@ -33,6 +43,27 @@ function isPrivateUrl(url: string): boolean {
   } catch {
     return true;
   }
+}
+
+const MAX_REDIRECTS = 5;
+
+async function safeFetch(url: string, options: RequestInit): Promise<Response> {
+  let currentUrl = url;
+  for (let i = 0; i < MAX_REDIRECTS; i++) {
+    const response = await fetch(currentUrl, { ...options, redirect: 'manual' });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) throw new Error('Redirect without location header');
+      const resolved = new URL(location, currentUrl).toString();
+      if (isPrivateUrl(resolved)) {
+        throw new Error('Redirect to private/internal URL blocked');
+      }
+      currentUrl = resolved;
+      continue;
+    }
+    return response;
+  }
+  throw new Error('Too many redirects');
 }
 
 serve(async (req) => {
