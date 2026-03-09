@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
             if (robotsUrlValidation.valid) {
               console.log('Found sitemap in robots.txt:', robotsSitemapUrl);
               
-              const sitemapResponse = await fetch(robotsSitemapUrl, {
+              const sitemapResponse = await safeFetch(robotsSitemapUrl, {
                 headers: {
                   'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
                   'Accept': 'application/xml, text/xml, */*',
