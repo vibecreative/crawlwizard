@@ -399,6 +399,9 @@ export const AnalysisResults = ({
                 <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {t('analysis.ogImage')}
                 </label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Ideaal formaat: 1200 × 630 pixels
+                </p>
                 <img 
                   src={data.meta.ogImage} 
                   alt="OG Image" 
