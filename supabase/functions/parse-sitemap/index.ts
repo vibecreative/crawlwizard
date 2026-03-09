@@ -58,6 +58,28 @@ function validateUrl(url: string): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
+const MAX_REDIRECTS = 5;
+
+async function safeFetch(url: string, options: RequestInit): Promise<Response> {
+  let currentUrl = url;
+  for (let i = 0; i < MAX_REDIRECTS; i++) {
+    const response = await fetch(currentUrl, { ...options, redirect: 'manual' });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) throw new Error('Redirect without location header');
+      const resolved = new URL(location, currentUrl).toString();
+      if (!validateUrl(resolved).valid) {
+        throw new Error('Redirect to blocked URL');
+      }
+      currentUrl = resolved;
+      continue;
+    }
+    return response;
+  }
+  throw new Error('Too many redirects');
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -136,7 +158,7 @@ Deno.serve(async (req) => {
       console.log('Trying sitemap URL:', sitemapUrl);
       
       try {
-        const response = await fetch(sitemapUrl, {
+        const response = await safeFetch(sitemapUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
             'Accept': 'application/xml, text/xml, */*',
@@ -167,7 +189,7 @@ Deno.serve(async (req) => {
         const robotsUrl = `${normalizedUrl}/robots.txt`;
         console.log('Checking robots.txt:', robotsUrl);
         
-        const robotsResponse = await fetch(robotsUrl, {
+        const robotsResponse = await safeFetch(robotsUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
           },
@@ -185,7 +207,7 @@ Deno.serve(async (req) => {
             if (robotsUrlValidation.valid) {
               console.log('Found sitemap in robots.txt:', robotsSitemapUrl);
               
-              const sitemapResponse = await fetch(robotsSitemapUrl, {
+              const sitemapResponse = await safeFetch(robotsSitemapUrl, {
                 headers: {
                   'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
                   'Accept': 'application/xml, text/xml, */*',
@@ -243,7 +265,7 @@ Deno.serve(async (req) => {
       for (const subUrl of subSitemapUrls.slice(0, 5)) {
         try {
           console.log('Fetching sub-sitemap:', subUrl);
-          const subResponse = await fetch(subUrl, {
+          const subResponse = await safeFetch(subUrl, {
             headers: {
               'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
               'Accept': 'application/xml, text/xml, */*',
