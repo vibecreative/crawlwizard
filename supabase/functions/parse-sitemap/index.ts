@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
         const robotsUrl = `${normalizedUrl}/robots.txt`;
         console.log('Checking robots.txt:', robotsUrl);
         
-        const robotsResponse = await fetch(robotsUrl, {
+        const robotsResponse = await safeFetch(robotsUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
           },
