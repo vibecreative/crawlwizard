@@ -55,6 +55,8 @@ function validateUrl(url: string): { valid: boolean; error?: string } {
     }
   }
 
+  return { valid: true };
+}
 
 const MAX_REDIRECTS = 5;
 
