@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import CookieBanner from "@/components/CookieBanner";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import Index from "./pages/Index";
