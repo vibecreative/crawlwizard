@@ -134,13 +134,12 @@ serve(async (req) => {
 
     console.log('Fetching page:', url);
 
-    const response = await fetch(url, {
+    const response = await safeFetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; CrawlWizard/1.0; +https://crawlwizard.app)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'nl,en;q=0.9',
       },
-      redirect: 'follow',
     });
 
     if (!response.ok) {
