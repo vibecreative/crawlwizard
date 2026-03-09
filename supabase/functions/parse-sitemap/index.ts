@@ -263,7 +263,7 @@ Deno.serve(async (req) => {
       for (const subUrl of subSitemapUrls.slice(0, 5)) {
         try {
           console.log('Fetching sub-sitemap:', subUrl);
-          const subResponse = await fetch(subUrl, {
+          const subResponse = await safeFetch(subUrl, {
             headers: {
               'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
               'Accept': 'application/xml, text/xml, */*',
