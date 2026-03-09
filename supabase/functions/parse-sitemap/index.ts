@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
       console.log('Trying sitemap URL:', sitemapUrl);
       
       try {
-        const response = await fetch(sitemapUrl, {
+        const response = await safeFetch(sitemapUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
             'Accept': 'application/xml, text/xml, */*',
