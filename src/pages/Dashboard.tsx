@@ -205,27 +205,27 @@ const Dashboard = () => {
       <SEOHead title="Dashboard" noindex />
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md gradient-primary flex items-center justify-center">
-              <Search className="h-4 w-4 text-primary-foreground" />
+        <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md gradient-primary flex items-center justify-center">
+              <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
             </div>
-            <h1 className="text-lg font-bold font-display">CrawlWizard</h1>
+            <h1 className="text-base sm:text-lg font-bold font-display">CrawlWizard</h1>
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:block">
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <span className="text-xs text-muted-foreground hidden md:block truncate max-w-[160px]">
               {user?.email}
             </span>
             {isAdmin && (
-              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="h-8 text-xs">
-                <Shield className="h-3.5 w-3.5 mr-1.5" />
-                Admin
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="h-7 sm:h-8 text-[10px] sm:text-xs px-2">
+                <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1.5" />
+                <span className="hidden sm:inline">Admin</span>
               </Button>
             )}
             <LanguageSwitcher />
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8">
-              <LogOut className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-7 w-7 sm:h-8 sm:w-8">
+              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
