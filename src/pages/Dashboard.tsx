@@ -231,9 +231,9 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
+      <main className="container mx-auto px-3 sm:px-4 py-5 sm:py-8 max-w-5xl">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
           <Card className="shadow-soft border-border/50">
             <CardContent className="pt-5 pb-5">
               <div className="flex items-center gap-3">
