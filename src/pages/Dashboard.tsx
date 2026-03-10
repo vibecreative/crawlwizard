@@ -372,7 +372,7 @@ const Dashboard = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="pb-5">
-                    <div className="flex items-center gap-5 text-xs text-muted-foreground mb-3">
+                    <div className="flex items-center gap-3 sm:gap-5 text-[10px] sm:text-xs text-muted-foreground mb-3 flex-wrap">
                       <span className="flex items-center gap-1">
                         <FileText className="h-3.5 w-3.5" />
                         {project.analyzed_pages}/{project.total_pages} {t('dashboard.pages').toLowerCase()}
