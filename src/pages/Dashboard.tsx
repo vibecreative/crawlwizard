@@ -342,16 +342,16 @@ const Dashboard = () => {
                   <CardHeader className="pb-3 pt-5">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <CardTitle className="text-sm font-display">{project.name}</CardTitle>
-                          <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                          <CardTitle className="text-xs sm:text-sm font-display">{project.name}</CardTitle>
+                          <Badge variant="outline" className="text-[9px] sm:text-[10px] h-4 sm:h-5 px-1 sm:px-1.5">
                             {project.status === "completed" ? t('dashboard.completed') : 
                              project.status === "analyzing" ? t('dashboard.analyzing') : t('dashboard.queued')}
                           </Badge>
                         </div>
-                        <CardDescription className="flex items-center gap-1.5 text-xs">
-                          <Globe className="h-3 w-3" />
-                          {project.base_url}
+                        <CardDescription className="flex items-center gap-1.5 text-[10px] sm:text-xs">
+                          <Globe className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{project.base_url}</span>
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
