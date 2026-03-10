@@ -235,27 +235,27 @@ const Dashboard = () => {
         {/* Stats Overview */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
           <Card className="shadow-soft border-border/50">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Globe className="h-5 w-5 text-primary" />
+            <CardContent className="p-3 sm:pt-5 sm:pb-5 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.projects')}</p>
-                  <p className="text-2xl font-bold font-display">{projects.length}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.projects')}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-display">{projects.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-soft border-border/50">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <CardContent className="p-3 sm:pt-5 sm:pb-5 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.pages')}</p>
-                  <p className="text-2xl font-bold font-display">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.pages')}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-display">
                     {projects.reduce((acc, p) => acc + (p.analyzed_pages || 0), 0)}
                   </p>
                 </div>
@@ -263,14 +263,14 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           <Card className="shadow-soft border-border/50">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <CardContent className="p-3 sm:pt-5 sm:pb-5 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.avgScore')}</p>
-                  <p className="text-2xl font-bold font-display">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.avgScore')}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-display">
                     {projects.length > 0 
                       ? Math.round(projects.reduce((acc, p) => {
                           const score = getAverageScore(p);
