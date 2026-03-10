@@ -205,57 +205,57 @@ const Dashboard = () => {
       <SEOHead title="Dashboard" noindex />
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-xl sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md gradient-primary flex items-center justify-center">
-              <Search className="h-4 w-4 text-primary-foreground" />
+        <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md gradient-primary flex items-center justify-center">
+              <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
             </div>
-            <h1 className="text-lg font-bold font-display">CrawlWizard</h1>
+            <h1 className="text-base sm:text-lg font-bold font-display">CrawlWizard</h1>
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:block">
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <span className="text-xs text-muted-foreground hidden md:block truncate max-w-[160px]">
               {user?.email}
             </span>
             {isAdmin && (
-              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="h-8 text-xs">
-                <Shield className="h-3.5 w-3.5 mr-1.5" />
-                Admin
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="h-7 sm:h-8 text-[10px] sm:text-xs px-2">
+                <Shield className="h-3 w-3 sm:h-3.5 sm:w-3.5 sm:mr-1.5" />
+                <span className="hidden sm:inline">Admin</span>
               </Button>
             )}
             <LanguageSwitcher />
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-8 w-8">
-              <LogOut className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={handleSignOut} className="h-7 w-7 sm:h-8 sm:w-8">
+              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
+      <main className="container mx-auto px-3 sm:px-4 py-5 sm:py-8 max-w-5xl">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
           <Card className="shadow-soft border-border/50">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Globe className="h-5 w-5 text-primary" />
+            <CardContent className="p-3 sm:pt-5 sm:pb-5 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.projects')}</p>
-                  <p className="text-2xl font-bold font-display">{projects.length}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.projects')}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-display">{projects.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-soft border-border/50">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <CardContent className="p-3 sm:pt-5 sm:pb-5 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.pages')}</p>
-                  <p className="text-2xl font-bold font-display">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.pages')}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-display">
                     {projects.reduce((acc, p) => acc + (p.analyzed_pages || 0), 0)}
                   </p>
                 </div>
@@ -263,14 +263,14 @@ const Dashboard = () => {
             </CardContent>
           </Card>
           <Card className="shadow-soft border-border/50">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <CardContent className="p-3 sm:pt-5 sm:pb-5 sm:px-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1.5 sm:gap-3 text-center sm:text-left">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.avgScore')}</p>
-                  <p className="text-2xl font-bold font-display">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">{t('dashboard.avgScore')}</p>
+                  <p className="text-xl sm:text-2xl font-bold font-display">
                     {projects.length > 0 
                       ? Math.round(projects.reduce((acc, p) => {
                           const score = getAverageScore(p);
@@ -285,10 +285,10 @@ const Dashboard = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold font-display">{t('dashboard.myProjects')}</h2>
-          <Button size="sm" onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground h-8 text-xs">
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
+        <div className="flex items-center justify-between mb-4 sm:mb-5">
+          <h2 className="text-sm sm:text-base font-semibold font-display">{t('dashboard.myProjects')}</h2>
+          <Button size="sm" onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground h-7 sm:h-8 text-[10px] sm:text-xs px-2.5 sm:px-3">
+            <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5" />
             {t('dashboard.newAnalysis')}
           </Button>
         </div>
@@ -342,16 +342,16 @@ const Dashboard = () => {
                   <CardHeader className="pb-3 pt-5">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <CardTitle className="text-sm font-display">{project.name}</CardTitle>
-                          <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                          <CardTitle className="text-xs sm:text-sm font-display">{project.name}</CardTitle>
+                          <Badge variant="outline" className="text-[9px] sm:text-[10px] h-4 sm:h-5 px-1 sm:px-1.5">
                             {project.status === "completed" ? t('dashboard.completed') : 
                              project.status === "analyzing" ? t('dashboard.analyzing') : t('dashboard.queued')}
                           </Badge>
                         </div>
-                        <CardDescription className="flex items-center gap-1.5 text-xs">
-                          <Globe className="h-3 w-3" />
-                          {project.base_url}
+                        <CardDescription className="flex items-center gap-1.5 text-[10px] sm:text-xs">
+                          <Globe className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{project.base_url}</span>
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
@@ -372,7 +372,7 @@ const Dashboard = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="pb-5">
-                    <div className="flex items-center gap-5 text-xs text-muted-foreground mb-3">
+                    <div className="flex items-center gap-3 sm:gap-5 text-[10px] sm:text-xs text-muted-foreground mb-3 flex-wrap">
                       <span className="flex items-center gap-1">
                         <FileText className="h-3.5 w-3.5" />
                         {project.analyzed_pages}/{project.total_pages} {t('dashboard.pages').toLowerCase()}
