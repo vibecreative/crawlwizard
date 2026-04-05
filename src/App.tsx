@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
 import CookieBanner from "@/components/CookieBanner";
+import ScrollToTop from "@/components/ScrollToTop";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
