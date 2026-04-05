@@ -170,7 +170,7 @@ const Privacy = () => {
           {/* Privacy Policy Content */}
           <div className="prose prose-sm dark:prose-invert max-w-none space-y-8">
             <section>
-              <h2 className="text-2xl font-semibold mb-3">1. {i18n.language === 'nl' ? 'Inleiding' : 'Introduction'}</h2>
+              <h2 className="text-2xl font-semibold mb-3">1. {t('privacy.introTitle')}</h2>
               <p className="text-muted-foreground">
                 {t('privacy.intro')}
               </p>
@@ -180,7 +180,7 @@ const Privacy = () => {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3">10. Contact</h2>
+              <h2 className="text-2xl font-semibold mb-3">10. {t('privacy.contactTitle')}</h2>
               <ContactForm />
             </section>
           </div>
