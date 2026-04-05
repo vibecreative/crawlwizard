@@ -377,6 +377,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_own_profile: {
+        Args: { _company_name?: string; _full_name?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
