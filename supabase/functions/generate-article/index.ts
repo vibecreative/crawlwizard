@@ -16,8 +16,16 @@ async function checkCredits(supabase: any, userId: string, creditsNeeded: number
   return { allowed: true, ...credits };
 }
 
-async function logCreditUsage(supabase: any, userId: string, actionType: string, credits: number) {
-  await supabase.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
+function getAdminClient() {
+  return createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+}
+
+async function logCreditUsage(userId: string, actionType: string, credits: number) {
+  const adminClient = getAdminClient();
+  await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
 }
 
 function getSystemPrompt(lang: string, mode: string, brandContext?: string) {
