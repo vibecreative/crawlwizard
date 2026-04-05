@@ -26,6 +26,8 @@ const Auth = () => {
   
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const selectedPlan = searchParams.get('plan') || 'free';
   const { toast } = useToast();
 
   const emailSchema = z.string().email(t('auth.invalidEmail'));
