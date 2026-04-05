@@ -600,8 +600,10 @@
     "marketingCookies": "Marketing cookies",
     "marketingDesc": "Marketing cookies worden gebruikt om bezoekers te volgen op verschillende websites. Het doel is om advertenties te tonen die relevant en aantrekkelijk zijn voor de individuele gebruiker.",
     "intro": "CrawlWizard respecteert je privacy en zorgt ervoor dat je persoonlijke gegevens worden beschermd. Dit privacybeleid is van toepassing op de website en diensten van CrawlWizard en legt uit welke gegevens we verzamelen, waarom we dat doen en hoe we deze beschermen.",
-    "gdprCompliance": "Dit beleid voldoet aan de Algemene Verordening Gegevensbescherming (AVG/GDPR) en is van toepassing op alle bezoekers en gebruikers van onze dienst.",
-    "allRightsReserved": "Alle rechten voorbehouden."
+     "gdprCompliance": "Dit beleid voldoet aan de Algemene Verordening Gegevensbescherming (AVG/GDPR) en is van toepassing op alle bezoekers en gebruikers van onze dienst.",
+     "introTitle": "Introductie",
+     "contactTitle": "Contact opnemen",
+     "allRightsReserved": "Alle rechten voorbehouden."
   },
   "admin": {
     "noAccess": "Geen toegang",

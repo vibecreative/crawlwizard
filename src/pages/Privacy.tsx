@@ -180,7 +180,7 @@ const Privacy = () => {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3">10. Contact</h2>
+              <h2 className="text-2xl font-semibold mb-3">10. {t('privacy.contactTitle')}</h2>
               <ContactForm />
             </section>
           </div>
