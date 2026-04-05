@@ -226,7 +226,7 @@ serve(async (req) => {
 
     await supabase.from("ai_ranking_checks").update({ status: "completed" }).eq("id", check.id);
 
-    await logCreditUsage(supabase, user.id, 'ai_ranking_check', totalCredits);
+    await logCreditUsage(user.id, 'ai_ranking_check', totalCredits);
 
     return new Response(JSON.stringify({ checkId: check.id, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

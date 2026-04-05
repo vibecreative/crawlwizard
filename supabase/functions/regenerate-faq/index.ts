@@ -182,7 +182,7 @@ serve(async (req) => {
       throw new Error('AI gateway error');
     }
 
-    await logCreditUsage(supabaseClient, user.id, 'faq_regeneration', CREDITS_REQUIRED);
+    await logCreditUsage(user.id, 'faq_regeneration', CREDITS_REQUIRED);
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];

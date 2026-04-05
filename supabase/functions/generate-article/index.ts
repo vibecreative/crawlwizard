@@ -242,7 +242,7 @@ serve(async (req) => {
       if (toolCall) detection = JSON.parse(toolCall.function.arguments);
     }
 
-    await logCreditUsage(supabaseClient, user.id, 'article_generation', CREDITS_REQUIRED);
+    await logCreditUsage(user.id, 'article_generation', CREDITS_REQUIRED);
 
     return new Response(JSON.stringify({ article, detection }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
