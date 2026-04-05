@@ -67,7 +67,7 @@ const Auth = () => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsLoading(true);
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(email, password, fullName, selectedPlan);
     setIsLoading(false);
     if (error) {
       let message = t('auth.registerError');

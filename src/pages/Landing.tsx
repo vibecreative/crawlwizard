@@ -479,7 +479,7 @@ const Landing = () => {
                     <Button 
                       variant={plan.variant}
                       className={`w-full mt-8 ${plan.popular ? 'gradient-primary text-primary-foreground shadow-glow' : ''}`}
-                      onClick={() => navigate('/auth')}
+                      onClick={() => navigate(`/auth?plan=${plan.name.toLowerCase()}`)}
                     >
                       {plan.cta}
                     </Button>
