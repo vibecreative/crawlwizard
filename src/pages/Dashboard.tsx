@@ -96,6 +96,7 @@ const Dashboard = () => {
   const fetchImpersonatedData = async (targetUserId: string) => {
     setIsLoading(true);
     try {
+      // Fetch profile name via edge function
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=view-user-data&userId=${targetUserId}`,
         {
@@ -108,13 +109,17 @@ const Dashboard = () => {
         }
       );
       if (!response.ok) throw new Error("Failed");
-      const { projects: userProjects, pages, profile } = await response.json();
+      const { profile } = await response.json();
       setViewAsName(profile?.full_name || profile?.company_name || targetUserId);
-      const enriched = (userProjects || []).map((p: Project) => ({
-        ...p,
-        pages: (pages || []).filter((pg: any) => pg.project_id === p.id),
-      }));
-      setProjects(enriched);
+
+      // Fetch projects directly via supabase (admin RLS allows this)
+      const { data: userProjects, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("user_id", targetUserId)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      setProjects(userProjects || []);
     } catch (error) {
       console.error("Impersonation fetch error:", error);
       toast.error(t('admin.viewAsDataFailed'));
@@ -126,7 +131,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchAllProjectPages = async () => {
-      if (projects.length === 0 || viewAsUserId) return;
+      if (projects.length === 0) return;
       const projectsNeedingPages = projects.filter(p => !p.pages);
       if (projectsNeedingPages.length === 0) return;
       try {
@@ -279,16 +284,16 @@ const Dashboard = () => {
 
       {/* Impersonation Banner */}
       {viewAsUserId && viewAsName && (
-        <div className="bg-amber-500/10 border-b border-amber-500/30 px-3 sm:px-4 py-2.5">
+        <div className="bg-primary/10 border-b border-primary/30 px-3 sm:px-4 py-2.5">
           <div className="container mx-auto flex items-center justify-between max-w-5xl">
-            <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
-              <Eye className="h-4 w-4 shrink-0" />
+            <div className="flex items-center gap-2 text-sm text-primary">
+              <Shield className="h-4 w-4 shrink-0" />
               <span>{t('dashboard.viewingAs', { name: viewAsName })}</span>
             </div>
             <Button
               variant="outline"
               size="sm"
-              className="h-7 text-xs border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
+              className="h-7 text-xs border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => navigate("/admin")}
             >
               <XCircle className="h-3 w-3 mr-1" />

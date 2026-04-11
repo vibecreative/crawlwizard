@@ -197,8 +197,8 @@
     "loadPagesFailed": "Kon pagina's niet laden",
     "details": "Details",
     "aiCredits": "AI Credits",
-    "viewingAs": "Je bekijkt het dashboard van {{name}}",
-    "stopViewing": "Stoppen met meekijken"
+    "viewingAs": "Je beheert het dashboard van {{name}}",
+    "stopViewing": "Terug naar Admin"
   },
   "analysis": {
     "pageStructureScore": "Paginastructuur score",
@@ -650,7 +650,7 @@
     "messageDeleted": "Bericht verwijderd",
     "messageDeleteFailed": "Kon bericht niet verwijderen",
     "statusUpdateFailed": "Kon status niet bijwerken",
-    "viewAs": "Meekijken",
+    "viewAs": "Beheren",
     "viewAsDataFailed": "Kon gebruikersdata niet laden"
   },
   "jsonLd": {

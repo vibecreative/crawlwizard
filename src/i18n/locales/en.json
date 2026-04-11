@@ -197,8 +197,8 @@
     "loadPagesFailed": "Could not load pages",
     "details": "Details",
     "aiCredits": "AI Credits",
-    "viewingAs": "You are viewing the dashboard of {{name}}",
-    "stopViewing": "Stop viewing"
+    "viewingAs": "You are managing the dashboard of {{name}}",
+    "stopViewing": "Back to Admin"
   },
   "analysis": {
     "pageStructureScore": "Page Structure Score",
@@ -650,7 +650,7 @@
     "messageDeleted": "Message deleted",
     "messageDeleteFailed": "Could not delete message",
     "statusUpdateFailed": "Could not update status",
-    "viewAs": "View as",
+    "viewAs": "Manage",
     "viewAsDataFailed": "Could not load user data"
   },
   "jsonLd": {
