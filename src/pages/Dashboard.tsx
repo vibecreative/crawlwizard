@@ -26,7 +26,8 @@ import {
   Trash2,
   Eye,
   Shield,
-  Search
+  Search,
+  XCircle
 } from "lucide-react";
 
 interface ProjectPage {
