@@ -647,8 +647,13 @@
     "userDeleteFailed": "Could not delete user",
     "messageDeleted": "Message deleted",
     "messageDeleteFailed": "Could not delete message",
-    "statusUpdateFailed": "Could not update status"
+    "statusUpdateFailed": "Could not update status",
+    "viewAs": "View as",
+    "viewAsDataFailed": "Could not load user data"
   },
+  "dashboard": {
+    "viewingAs": "You are viewing the dashboard of {{name}}",
+    "stopViewing": "Stop viewing",
   "jsonLd": {
     "title": "JSON-LD Generator",
     "subtitle": "Generate complete structured data for your website",
