@@ -96,6 +96,7 @@ const Dashboard = () => {
   const fetchImpersonatedData = async (targetUserId: string) => {
     setIsLoading(true);
     try {
+      // Fetch profile name via edge function
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=view-user-data&userId=${targetUserId}`,
         {
@@ -108,13 +109,17 @@ const Dashboard = () => {
         }
       );
       if (!response.ok) throw new Error("Failed");
-      const { projects: userProjects, pages, profile } = await response.json();
+      const { profile } = await response.json();
       setViewAsName(profile?.full_name || profile?.company_name || targetUserId);
-      const enriched = (userProjects || []).map((p: Project) => ({
-        ...p,
-        pages: (pages || []).filter((pg: any) => pg.project_id === p.id),
-      }));
-      setProjects(enriched);
+
+      // Fetch projects directly via supabase (admin RLS allows this)
+      const { data: userProjects, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("user_id", targetUserId)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      setProjects(userProjects || []);
     } catch (error) {
       console.error("Impersonation fetch error:", error);
       toast.error(t('admin.viewAsDataFailed'));
