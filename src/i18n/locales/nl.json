@@ -196,7 +196,9 @@
     "loadProjectsFailed": "Kon projecten niet laden",
     "loadPagesFailed": "Kon pagina's niet laden",
     "details": "Details",
-    "aiCredits": "AI Credits"
+    "aiCredits": "AI Credits",
+    "viewingAs": "Je bekijkt het dashboard van {{name}}",
+    "stopViewing": "Stoppen met meekijken"
   },
   "analysis": {
     "pageStructureScore": "Paginastructuur score",

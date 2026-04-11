@@ -196,7 +196,9 @@
     "loadProjectsFailed": "Could not load projects",
     "loadPagesFailed": "Could not load pages",
     "details": "Details",
-    "aiCredits": "AI Credits"
+    "aiCredits": "AI Credits",
+    "viewingAs": "You are viewing the dashboard of {{name}}",
+    "stopViewing": "Stop viewing"
   },
   "analysis": {
     "pageStructureScore": "Page Structure Score",
