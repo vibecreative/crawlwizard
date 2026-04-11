@@ -59,14 +59,26 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [loadingPages, setLoadingPages] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Impersonation state
+  const viewAsUserId = searchParams.get("viewAs");
+  const [viewAsName, setViewAsName] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchProjects();
+    if (viewAsUserId && isAdmin) {
+      fetchImpersonatedData(viewAsUserId);
+    } else if (!viewAsUserId) {
+      fetchProjects();
+    }
+  }, [viewAsUserId, isAdmin]);
+
+  useEffect(() => {
     if (user?.id) {
       supabase
         .from("user_roles")
@@ -74,10 +86,43 @@ const Dashboard = () => {
         .eq("user_id", user.id)
         .eq("role", "admin")
         .then(({ data }) => {
-          if (data && data.length > 0) setIsAdmin(true);
+          const admin = !!(data && data.length > 0);
+          setIsAdmin(admin);
+          if (!viewAsUserId) fetchProjects();
         });
     }
   }, [user?.id]);
+
+  const fetchImpersonatedData = async (targetUserId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=view-user-data&userId=${targetUserId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed");
+      const { projects: userProjects, pages, profile } = await response.json();
+      setViewAsName(profile?.full_name || profile?.company_name || targetUserId);
+      const enriched = (userProjects || []).map((p: Project) => ({
+        ...p,
+        pages: (pages || []).filter((pg: any) => pg.project_id === p.id),
+      }));
+      setProjects(enriched);
+    } catch (error) {
+      console.error("Impersonation fetch error:", error);
+      toast.error(t('admin.viewAsDataFailed'));
+      setSearchParams({});
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAllProjectPages = async () => {
