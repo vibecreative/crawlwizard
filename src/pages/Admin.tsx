@@ -416,7 +416,16 @@ const Admin = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs"
+                                onClick={() => navigate(`/dashboard?viewAs=${u.id}`)}
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                {t('admin.viewAs')}
+                              </Button>
                               <Button
                                 variant={u.is_active ? "destructive" : "default"}
                                 size="sm"

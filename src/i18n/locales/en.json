@@ -196,7 +196,9 @@
     "loadProjectsFailed": "Could not load projects",
     "loadPagesFailed": "Could not load pages",
     "details": "Details",
-    "aiCredits": "AI Credits"
+    "aiCredits": "AI Credits",
+    "viewingAs": "You are viewing the dashboard of {{name}}",
+    "stopViewing": "Stop viewing"
   },
   "analysis": {
     "pageStructureScore": "Page Structure Score",
@@ -647,7 +649,9 @@
     "userDeleteFailed": "Could not delete user",
     "messageDeleted": "Message deleted",
     "messageDeleteFailed": "Could not delete message",
-    "statusUpdateFailed": "Could not update status"
+    "statusUpdateFailed": "Could not update status",
+    "viewAs": "View as",
+    "viewAsDataFailed": "Could not load user data"
   },
   "jsonLd": {
     "title": "JSON-LD Generator",

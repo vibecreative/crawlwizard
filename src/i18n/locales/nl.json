@@ -196,7 +196,9 @@
     "loadProjectsFailed": "Kon projecten niet laden",
     "loadPagesFailed": "Kon pagina's niet laden",
     "details": "Details",
-    "aiCredits": "AI Credits"
+    "aiCredits": "AI Credits",
+    "viewingAs": "Je bekijkt het dashboard van {{name}}",
+    "stopViewing": "Stoppen met meekijken"
   },
   "analysis": {
     "pageStructureScore": "Paginastructuur score",
@@ -647,7 +649,9 @@
     "userDeleteFailed": "Kon gebruiker niet verwijderen",
     "messageDeleted": "Bericht verwijderd",
     "messageDeleteFailed": "Kon bericht niet verwijderen",
-    "statusUpdateFailed": "Kon status niet bijwerken"
+    "statusUpdateFailed": "Kon status niet bijwerken",
+    "viewAs": "Meekijken",
+    "viewAsDataFailed": "Kon gebruikersdata niet laden"
   },
   "jsonLd": {
     "title": "JSON-LD Generator",

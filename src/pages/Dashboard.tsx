@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { SEOHead } from "@/components/SEOHead";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -26,7 +26,8 @@ import {
   Trash2,
   Eye,
   Shield,
-  Search
+  Search,
+  XCircle
 } from "lucide-react";
 
 interface ProjectPage {
@@ -58,14 +59,26 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [loadingPages, setLoadingPages] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Impersonation state
+  const viewAsUserId = searchParams.get("viewAs");
+  const [viewAsName, setViewAsName] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchProjects();
+    if (viewAsUserId && isAdmin) {
+      fetchImpersonatedData(viewAsUserId);
+    } else if (!viewAsUserId) {
+      fetchProjects();
+    }
+  }, [viewAsUserId, isAdmin]);
+
+  useEffect(() => {
     if (user?.id) {
       supabase
         .from("user_roles")
@@ -73,14 +86,47 @@ const Dashboard = () => {
         .eq("user_id", user.id)
         .eq("role", "admin")
         .then(({ data }) => {
-          if (data && data.length > 0) setIsAdmin(true);
+          const admin = !!(data && data.length > 0);
+          setIsAdmin(admin);
+          if (!viewAsUserId) fetchProjects();
         });
     }
   }, [user?.id]);
 
+  const fetchImpersonatedData = async (targetUserId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=view-user-data&userId=${targetUserId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed");
+      const { projects: userProjects, pages, profile } = await response.json();
+      setViewAsName(profile?.full_name || profile?.company_name || targetUserId);
+      const enriched = (userProjects || []).map((p: Project) => ({
+        ...p,
+        pages: (pages || []).filter((pg: any) => pg.project_id === p.id),
+      }));
+      setProjects(enriched);
+    } catch (error) {
+      console.error("Impersonation fetch error:", error);
+      toast.error(t('admin.viewAsDataFailed'));
+      setSearchParams({});
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchAllProjectPages = async () => {
-      if (projects.length === 0) return;
+      if (projects.length === 0 || viewAsUserId) return;
       const projectsNeedingPages = projects.filter(p => !p.pages);
       if (projectsNeedingPages.length === 0) return;
       try {
@@ -231,6 +277,27 @@ const Dashboard = () => {
         </div>
       </header>
 
+      {/* Impersonation Banner */}
+      {viewAsUserId && viewAsName && (
+        <div className="bg-amber-500/10 border-b border-amber-500/30 px-3 sm:px-4 py-2.5">
+          <div className="container mx-auto flex items-center justify-between max-w-5xl">
+            <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
+              <Eye className="h-4 w-4 shrink-0" />
+              <span>{t('dashboard.viewingAs', { name: viewAsName })}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs border-amber-500/30 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
+              onClick={() => navigate("/admin")}
+            >
+              <XCircle className="h-3 w-3 mr-1" />
+              {t('dashboard.stopViewing')}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-3 sm:px-4 py-5 sm:py-8 max-w-5xl">
         {/* Stats Overview */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
@@ -287,10 +354,12 @@ const Dashboard = () => {
         {/* Actions */}
         <div className="flex items-center justify-between mb-4 sm:mb-5">
           <h2 className="text-sm sm:text-base font-semibold font-display">{t('dashboard.myProjects')}</h2>
-          <Button size="sm" onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground h-7 sm:h-8 text-[10px] sm:text-xs px-2.5 sm:px-3">
-            <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5" />
-            {t('dashboard.newAnalysis')}
-          </Button>
+          {!viewAsUserId && (
+            <Button size="sm" onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground h-7 sm:h-8 text-[10px] sm:text-xs px-2.5 sm:px-3">
+              <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5" />
+              {t('dashboard.newAnalysis')}
+            </Button>
+          )}
         </div>
 
         {/* Projects List */}

@@ -144,6 +144,40 @@ Deno.serve(async (req) => {
       });
     }
 
+    // VIEW USER DATA (impersonation - read only)
+    if (req.method === "GET" && action === "view-user-data") {
+      const targetUserId = url.searchParams.get("userId");
+      if (!targetUserId) throw new Error("userId is required");
+
+      const { data: projects, error: projError } = await adminClient
+        .from("projects")
+        .select("*")
+        .eq("user_id", targetUserId)
+        .order("updated_at", { ascending: false });
+      if (projError) throw projError;
+
+      let pages: any[] = [];
+      if (projects && projects.length > 0) {
+        const { data: pagesData, error: pagesError } = await adminClient
+          .from("project_pages")
+          .select("*")
+          .in("project_id", projects.map((p: any) => p.id));
+        if (pagesError) throw pagesError;
+        pages = pagesData || [];
+      }
+
+      // Get target user profile
+      const { data: profile } = await adminClient
+        .from("profiles")
+        .select("*")
+        .eq("id", targetUserId)
+        .single();
+
+      return new Response(JSON.stringify({ projects, pages, profile }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // DELETE USER
     if (req.method === "POST" && action === "delete") {
       const body = await req.json();
