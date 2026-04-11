@@ -653,10 +653,6 @@
     "viewAs": "Meekijken",
     "viewAsDataFailed": "Kon gebruikersdata niet laden"
   },
-  "dashboard": {
-    "viewingAs": "Je bekijkt het dashboard van {{name}}",
-    "stopViewing": "Stoppen met meekijken",
-  "jsonLd": {
     "title": "JSON-LD Generator",
     "subtitle": "Genereer complete structured data voor uw website",
     "selected": "geselecteerd",
