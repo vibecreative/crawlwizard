@@ -126,7 +126,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchAllProjectPages = async () => {
-      if (projects.length === 0) return;
+      if (projects.length === 0 || viewAsUserId) return;
       const projectsNeedingPages = projects.filter(p => !p.pages);
       if (projectsNeedingPages.length === 0) return;
       try {
