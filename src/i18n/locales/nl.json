@@ -653,6 +653,7 @@
     "viewAs": "Meekijken",
     "viewAsDataFailed": "Kon gebruikersdata niet laden"
   },
+  "jsonLd": {
     "title": "JSON-LD Generator",
     "subtitle": "Genereer complete structured data voor uw website",
     "selected": "geselecteerd",

@@ -653,6 +653,7 @@
     "viewAs": "View as",
     "viewAsDataFailed": "Could not load user data"
   },
+  "jsonLd": {
     "title": "JSON-LD Generator",
     "subtitle": "Generate complete structured data for your website",
     "selected": "selected",
