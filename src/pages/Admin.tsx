@@ -462,7 +462,7 @@ const Admin = () => {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="h-8 text-xs text-destructive hover:text-destructive"
+                                      className="h-8 text-xs text-destructive hover:text-destructive-foreground hover:bg-destructive"
                                       disabled={updatingUser === u.id}
                                     >
                                       <Trash2 className="h-3 w-3 mr-1" />
