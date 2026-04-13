@@ -172,7 +172,8 @@
     "understood": "Got it",
     "invalidEmail": "Please enter a valid email address",
     "passwordMinLength": "Password must be at least 6 characters",
-    "passwordMin": "At least 6 characters"
+    "passwordMin": "At least 6 characters",
+    "startingWithPlan": "Starting with {{plan}}"
   },
   "dashboard": {
     "projects": "Projects",

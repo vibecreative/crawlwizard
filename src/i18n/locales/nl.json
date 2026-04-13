@@ -172,7 +172,8 @@
     "understood": "Begrepen",
     "invalidEmail": "Voer een geldig e-mailadres in",
     "passwordMinLength": "Wachtwoord moet minimaal 6 karakters zijn",
-    "passwordMin": "Minimaal 6 karakters"
+    "passwordMin": "Minimaal 6 karakters",
+    "startingWithPlan": "Starten met {{plan}}"
   },
   "dashboard": {
     "projects": "Projecten",
