@@ -28,6 +28,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedPlan = searchParams.get('plan') || 'free';
+  const planLabel = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
   const { toast } = useToast();
 
   const emailSchema = z.string().email(t('auth.invalidEmail'));
@@ -154,6 +155,11 @@ const Auth = () => {
               </TabsContent>
               
               <TabsContent value="register">
+                <div className="mb-4 p-2.5 rounded-lg bg-primary/10 text-center">
+                  <p className="text-xs font-medium text-primary">
+                    {t('auth.startingWithPlan', { plan: planLabel })}
+                  </p>
+                </div>
                 <form onSubmit={handleSignUp} className="space-y-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="register-name" className="text-xs">{t('auth.fullName')}</Label>
