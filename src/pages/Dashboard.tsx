@@ -156,12 +156,16 @@ const Dashboard = () => {
         const { data, error } = await supabase
           .from("project_pages")
           .select("*")
-          .in("project_id", projectsNeedingPages.map(p => p.id));
+          .in("project_id", projectsNeedingPages.map(p => p.id))
+          .order("position", { ascending: true, nullsFirst: false });
         if (error) throw error;
         if (data) {
           setProjects(prev => prev.map(p => {
             const projectPages = data.filter(page => page.project_id === p.id);
-            return projectPages.length > 0 ? { ...p, pages: projectPages } : p;
+            // Fallback: if positions are missing, sort by URL hierarchy
+            const hasPositions = projectPages.every(pg => pg.position != null);
+            const ordered = hasPositions ? projectPages : sortByUrlHierarchy(projectPages);
+            return ordered.length > 0 ? { ...p, pages: ordered } : p;
           }));
         }
       } catch (error) {
