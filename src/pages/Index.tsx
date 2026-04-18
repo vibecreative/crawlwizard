@@ -34,6 +34,8 @@ import {
 const Index = () => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const viewAsUserId = searchParams.get("viewAs");
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
@@ -49,6 +51,7 @@ const Index = () => {
   const [projectName, setProjectName] = useState<string>("");
   const shouldStopAnalysisRef = useRef(false);
   const [userPlan, setUserPlan] = useState<string>("free");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const { signOut, user } = useAuth();
 
@@ -56,6 +59,8 @@ const Index = () => {
     if (user?.id) {
       supabase.from('profiles').select('plan').eq('id', user.id).single()
         .then(({ data }) => { if (data) setUserPlan(data.plan); });
+      supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
+        .then(({ data }) => setIsAdmin(!!data));
     }
   }, [user?.id]);
 
