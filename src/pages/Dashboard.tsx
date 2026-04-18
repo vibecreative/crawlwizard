@@ -200,16 +200,57 @@ const Dashboard = () => {
         .from("project_pages")
         .select("*")
         .eq("project_id", projectId)
-        .order("seo_score", { ascending: true });
+        .order("position", { ascending: true, nullsFirst: false });
       if (error) throw error;
+      const pages = data || [];
+      const hasPositions = pages.every(pg => pg.position != null);
+      const ordered = hasPositions ? pages : sortByUrlHierarchy(pages);
       setProjects(prev => prev.map(p => 
-        p.id === projectId ? { ...p, pages: data || [] } : p
+        p.id === projectId ? { ...p, pages: ordered } : p
       ));
     } catch (error) {
       console.error("Error fetching pages:", error);
       toast.error(t('dashboard.loadPagesFailed'));
     } finally {
       setLoadingPages(null);
+    }
+  };
+
+  // Sensors for drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (projectId: string, event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const project = projects.find(p => p.id === projectId);
+    if (!project?.pages) return;
+
+    const oldIndex = project.pages.findIndex(p => p.id === active.id);
+    const newIndex = project.pages.findIndex(p => p.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const reordered = arrayMove(project.pages, oldIndex, newIndex);
+
+    // Optimistic update
+    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, pages: reordered } : p));
+
+    // Persist new positions (1-based)
+    try {
+      const updates = reordered.map((page, idx) =>
+        supabase.from("project_pages").update({ position: idx + 1 }).eq("id", page.id)
+      );
+      const results = await Promise.all(updates);
+      const failed = results.find(r => r.error);
+      if (failed?.error) throw failed.error;
+    } catch (err) {
+      console.error("Reorder save error:", err);
+      toast.error(t('dashboard.reorderFailed') || "Volgorde opslaan mislukt");
+      // Revert
+      fetchProjectPages(projectId);
     }
   };
 
