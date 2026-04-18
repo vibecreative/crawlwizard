@@ -29,6 +29,23 @@ import {
   Search,
   XCircle
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortablePageItem } from "@/components/SortablePageItem";
+import { sortByUrlHierarchy } from "@/lib/sortPages";
 
 interface ProjectPage {
   id: string;
