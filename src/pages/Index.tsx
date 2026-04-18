@@ -52,6 +52,7 @@ const Index = () => {
   const shouldStopAnalysisRef = useRef(false);
   const [userPlan, setUserPlan] = useState<string>("free");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [viewAsName, setViewAsName] = useState<string | null>(null);
 
   const { signOut, user } = useAuth();
 
@@ -63,6 +64,19 @@ const Index = () => {
         .then(({ data }) => setIsAdmin(!!data));
     }
   }, [user?.id]);
+
+  // When admin is impersonating, fetch the target user's profile + use their plan
+  useEffect(() => {
+    if (isAdmin && viewAsUserId) {
+      supabase.from('profiles').select('plan, full_name, company_name').eq('id', viewAsUserId).single()
+        .then(({ data }) => {
+          if (data) {
+            setUserPlan(data.plan);
+            setViewAsName(data.full_name || data.company_name || viewAsUserId);
+          }
+        });
+    }
+  }, [isAdmin, viewAsUserId]);
 
   // ── Single Page Analysis ─────────────────────────────────────────────────
 
