@@ -20,6 +20,7 @@ import { FileText, Globe, LogOut, Save, Loader2, FolderOpen } from "lucide-react
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { AnalysisData, FaqItem } from "@/types/analysis";
+import { sortByUrlHierarchy } from "@/lib/sortPages";
 import {
   parseHeadings,
   parseMeta,
