@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { SEOHead } from "@/components/SEOHead";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { UrlAnalyzer } from "@/components/UrlAnalyzer";
 import { WebsiteAnalyzer } from "@/components/WebsiteAnalyzer";
 import { SitemapUrlList } from "@/components/SitemapUrlList";
