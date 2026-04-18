@@ -246,6 +246,7 @@ export type Database = {
           id: string
           keyword_issues: number | null
           meta_description: string | null
+          position: number | null
           project_id: string
           seo_score: number | null
           status: string
@@ -265,6 +266,7 @@ export type Database = {
           id?: string
           keyword_issues?: number | null
           meta_description?: string | null
+          position?: number | null
           project_id: string
           seo_score?: number | null
           status?: string
@@ -284,6 +286,7 @@ export type Database = {
           id?: string
           keyword_issues?: number | null
           meta_description?: string | null
+          position?: number | null
           project_id?: string
           seo_score?: number | null
           status?: string

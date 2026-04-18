@@ -29,6 +29,23 @@ import {
   Search,
   XCircle
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortablePageItem } from "@/components/SortablePageItem";
+import { sortByUrlHierarchy } from "@/lib/sortPages";
 
 interface ProjectPage {
   id: string;
@@ -41,6 +58,7 @@ interface ProjectPage {
   heading_issues: number;
   status: string;
   analysis_data: any | null;
+  position: number | null;
 }
 
 interface Project {
@@ -138,12 +156,16 @@ const Dashboard = () => {
         const { data, error } = await supabase
           .from("project_pages")
           .select("*")
-          .in("project_id", projectsNeedingPages.map(p => p.id));
+          .in("project_id", projectsNeedingPages.map(p => p.id))
+          .order("position", { ascending: true, nullsFirst: false });
         if (error) throw error;
         if (data) {
           setProjects(prev => prev.map(p => {
             const projectPages = data.filter(page => page.project_id === p.id);
-            return projectPages.length > 0 ? { ...p, pages: projectPages } : p;
+            // Fallback: if positions are missing, sort by URL hierarchy
+            const hasPositions = projectPages.every(pg => pg.position != null);
+            const ordered = hasPositions ? projectPages : sortByUrlHierarchy(projectPages);
+            return ordered.length > 0 ? { ...p, pages: ordered } : p;
           }));
         }
       } catch (error) {
@@ -178,16 +200,57 @@ const Dashboard = () => {
         .from("project_pages")
         .select("*")
         .eq("project_id", projectId)
-        .order("seo_score", { ascending: true });
+        .order("position", { ascending: true, nullsFirst: false });
       if (error) throw error;
+      const pages = data || [];
+      const hasPositions = pages.every(pg => pg.position != null);
+      const ordered = hasPositions ? pages : sortByUrlHierarchy(pages);
       setProjects(prev => prev.map(p => 
-        p.id === projectId ? { ...p, pages: data || [] } : p
+        p.id === projectId ? { ...p, pages: ordered } : p
       ));
     } catch (error) {
       console.error("Error fetching pages:", error);
       toast.error(t('dashboard.loadPagesFailed'));
     } finally {
       setLoadingPages(null);
+    }
+  };
+
+  // Sensors for drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (projectId: string, event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const project = projects.find(p => p.id === projectId);
+    if (!project?.pages) return;
+
+    const oldIndex = project.pages.findIndex(p => p.id === active.id);
+    const newIndex = project.pages.findIndex(p => p.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const reordered = arrayMove(project.pages, oldIndex, newIndex);
+
+    // Optimistic update
+    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, pages: reordered } : p));
+
+    // Persist new positions (1-based)
+    try {
+      const updates = reordered.map((page, idx) =>
+        supabase.from("project_pages").update({ position: idx + 1 }).eq("id", page.id)
+      );
+      const results = await Promise.all(updates);
+      const failed = results.find(r => r.error);
+      if (failed?.error) throw failed.error;
+    } catch (err) {
+      console.error("Reorder save error:", err);
+      toast.error(t('dashboard.reorderFailed') || "Volgorde opslaan mislukt");
+      // Revert
+      fetchProjectPages(projectId);
     }
   };
 
@@ -484,55 +547,27 @@ const Dashboard = () => {
                             ))}
                           </div>
                         ) : project.pages && project.pages.length > 0 ? (
-                          <div className="space-y-1.5 max-h-96 overflow-y-auto">
-                            {project.pages.map(page => (
-                              <div 
-                                key={page.id}
-                                className="flex items-center justify-between p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                              >
-                              <div 
-                                className="flex-1 min-w-0 mr-2 sm:mr-3 cursor-pointer hover:text-primary transition-colors"
-                                onClick={() => navigate(`/page/${page.id}`)}
-                              >
-                                <p className="text-[11px] sm:text-xs font-medium truncate">
-                                  {page.title || new URL(page.url).pathname || "/"}
-                                </p>
-                                <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">
-                                  {page.url}
-                                </p>
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={(e) => handleDragEnd(project.id, e)}
+                          >
+                            <SortableContext
+                              items={project.pages.map(p => p.id)}
+                              strategy={verticalListSortingStrategy}
+                            >
+                              <div className="space-y-1.5 max-h-96 overflow-y-auto">
+                                {project.pages.map(page => (
+                                  <SortablePageItem
+                                    key={page.id}
+                                    page={page}
+                                    getScoreBg={getScoreBg}
+                                    getScoreColor={getScoreColor}
+                                  />
+                                ))}
                               </div>
-                                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                                  <div className="hidden sm:flex items-center gap-1.5">
-                                    <Badge variant={page.has_h1 ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">H1</Badge>
-                                    <Badge variant={page.has_meta_description ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">Meta</Badge>
-                                    <Badge variant={page.has_structured_data ? "default" : "secondary"} className="text-[10px] h-5 px-1.5">Schema</Badge>
-                                  </div>
-                                  <div className={`w-8 sm:w-9 text-center py-0.5 rounded ${getScoreBg(page.seo_score)}`}>
-                                    <span className={`text-[10px] sm:text-xs font-bold ${getScoreColor(page.seo_score)}`}>
-                                      {page.seo_score ?? "-"}
-                                    </span>
-                                  </div>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-7 text-[10px] px-1.5 sm:px-2"
-                                    onClick={() => navigate(`/page/${page.id}`)}
-                                  >
-                                    <Eye className="h-3 w-3 sm:mr-1" />
-                                    <span className="hidden sm:inline">{t('dashboard.details')}</span>
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 hidden sm:flex"
-                                    onClick={() => window.open(page.url, "_blank")}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                            </SortableContext>
+                          </DndContext>
                         ) : (
                           <p className="text-xs text-muted-foreground text-center py-4">
                             {t('dashboard.noPagesAnalyzed')}
