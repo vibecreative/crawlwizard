@@ -338,7 +338,23 @@ const Index = () => {
           </Button>
           <ThemeToggle />
         </div>
-        
+
+        {isAdmin && viewAsUserId && viewAsName && (
+          <div className="bg-primary/10 border border-primary/30 rounded-lg px-4 py-2.5 mb-6 flex items-center justify-between gap-3 max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 text-sm text-primary">
+              <FolderOpen className="h-4 w-4 shrink-0" />
+              <span>Je beheert het dashboard van <strong>{viewAsName}</strong>. Nieuwe analyses worden onder dit account opgeslagen.</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs border-primary/30 text-primary hover:bg-primary/10 shrink-0"
+              onClick={() => navigate(`/dashboard?viewAs=${viewAsUserId}`)}
+            >
+              Terug
+            </Button>
+          </div>
+        )}
         <div className="mb-16">
           <Tabs defaultValue="single" className="w-full max-w-4xl mx-auto">
             <TabsList className="grid w-full grid-cols-2 mb-8 h-auto">
