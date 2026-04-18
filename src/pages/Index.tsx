@@ -294,7 +294,8 @@ const Index = () => {
       
       if (projectError) throw projectError;
       
-      const pagesToInsert = websiteResults.map(result => ({
+      const orderedResults = sortByUrlHierarchy(websiteResults);
+      const pagesToInsert = orderedResults.map((result, idx) => ({
         project_id: project.id,
         url: result.url,
         title: result.title || null,
@@ -306,6 +307,7 @@ const Index = () => {
         heading_issues: result.headingIssues,
         error_message: result.errorMessage || null,
         analysis_data: result.analysisData || null,
+        position: idx + 1,
       }));
       
       const { error: pagesError } = await supabase
