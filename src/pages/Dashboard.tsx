@@ -394,7 +394,7 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground mb-6">
                 {t('dashboard.noProjectsDesc')}
               </p>
-              <Button onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground">
+              <Button onClick={() => navigate(viewAsUserId ? `/analyze?viewAs=${viewAsUserId}` : "/analyze")} className="gradient-primary text-primary-foreground">
                 <Plus className="h-4 w-4 mr-2" />
                 {t('dashboard.startNewAnalysis')}
               </Button>
