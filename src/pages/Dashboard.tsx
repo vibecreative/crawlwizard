@@ -58,6 +58,7 @@ interface ProjectPage {
   heading_issues: number;
   status: string;
   analysis_data: any | null;
+  position: number | null;
 }
 
 interface Project {
