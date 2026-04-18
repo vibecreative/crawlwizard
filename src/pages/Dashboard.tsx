@@ -361,12 +361,10 @@ const Dashboard = () => {
         {/* Actions */}
         <div className="flex items-center justify-between mb-4 sm:mb-5">
           <h2 className="text-sm sm:text-base font-semibold font-display">{t('dashboard.myProjects')}</h2>
-          {!viewAsUserId && (
-            <Button size="sm" onClick={() => navigate("/analyze")} className="gradient-primary text-primary-foreground h-7 sm:h-8 text-[10px] sm:text-xs px-2.5 sm:px-3">
-              <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5" />
-              {t('dashboard.newAnalysis')}
-            </Button>
-          )}
+          <Button size="sm" onClick={() => navigate(viewAsUserId ? `/analyze?viewAs=${viewAsUserId}` : "/analyze")} className="gradient-primary text-primary-foreground h-7 sm:h-8 text-[10px] sm:text-xs px-2.5 sm:px-3">
+            <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-1.5" />
+            {t('dashboard.newAnalysis')}
+          </Button>
         </div>
 
         {/* Projects List */}
