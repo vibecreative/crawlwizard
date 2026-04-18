@@ -263,10 +263,11 @@ const Index = () => {
     setIsSavingProject(true);
     
     try {
+      const targetUserId = (isAdmin && viewAsUserId) ? viewAsUserId : user.id;
       const { data: project, error: projectError } = await supabase
         .from('projects')
         .insert({
-          user_id: user.id,
+          user_id: targetUserId,
           name: projectName.trim(),
           base_url: websiteBaseUrl,
           total_pages: websiteResults.length,
@@ -299,7 +300,7 @@ const Index = () => {
       if (pagesError) throw pagesError;
       
       toast.success("Project opgeslagen!");
-      navigate('/dashboard');
+      navigate(isAdmin && viewAsUserId ? `/dashboard?viewAs=${viewAsUserId}` : '/dashboard');
     } catch (error) {
       console.error('Error saving project:', error);
       toast.error("Fout bij opslaan van project");
