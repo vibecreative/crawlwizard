@@ -5,7 +5,9 @@
     "howItWorks": "How it works",
     "login": "Log in",
     "getStarted": "Get started free",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "dashboard": "Dashboard",
+    "signOut": "Sign out"
   },
   "hero": {
     "badge": "Now with AI-powered FAQ Generator",

@@ -5,7 +5,9 @@
     "howItWorks": "Hoe het werkt",
     "login": "Inloggen",
     "getStarted": "Gratis starten",
-    "privacy": "Privacybeleid"
+    "privacy": "Privacybeleid",
+    "dashboard": "Dashboard",
+    "signOut": "Uitloggen"
   },
   "hero": {
     "badge": "Nu met AI-gedreven FAQ Generator",

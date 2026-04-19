@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useAuth } from '@/hooks/useAuth';
+import { LayoutDashboard, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -46,8 +48,10 @@ const scaleIn = {
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { user, signOut, loading: authLoading } = useAuth();
   const [isYearly, setIsYearly] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const userLabel = (user?.user_metadata as any)?.full_name || user?.email || '';
 
   const features = [
     { icon: Layers, title: t('features.headingAnalysis.title'), description: t('features.headingAnalysis.description') },
@@ -119,8 +123,22 @@ const Landing = () => {
           <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
             <ThemeToggle />
-            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>{t('nav.login')}</Button>
-            <Button size="sm" onClick={() => navigate('/auth')} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+            {authLoading ? null : user ? (
+              <>
+                <span className="text-sm text-muted-foreground max-w-[180px] truncate" title={userLabel}>{userLabel}</span>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
+                  <LayoutDashboard className="w-4 h-4 mr-1.5" />{t('nav.dashboard', 'Dashboard')}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => signOut()}>
+                  <LogOut className="w-4 h-4 mr-1.5" />{t('nav.signOut', 'Uitloggen')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>{t('nav.login')}</Button>
+                <Button size="sm" onClick={() => navigate('/auth')} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+              </>
+            )}
           </div>
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
@@ -146,8 +164,22 @@ const Landing = () => {
                 <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">{t('nav.pricing')}</a>
                 <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">{t('nav.howItWorks')}</a>
                 <div className="border-t border-border/50 pt-3 flex flex-col gap-2">
-                  <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>{t('nav.login')}</Button>
-                  <Button size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+                  {authLoading ? null : user ? (
+                    <>
+                      <span className="text-sm text-muted-foreground py-1 truncate" title={userLabel}>{userLabel}</span>
+                      <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/dashboard'); }}>
+                        <LayoutDashboard className="w-4 h-4 mr-1.5" />{t('nav.dashboard', 'Dashboard')}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => { setMobileMenuOpen(false); signOut(); }}>
+                        <LogOut className="w-4 h-4 mr-1.5" />{t('nav.signOut', 'Uitloggen')}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>{t('nav.login')}</Button>
+                      <Button size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
