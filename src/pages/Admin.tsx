@@ -204,6 +204,33 @@ const Admin = () => {
     }
   };
 
+  const confirmEmail = async (userId: string) => {
+    setUpdatingUser(userId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=confirm-email`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Confirm failed");
+      toast.success(t('admin.emailConfirmed'));
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error confirming email:", error);
+      toast.error(t('admin.emailConfirmFailed'));
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
   const deleteUser = async (userId: string) => {
     setUpdatingUser(userId);
     try {
