@@ -206,6 +206,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // CONFIRM EMAIL (override email verification)
+    if (req.method === "POST" && action === "confirm-email") {
+      const body = await req.json();
+      const { userId } = body;
+
+      if (!userId) throw new Error("userId is required");
+
+      const { error } = await adminClient.auth.admin.updateUserById(userId, {
+        email_confirm: true,
+      });
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // DELETE USER
     if (req.method === "POST" && action === "delete") {
       const body = await req.json();
