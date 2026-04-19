@@ -58,9 +58,9 @@ export const SortablePageItem = ({ page, getScoreBg, getScoreColor }: SortablePa
       </div>
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         <div className="hidden sm:flex items-center gap-1.5">
-          <Badge variant={page.has_h1 ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">H1</Badge>
-          <Badge variant={page.has_meta_description ? "default" : "destructive"} className="text-[10px] h-5 px-1.5">Meta</Badge>
-          <Badge variant={page.has_structured_data ? "default" : "secondary"} className="text-[10px] h-5 px-1.5">Schema</Badge>
+          <Badge className={`text-[10px] h-5 px-1.5 border ${page.has_h1 ? "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20" : "bg-destructive text-destructive-foreground border-transparent"}`}>H1</Badge>
+          <Badge className={`text-[10px] h-5 px-1.5 border ${page.has_meta_description ? "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20" : "bg-destructive text-destructive-foreground border-transparent"}`}>Meta</Badge>
+          <Badge className={`text-[10px] h-5 px-1.5 border ${page.has_structured_data ? "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20" : "bg-destructive text-destructive-foreground border-transparent"}`}>Schema</Badge>
         </div>
         <div className={`w-8 sm:w-9 text-center py-0.5 rounded ${getScoreBg(page.seo_score)}`}>
           <span className={`text-[10px] sm:text-xs font-bold ${getScoreColor(page.seo_score)}`}>
