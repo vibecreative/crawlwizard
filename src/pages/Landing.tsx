@@ -48,8 +48,10 @@ const scaleIn = {
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { user, signOut, loading: authLoading } = useAuth();
   const [isYearly, setIsYearly] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const userLabel = (user?.user_metadata as any)?.full_name || user?.email || '';
 
   const features = [
     { icon: Layers, title: t('features.headingAnalysis.title'), description: t('features.headingAnalysis.description') },
