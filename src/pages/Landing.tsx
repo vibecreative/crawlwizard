@@ -123,8 +123,22 @@ const Landing = () => {
           <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
             <ThemeToggle />
-            <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>{t('nav.login')}</Button>
-            <Button size="sm" onClick={() => navigate('/auth')} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+            {authLoading ? null : user ? (
+              <>
+                <span className="text-sm text-muted-foreground max-w-[180px] truncate" title={userLabel}>{userLabel}</span>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
+                  <LayoutDashboard className="w-4 h-4 mr-1.5" />{t('nav.dashboard', 'Dashboard')}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => signOut()}>
+                  <LogOut className="w-4 h-4 mr-1.5" />{t('nav.signOut', 'Uitloggen')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>{t('nav.login')}</Button>
+                <Button size="sm" onClick={() => navigate('/auth')} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+              </>
+            )}
           </div>
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
