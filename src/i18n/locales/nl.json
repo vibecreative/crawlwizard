@@ -652,7 +652,21 @@
     "messageDeleteFailed": "Kon bericht niet verwijderen",
     "statusUpdateFailed": "Kon status niet bijwerken",
     "viewAs": "Beheren",
-    "viewAsDataFailed": "Kon gebruikersdata niet laden"
+    "viewAsDataFailed": "Kon gebruikersdata niet laden",
+    "setPassword": "Wachtwoord",
+    "setPasswordTitle": "Wachtwoord instellen voor {{name}}",
+    "setPasswordDesc": "Stel een nieuw wachtwoord in voor deze gebruiker. De gebruiker kan hiermee direct inloggen. Communiceer het wachtwoord veilig.",
+    "newPassword": "Nieuw wachtwoord",
+    "newPasswordPlaceholder": "Minimaal 8 tekens",
+    "generate": "Genereer sterk wachtwoord",
+    "showPassword": "Toon wachtwoord",
+    "hidePassword": "Verberg wachtwoord",
+    "copyPassword": "Kopieer naar klembord",
+    "passwordCopied": "Wachtwoord gekopieerd",
+    "passwordTooShort": "Wachtwoord moet minimaal 8 tekens zijn",
+    "passwordUpdated": "Wachtwoord bijgewerkt",
+    "passwordUpdateFailed": "Kon wachtwoord niet bijwerken",
+    "save": "Opslaan"
   },
   "jsonLd": {
     "title": "JSON-LD Generator",
