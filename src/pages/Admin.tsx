@@ -21,7 +21,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  Shield, Users, LogOut, ArrowLeft, UserCheck, UserX, Crown, Trash2, RotateCcw, Mail, Eye, EyeOff,
+  Shield, Users, LogOut, ArrowLeft, UserCheck, UserX, Crown, Trash2, RotateCcw, Mail, Eye, EyeOff, MailCheck,
 } from "lucide-react";
 import { AdminPasswordDialog } from "@/components/AdminPasswordDialog";
 
