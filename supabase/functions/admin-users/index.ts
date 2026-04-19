@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
           email: u.email,
           created_at: u.created_at,
           last_sign_in_at: u.last_sign_in_at,
+          email_confirmed_at: u.email_confirmed_at ?? null,
           full_name: profile?.full_name || null,
           company_name: profile?.company_name || null,
           is_active: profile?.is_active ?? true,
