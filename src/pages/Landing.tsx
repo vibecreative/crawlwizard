@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useAuth } from '@/hooks/useAuth';
+import { LayoutDashboard, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
