@@ -164,8 +164,22 @@ const Landing = () => {
                 <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">{t('nav.pricing')}</a>
                 <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium py-2 text-muted-foreground hover:text-foreground transition-colors">{t('nav.howItWorks')}</a>
                 <div className="border-t border-border/50 pt-3 flex flex-col gap-2">
-                  <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>{t('nav.login')}</Button>
-                  <Button size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+                  {authLoading ? null : user ? (
+                    <>
+                      <span className="text-sm text-muted-foreground py-1 truncate" title={userLabel}>{userLabel}</span>
+                      <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/dashboard'); }}>
+                        <LayoutDashboard className="w-4 h-4 mr-1.5" />{t('nav.dashboard', 'Dashboard')}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => { setMobileMenuOpen(false); signOut(); }}>
+                        <LogOut className="w-4 h-4 mr-1.5" />{t('nav.signOut', 'Uitloggen')}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>{t('nav.login')}</Button>
+                      <Button size="sm" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }} className="gradient-primary text-primary-foreground">{t('nav.getStarted')}</Button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
