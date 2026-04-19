@@ -485,6 +485,19 @@ const Admin = () => {
                                 <RotateCcw className="h-3 w-3 mr-1" />
                                 {t('admin.resetCredits')}
                               </Button>
+                              {!u.email_confirmed_at && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 text-xs"
+                                  disabled={updatingUser === u.id}
+                                  onClick={() => confirmEmail(u.id)}
+                                  title={t('admin.confirmEmailTitle')}
+                                >
+                                  <MailCheck className="h-3 w-3 mr-1" />
+                                  {t('admin.confirmEmail')}
+                                </Button>
+                              )}
                               {u.id !== user?.id && (
                                 <AdminPasswordDialog userId={u.id} userName={u.full_name || u.email} />
                               )}
