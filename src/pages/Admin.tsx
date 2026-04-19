@@ -21,7 +21,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  Shield, Users, LogOut, ArrowLeft, UserCheck, UserX, Crown, Trash2, RotateCcw, Mail, Eye, EyeOff,
+  Shield, Users, LogOut, ArrowLeft, UserCheck, UserX, Crown, Trash2, RotateCcw, Mail, Eye, EyeOff, MailCheck,
 } from "lucide-react";
 import { AdminPasswordDialog } from "@/components/AdminPasswordDialog";
 
@@ -30,6 +30,7 @@ interface AdminUser {
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
+  email_confirmed_at: string | null;
   full_name: string | null;
   company_name: string | null;
   is_active: boolean;
@@ -198,6 +199,33 @@ const Admin = () => {
     } catch (error) {
       console.error("Error resetting credits:", error);
       toast.error(t('admin.creditsResetFailed'));
+    } finally {
+      setUpdatingUser(null);
+    }
+  };
+
+  const confirmEmail = async (userId: string) => {
+    setUpdatingUser(userId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users?action=confirm-email`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Confirm failed");
+      toast.success(t('admin.emailConfirmed'));
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error confirming email:", error);
+      toast.error(t('admin.emailConfirmFailed'));
     } finally {
       setUpdatingUser(null);
     }
@@ -457,6 +485,19 @@ const Admin = () => {
                                 <RotateCcw className="h-3 w-3 mr-1" />
                                 {t('admin.resetCredits')}
                               </Button>
+                              {!u.email_confirmed_at && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 text-xs"
+                                  disabled={updatingUser === u.id}
+                                  onClick={() => confirmEmail(u.id)}
+                                  title={t('admin.confirmEmailTitle')}
+                                >
+                                  <MailCheck className="h-3 w-3 mr-1" />
+                                  {t('admin.confirmEmail')}
+                                </Button>
+                              )}
                               {u.id !== user?.id && (
                                 <AdminPasswordDialog userId={u.id} userName={u.full_name || u.email} />
                               )}

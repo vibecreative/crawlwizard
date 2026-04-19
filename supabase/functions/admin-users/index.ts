@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
           email: u.email,
           created_at: u.created_at,
           last_sign_in_at: u.last_sign_in_at,
+          email_confirmed_at: u.email_confirmed_at ?? null,
           full_name: profile?.full_name || null,
           company_name: profile?.company_name || null,
           is_active: profile?.is_active ?? true,
@@ -198,6 +199,23 @@ Deno.serve(async (req) => {
       }
 
       const { error } = await adminClient.auth.admin.updateUserById(userId, { password });
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // CONFIRM EMAIL (override email verification)
+    if (req.method === "POST" && action === "confirm-email") {
+      const body = await req.json();
+      const { userId } = body;
+
+      if (!userId) throw new Error("userId is required");
+
+      const { error } = await adminClient.auth.admin.updateUserById(userId, {
+        email_confirm: true,
+      });
       if (error) throw error;
 
       return new Response(JSON.stringify({ success: true }), {
