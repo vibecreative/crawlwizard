@@ -178,6 +178,33 @@ Deno.serve(async (req) => {
       });
     }
 
+    // SET PASSWORD
+    if (req.method === "POST" && action === "set-password") {
+      const body = await req.json();
+      const { userId, password } = body;
+
+      if (!userId) throw new Error("userId is required");
+      if (!password || typeof password !== "string" || password.length < 8) {
+        return new Response(JSON.stringify({ error: "Password must be at least 8 characters" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (password.length > 72) {
+        return new Response(JSON.stringify({ error: "Password must be at most 72 characters" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error } = await adminClient.auth.admin.updateUserById(userId, { password });
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // DELETE USER
     if (req.method === "POST" && action === "delete") {
       const body = await req.json();

@@ -652,7 +652,21 @@
     "messageDeleteFailed": "Could not delete message",
     "statusUpdateFailed": "Could not update status",
     "viewAs": "Manage",
-    "viewAsDataFailed": "Could not load user data"
+    "viewAsDataFailed": "Could not load user data",
+    "setPassword": "Password",
+    "setPasswordTitle": "Set password for {{name}}",
+    "setPasswordDesc": "Set a new password for this user. They can sign in with it immediately. Share the password securely.",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "At least 8 characters",
+    "generate": "Generate strong password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "copyPassword": "Copy to clipboard",
+    "passwordCopied": "Password copied",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordUpdated": "Password updated",
+    "passwordUpdateFailed": "Could not update password",
+    "save": "Save"
   },
   "jsonLd": {
     "title": "JSON-LD Generator",
