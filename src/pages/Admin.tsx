@@ -30,6 +30,7 @@ interface AdminUser {
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
+  email_confirmed_at: string | null;
   full_name: string | null;
   company_name: string | null;
   is_active: boolean;
