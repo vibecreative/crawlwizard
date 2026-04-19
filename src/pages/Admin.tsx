@@ -23,6 +23,7 @@ import {
 import {
   Shield, Users, LogOut, ArrowLeft, UserCheck, UserX, Crown, Trash2, RotateCcw, Mail, Eye, EyeOff,
 } from "lucide-react";
+import { AdminPasswordDialog } from "@/components/AdminPasswordDialog";
 
 interface AdminUser {
   id: string;
@@ -456,6 +457,9 @@ const Admin = () => {
                                 <RotateCcw className="h-3 w-3 mr-1" />
                                 {t('admin.resetCredits')}
                               </Button>
+                              {u.id !== user?.id && (
+                                <AdminPasswordDialog userId={u.id} userName={u.full_name || u.email} />
+                              )}
                               {u.id !== user?.id && (
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
