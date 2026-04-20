@@ -41,6 +41,7 @@ const charLimits: Record<string, { max: number; label: string }> = {
 
 export const MetaTagSuggestions = ({ url, pageContent, currentMeta, onCreditsUsed }: MetaTagSuggestionsProps) => {
   const { i18n } = useTranslation();
+  const viewAsUserId = useViewAsUserId();
   const [suggestions, setSuggestions] = useState<MetaSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -49,7 +50,7 @@ export const MetaTagSuggestions = ({ url, pageContent, currentMeta, onCreditsUse
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-meta-tags", {
-        body: { url, pageContent, currentMeta, language: i18n.language },
+        body: { url, pageContent, currentMeta, language: i18n.language, viewAsUserId: viewAsUserId || undefined },
       });
 
       if (error) throw error;

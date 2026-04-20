@@ -25,6 +25,7 @@ interface ArticleGeneratorProps {
 
 export const ArticleGenerator = ({ question, answer, pageContent, brandContext, onClose }: ArticleGeneratorProps) => {
   const { t, i18n } = useTranslation();
+  const viewAsUserId = useViewAsUserId();
   const [article, setArticle] = useState<string | null>(null);
   const [detection, setDetection] = useState<AiDetection | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -39,6 +40,7 @@ export const ArticleGenerator = ({ question, answer, pageContent, brandContext, 
         body: {
           question, answer, pageContent, brandContext, mode,
           language: i18n.language,
+          viewAsUserId: viewAsUserId || undefined,
           ...(mode === "rewrite" && { articleText: article }),
         }
       });
