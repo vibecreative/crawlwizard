@@ -65,7 +65,20 @@ Deno.serve(async (req) => {
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const { data: creditsData } = await adminClient.rpc("get_remaining_credits", { _user_id: user.id });
+
+    const { url, pageContent, currentMeta, language, viewAsUserId } = await req.json();
+
+    // Resolve effective user (admin viewAs)
+    let effectiveUserId = user.id;
+    if (viewAsUserId && viewAsUserId !== user.id) {
+      const { data: roleRow } = await adminClient.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
+      if (roleRow) {
+        const { data: target } = await adminClient.from("profiles").select("id").eq("id", viewAsUserId).maybeSingle();
+        if (target?.id) effectiveUserId = viewAsUserId;
+      }
+    }
+
+    const { data: creditsData } = await adminClient.rpc("get_remaining_credits", { _user_id: effectiveUserId });
     const remaining = creditsData?.remaining ?? 0;
     if (remaining <= 0) {
       return new Response(JSON.stringify({ error: "No AI credits remaining this month." }), {
@@ -73,8 +86,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const { url, pageContent, currentMeta, language } = await req.json();
     const lang = language === 'en' ? 'en' : 'nl';
 
     const truncatedContent = (pageContent || "").substring(0, 4000);
@@ -201,7 +212,7 @@ ${truncatedContent}`;
     const suggestions = JSON.parse(toolCall.function.arguments);
 
     await adminClient.from("ai_credit_usage").insert({
-      user_id: user.id,
+      user_id: effectiveUserId,
       action_type: "meta_tag_generation",
       credits_used: 1,
     });
