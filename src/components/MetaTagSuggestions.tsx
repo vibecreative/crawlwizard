@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, Copy, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useViewAsUserId } from "@/hooks/useViewAsUserId";
 import { toast } from "sonner";
 
 interface MetaSuggestion {

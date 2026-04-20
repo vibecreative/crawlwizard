@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, RefreshCw, Loader2, X, FileText, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useViewAsUserId } from "@/hooks/useViewAsUserId";
 
 interface AiDetection {
   human_score: number;
