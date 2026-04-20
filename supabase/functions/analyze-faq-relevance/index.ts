@@ -208,7 +208,7 @@ Beoordeel hoe goed deze pagina als bron kan dienen voor een AI-antwoord op boven
     }
 
     // Log credit usage after successful AI call
-    await logCreditUsage(user.id, 'faq_analysis', CREDITS_REQUIRED);
+    await logCreditUsage(effectiveUserId, 'faq_analysis', CREDITS_REQUIRED);
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];

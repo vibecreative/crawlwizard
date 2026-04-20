@@ -192,7 +192,7 @@ serve(async (req) => {
       throw new Error('AI gateway error');
     }
 
-    await logCreditUsage(user.id, 'faq_regeneration', CREDITS_REQUIRED);
+    await logCreditUsage(effectiveUserId, 'faq_regeneration', CREDITS_REQUIRED);
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
