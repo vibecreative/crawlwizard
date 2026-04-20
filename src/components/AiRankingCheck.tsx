@@ -63,6 +63,7 @@ const MODEL_ORDER = [
 
 export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }: AiRankingCheckProps) => {
   const { t, i18n } = useTranslation();
+  const viewAsUserId = useViewAsUserId();
   const navigate = useNavigate();
   const isEnterprise = userPlan === "enterprise";
   const [isRunning, setIsRunning] = useState(false);

@@ -45,6 +45,7 @@ export const FaqSuggestions = ({
   brandContext = ""
 }: FaqSuggestionsProps) => {
   const { t, i18n } = useTranslation();
+  const viewAsUserId = useViewAsUserId();
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzingSingleIndex, setAnalyzingSingleIndex] = useState<number | null>(null);
