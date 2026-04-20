@@ -30,6 +30,15 @@ async function logCreditUsage(userId: string, actionType: string, credits: numbe
   await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
 }
 
+async function resolveEffectiveUserId(callerUserId: string, viewAsUserId?: string): Promise<string> {
+  if (!viewAsUserId || viewAsUserId === callerUserId) return callerUserId;
+  const adminClient = getAdminClient();
+  const { data } = await adminClient.from('user_roles').select('role').eq('user_id', callerUserId).eq('role', 'admin').maybeSingle();
+  if (!data) return callerUserId;
+  const { data: target } = await adminClient.from('profiles').select('id').eq('id', viewAsUserId).maybeSingle();
+  return target?.id ? viewAsUserId : callerUserId;
+}
+
 function getSystemPrompt(lang: string, analysisExplanation: string, brandContext?: string) {
   if (lang === 'en') {
     return `You are an SEO and AI search behavior expert who optimizes FAQ questions for high relevance in AI responses.
@@ -97,7 +106,11 @@ serve(async (req) => {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const creditCheck = await checkCredits(supabaseClient, user.id, CREDITS_REQUIRED);
+    const body = await req.json();
+    const { html, previousQuestion, analysisExplanation, brandContext, language, viewAsUserId } = body;
+    const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
+
+    const creditCheck = await checkCredits(getAdminClient(), effectiveUserId, CREDITS_REQUIRED);
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
@@ -105,9 +118,6 @@ serve(async (req) => {
         credits: creditCheck
       }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const body = await req.json();
-    const { html, previousQuestion, analysisExplanation, brandContext, language } = body;
     const lang = language === 'en' ? 'en' : 'nl';
     
     if (!html || typeof html !== 'string') {
@@ -182,7 +192,7 @@ serve(async (req) => {
       throw new Error('AI gateway error');
     }
 
-    await logCreditUsage(user.id, 'faq_regeneration', CREDITS_REQUIRED);
+    await logCreditUsage(effectiveUserId, 'faq_regeneration', CREDITS_REQUIRED);
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];

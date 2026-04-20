@@ -44,6 +44,15 @@ async function logCreditUsage(userId: string, actionType: string, credits: numbe
   await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
 }
 
+async function resolveEffectiveUserId(callerUserId: string, viewAsUserId?: string): Promise<string> {
+  if (!viewAsUserId || viewAsUserId === callerUserId) return callerUserId;
+  const adminClient = getAdminClient();
+  const { data } = await adminClient.from('user_roles').select('role').eq('user_id', callerUserId).eq('role', 'admin').maybeSingle();
+  if (!data) return callerUserId;
+  const { data: target } = await adminClient.from('profiles').select('id').eq('id', viewAsUserId).maybeSingle();
+  return target?.id ? viewAsUserId : callerUserId;
+}
+
 async function askModel(
   apiKey: string,
   modelId: string,
@@ -169,14 +178,16 @@ serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
+    const { questions, domain, pageId, language, viewAsUserId }: RankingRequest & { viewAsUserId?: string } = await req.json();
+    const lang = language === 'en' ? 'en' : 'nl';
+    const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
+    const adminClient = getAdminClient();
+
+    const { data: profile } = await adminClient.from("profiles").select("plan").eq("id", effectiveUserId).single();
     if (!profile || profile.plan !== "enterprise") {
       return new Response(JSON.stringify({ error: "Enterprise plan required" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
-    const { questions, domain, pageId, language }: RankingRequest = await req.json();
-    const lang = language === 'en' ? 'en' : 'nl';
 
     if (!questions?.length || !domain || !pageId) {
       return new Response(JSON.stringify({ error: "Questions, domain and page ID are required" }), {
@@ -186,7 +197,7 @@ serve(async (req) => {
     const limitedQuestions = questions.slice(0, 5);
     const totalCredits = limitedQuestions.length * CREDITS_PER_QUESTION;
 
-    const creditCheck = await checkCredits(supabase, user.id, totalCredits);
+    const creditCheck = await checkCredits(adminClient, effectiveUserId, totalCredits);
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
@@ -195,9 +206,10 @@ serve(async (req) => {
       }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { data: check, error: checkError } = await supabase
+    // Use admin client so admins acting via viewAs can insert under target user_id (bypass RLS)
+    const { data: check, error: checkError } = await adminClient
       .from("ai_ranking_checks")
-      .insert({ user_id: user.id, page_id: pageId, domain })
+      .insert({ user_id: effectiveUserId, page_id: pageId, domain })
       .select("id")
       .single();
     if (checkError) throw checkError;
@@ -221,12 +233,12 @@ serve(async (req) => {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
-    const { error: insertError } = await supabase.from("ai_ranking_results").insert(results);
+    const { error: insertError } = await adminClient.from("ai_ranking_results").insert(results);
     if (insertError) console.error("Insert error:", insertError);
 
-    await supabase.from("ai_ranking_checks").update({ status: "completed" }).eq("id", check.id);
+    await adminClient.from("ai_ranking_checks").update({ status: "completed" }).eq("id", check.id);
 
-    await logCreditUsage(user.id, 'ai_ranking_check', totalCredits);
+    await logCreditUsage(effectiveUserId, 'ai_ranking_check', totalCredits);
 
     return new Response(JSON.stringify({ checkId: check.id, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

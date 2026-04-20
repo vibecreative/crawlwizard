@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, RefreshCw, Loader2, X, FileText, AlertTriangle, CheckCircle, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useViewAsUserId } from "@/hooks/useViewAsUserId";
 
 interface AiDetection {
   human_score: number;
@@ -24,6 +25,7 @@ interface ArticleGeneratorProps {
 
 export const ArticleGenerator = ({ question, answer, pageContent, brandContext, onClose }: ArticleGeneratorProps) => {
   const { t, i18n } = useTranslation();
+  const viewAsUserId = useViewAsUserId();
   const [article, setArticle] = useState<string | null>(null);
   const [detection, setDetection] = useState<AiDetection | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -38,6 +40,7 @@ export const ArticleGenerator = ({ question, answer, pageContent, brandContext, 
         body: {
           question, answer, pageContent, brandContext, mode,
           language: i18n.language,
+          viewAsUserId: viewAsUserId || undefined,
           ...(mode === "rewrite" && { articleText: article }),
         }
       });

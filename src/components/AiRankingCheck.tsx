@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
+import { useViewAsUserId } from "@/hooks/useViewAsUserId";
 import { toast } from "sonner";
 import {
   Bot,
@@ -62,6 +63,7 @@ const MODEL_ORDER = [
 
 export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }: AiRankingCheckProps) => {
   const { t, i18n } = useTranslation();
+  const viewAsUserId = useViewAsUserId();
   const navigate = useNavigate();
   const isEnterprise = userPlan === "enterprise";
   const [isRunning, setIsRunning] = useState(false);
@@ -139,7 +141,7 @@ export const AiRankingCheck = ({ pageId, domain, faqs = [], userPlan = "free" }:
 
     try {
       const { data, error } = await supabase.functions.invoke("check-ai-ranking", {
-        body: { questions, domain, pageId, language: i18n.language },
+        body: { questions, domain, pageId, language: i18n.language, viewAsUserId: viewAsUserId || undefined },
       });
 
       if (error) throw error;

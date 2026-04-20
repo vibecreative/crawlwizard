@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
+import { useViewAsUserId } from "@/hooks/useViewAsUserId";
 import { analyzeRelevanceInBrowser, checkBrowserAiSupport, BrowserAnalysisResult } from "@/lib/browserAiRelevance";
 import { ArticleGenerator } from "./ArticleGenerator";
 
@@ -44,6 +45,7 @@ export const FaqSuggestions = ({
   brandContext = ""
 }: FaqSuggestionsProps) => {
   const { t, i18n } = useTranslation();
+  const viewAsUserId = useViewAsUserId();
   const [analysisResults, setAnalysisResults] = useState<Map<number, AnalysisResult>>(new Map());
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzingSingleIndex, setAnalyzingSingleIndex] = useState<number | null>(null);
@@ -99,7 +101,8 @@ export const FaqSuggestions = ({
       body: {
         question: faq.question,
         websiteUrl,
-        pageContent
+        pageContent,
+        viewAsUserId: viewAsUserId || undefined,
       }
     });
 
@@ -269,7 +272,8 @@ export const FaqSuggestions = ({
           previousQuestion: faqs[index].question,
           analysisExplanation: analysis.explanation,
           brandContext,
-          language: i18n.language
+          language: i18n.language,
+          viewAsUserId: viewAsUserId || undefined,
         }
       });
 
