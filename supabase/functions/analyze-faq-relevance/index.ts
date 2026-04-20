@@ -42,6 +42,15 @@ async function logCreditUsage(userId: string, actionType: string, credits: numbe
   });
 }
 
+async function resolveEffectiveUserId(callerUserId: string, viewAsUserId?: string): Promise<string> {
+  if (!viewAsUserId || viewAsUserId === callerUserId) return callerUserId;
+  const adminClient = getAdminClient();
+  const { data } = await adminClient.from('user_roles').select('role').eq('user_id', callerUserId).eq('role', 'admin').maybeSingle();
+  if (!data) return callerUserId;
+  const { data: target } = await adminClient.from('profiles').select('id').eq('id', viewAsUserId).maybeSingle();
+  return target?.id ? viewAsUserId : callerUserId;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -70,8 +79,12 @@ serve(async (req) => {
       });
     }
 
+    const body = await req.json();
+    const { question, websiteUrl, pageContent, viewAsUserId } = body;
+    const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
+
     // Credit check
-    const creditCheck = await checkCredits(supabaseClient, user.id, CREDITS_REQUIRED);
+    const creditCheck = await checkCredits(getAdminClient(), effectiveUserId, CREDITS_REQUIRED);
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
@@ -81,9 +94,6 @@ serve(async (req) => {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    const body = await req.json();
-    const { question, websiteUrl, pageContent } = body;
     
     if (!question || typeof question !== 'string') {
       return new Response(JSON.stringify({ error: 'question must be a non-empty string' }),

@@ -28,6 +28,21 @@ async function logCreditUsage(userId: string, actionType: string, credits: numbe
   await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
 }
 
+async function resolveEffectiveUserId(callerUserId: string, viewAsUserId?: string): Promise<string> {
+  if (!viewAsUserId || viewAsUserId === callerUserId) return callerUserId;
+  const adminClient = getAdminClient();
+  const { data } = await adminClient.from('user_roles').select('role').eq('user_id', callerUserId).eq('role', 'admin').maybeSingle();
+  if (!data) return callerUserId;
+  const { data: target } = await adminClient.from('profiles').select('id').eq('id', viewAsUserId).maybeSingle();
+  return target?.id ? viewAsUserId : callerUserId;
+}
+
+async function getUserPlan(userId: string): Promise<string | null> {
+  const adminClient = getAdminClient();
+  const { data } = await adminClient.from('profiles').select('plan').eq('id', userId).maybeSingle();
+  return data?.plan ?? null;
+}
+
 function getSystemPrompt(lang: string, mode: string, brandContext?: string) {
   const isRewrite = mode === 'rewrite';
   
@@ -126,13 +141,17 @@ serve(async (req) => {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { data: profile } = await supabaseClient.from('profiles').select('plan').eq('id', user.id).single();
-    if (!profile || profile.plan !== 'enterprise') {
+    const body = await req.json();
+    const { question, answer, pageContent, mode, brandContext, language, viewAsUserId } = body;
+    const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
+
+    const plan = await getUserPlan(effectiveUserId);
+    if (plan !== 'enterprise') {
       return new Response(JSON.stringify({ error: 'Enterprise plan required' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const creditCheck = await checkCredits(supabaseClient, user.id, CREDITS_REQUIRED);
+    const creditCheck = await checkCredits(getAdminClient(), effectiveUserId, CREDITS_REQUIRED);
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
@@ -140,9 +159,6 @@ serve(async (req) => {
         credits: creditCheck
       }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const body = await req.json();
-    const { question, answer, pageContent, mode, brandContext, language } = body;
     const lang = language === 'en' ? 'en' : 'nl';
 
     if (!question || !answer) {
