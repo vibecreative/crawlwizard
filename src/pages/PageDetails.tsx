@@ -4,6 +4,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useViewAsUserId } from "@/hooks/useViewAsUserId";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AnalysisResults } from "@/components/AnalysisResults";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ const PageDetails = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const viewAsUserId = useViewAsUserId();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
   const [brandContext, setBrandContext] = useState<string>("");
