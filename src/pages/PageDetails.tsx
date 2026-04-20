@@ -176,7 +176,7 @@ const PageDetails = () => {
       toast.info("FAQs worden gegenereerd...");
 
       const { data, error } = await supabase.functions.invoke('generate-faqs', {
-        body: { html: htmlContent, brandContext, language: i18n.language }
+        body: { html: htmlContent, brandContext, language: i18n.language, viewAsUserId: viewAsUserId || undefined }
       });
 
       if (error) throw error;
