@@ -101,7 +101,8 @@ export const FaqSuggestions = ({
       body: {
         question: faq.question,
         websiteUrl,
-        pageContent
+        pageContent,
+        viewAsUserId: viewAsUserId || undefined,
       }
     });
 
@@ -271,7 +272,8 @@ export const FaqSuggestions = ({
           previousQuestion: faqs[index].question,
           analysisExplanation: analysis.explanation,
           brandContext,
-          language: i18n.language
+          language: i18n.language,
+          viewAsUserId: viewAsUserId || undefined,
         }
       });
 
