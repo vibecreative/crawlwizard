@@ -171,7 +171,7 @@ const PageDetails = () => {
 
       if (!htmlContent) {
         toast.info("HTML wordt opgehaald...");
-        htmlContent = await fetchWithCorsRetry(pageData.url);
+        htmlContent = await fetchPageHtml(pageData.url);
         if (!htmlContent) throw new Error("Kon de pagina-inhoud niet ophalen");
       }
 
