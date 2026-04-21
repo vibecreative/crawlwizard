@@ -19,7 +19,7 @@ import {
   parseStructuredData,
   calculateSeoScore,
   calculateHeadingIssues,
-  fetchWithCorsRetry,
+  fetchPageHtml,
 } from "@/lib/htmlParser";
 
 interface PageData {
@@ -116,7 +116,7 @@ const PageDetails = () => {
     try {
       toast.info("Pagina wordt opnieuw geanalyseerd...");
 
-      const html = await fetchWithCorsRetry(pageData.url);
+      const html = await fetchPageHtml(pageData.url);
       const headings = parseHeadings(html);
       const meta = parseMeta(html);
       const structuredData = parseStructuredData(html);
