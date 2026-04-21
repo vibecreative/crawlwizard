@@ -39,6 +39,7 @@ export const HeadingStructureScore = ({ headings, meta, structuredData }: Headin
 
   const analyzeStructure = () => {
     const issues: Issue[] = [];
+    let score = 100; // tracked for issue messaging only; final value comes from shared helper
 
     const counts = headings.reduce((acc, h) => {
       acc[h.level] = (acc[h.level] || 0) + 1;
@@ -150,7 +151,7 @@ export const HeadingStructureScore = ({ headings, meta, structuredData }: Headin
     }
 
     return {
-      score: Math.max(0, Math.min(100, score)),
+      score: calculatePageStructureScore(headings, meta, structuredData),
       issues,
       counts
     };
