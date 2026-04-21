@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from "react-i18next";
+import { calculatePageStructureScore } from "@/lib/htmlParser";
 
 interface HeadingInfo {
   level: number;
@@ -38,7 +39,7 @@ export const HeadingStructureScore = ({ headings, meta, structuredData }: Headin
 
   const analyzeStructure = () => {
     const issues: Issue[] = [];
-    let score = 100;
+    let score = 100; // tracked for issue messaging only; final value comes from shared helper
 
     const counts = headings.reduce((acc, h) => {
       acc[h.level] = (acc[h.level] || 0) + 1;
@@ -150,7 +151,7 @@ export const HeadingStructureScore = ({ headings, meta, structuredData }: Headin
     }
 
     return {
-      score: Math.max(0, Math.min(100, score)),
+      score: calculatePageStructureScore(headings, meta, structuredData),
       issues,
       counts
     };

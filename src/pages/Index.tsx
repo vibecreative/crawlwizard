@@ -180,7 +180,7 @@ const Index = () => {
     const hasMetaDescription = !!meta.description;
     const hasStructuredDataFlag = structuredData.length > 0;
     const headingIssues = calculateHeadingIssues(headings);
-    const seoScore = calculateSeoScore(hasH1, hasMetaDescription, hasStructuredDataFlag, headingIssues);
+    const seoScore = calculateSeoScore(hasH1, hasMetaDescription, hasStructuredDataFlag, headingIssues, headings, meta, structuredData);
     
     const pageAnalysisData: AnalysisData = {
       url,
