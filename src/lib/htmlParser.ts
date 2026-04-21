@@ -496,13 +496,93 @@ export const analyzeKeywordPlacement = (
 };
 
 // ── SEO Score Calculation ────────────────────────────────────────────────────
+// Mirrors the logic in HeadingStructureScore.tsx so the dashboard overview
+// and the detail page show the exact same number.
 
+interface ScoreMeta {
+  title?: string;
+  description?: string;
+}
+
+interface ScoreStructuredItem {
+  type: string;
+}
+
+export const calculatePageStructureScore = (
+  headings: HeadingInfo[],
+  meta?: ScoreMeta,
+  structuredData?: ScoreStructuredItem[]
+): number => {
+  let score = 100;
+
+  const counts = headings.reduce((acc, h) => {
+    acc[h.level] = (acc[h.level] || 0) + 1;
+    return acc;
+  }, {} as Record<number, number>);
+
+  // H1
+  const h1Count = counts[1] || 0;
+  if (h1Count === 0) score -= 15;
+  else if (h1Count > 1) score -= 10;
+
+  // Hierarchy gaps (skipped levels)
+  const usedLevels = Object.keys(counts).map(Number).sort((a, b) => a - b);
+  let previousLevel = 0;
+  let hierarchyIssues = 0;
+  for (const level of usedLevels) {
+    if (previousLevel > 0 && level > previousLevel + 1) hierarchyIssues++;
+    previousLevel = level;
+  }
+  score -= Math.min(hierarchyIssues * 5, 10);
+
+  // Total headings
+  const totalHeadings = headings.length;
+  if (totalHeadings === 0) score -= 10;
+  else if (totalHeadings < 3) score -= 5;
+
+  // H2 presence
+  const h2Count = counts[2] || 0;
+  if (h2Count === 0 && totalHeadings > 1) score -= 5;
+
+  // Meta
+  if (meta) {
+    if (!meta.title) score -= 15;
+    else if (meta.title.length > 60) score -= 5;
+
+    if (!meta.description) score -= 15;
+    else if (meta.description.length > 160) score -= 5;
+  } else {
+    score -= 15;
+  }
+
+  // Structured data
+  if (!structuredData || structuredData.length === 0) {
+    score -= 30;
+  } else {
+    const types = structuredData.map((s) => s.type.toLowerCase());
+    const hasWebsite = types.some((t) => t.includes("website"));
+    const hasBreadcrumb = types.some((t) => t.includes("breadcrumb"));
+    if (!hasWebsite) score -= 5;
+    if (!hasBreadcrumb) score -= 5;
+  }
+
+  return Math.max(0, Math.min(100, score));
+};
+
+// Backwards-compatible alias used by existing call sites.
 export const calculateSeoScore = (
   hasH1: boolean,
   hasMetaDesc: boolean,
   hasStructuredData: boolean,
-  headingIssues: number
+  headingIssues: number,
+  headings?: HeadingInfo[],
+  meta?: ScoreMeta,
+  structuredData?: ScoreStructuredItem[]
 ): number => {
+  if (headings) {
+    return calculatePageStructureScore(headings, meta, structuredData);
+  }
+  // Fallback (legacy callers without full data)
   let score = 0;
   if (hasH1) score += 25;
   if (hasMetaDesc) score += 25;
