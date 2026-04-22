@@ -303,6 +303,10 @@ ${JSON.stringify(jsonLdContent, null, 2)}
           );
         })}
 
+        {selectedSchemas.product && (
+          <ProductSchemaForm products={products} onChange={setProducts} />
+        )}
+
         <div className="h-px bg-border my-4" />
 
         <div className="p-4 rounded-lg border border-primary/30 bg-primary/5">
