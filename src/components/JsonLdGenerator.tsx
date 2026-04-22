@@ -38,6 +38,7 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
   const isContactPage = urlPath.includes('contact');
   const isAboutPage = urlPath.includes('over') || urlPath.includes('about');
   const isBlogPage = urlPath.includes('blog') || urlPath.includes('artikel');
+  const isProductPage = /\/(product|producten|products|shop|winkel|webshop)(\/|$)/.test(urlPath);
   const hasFaqs = faqs && faqs.length > 0;
 
   const recommended: Record<string, boolean> = {
@@ -46,6 +47,7 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
     breadcrumb: !isHomePage,
     article: isBlogPage,
     faqPage: !!hasFaqs,
+    product: isProductPage,
   };
 
   const [selectedSchemas, setSelectedSchemas] = useState({
@@ -54,7 +56,10 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
     breadcrumb: recommended.breadcrumb,
     article: recommended.article,
     faqPage: recommended.faqPage,
+    product: recommended.product,
   });
+
+  const [products, setProducts] = useState<ProductInput[]>([]);
 
   const getDomainName = (url: string) => {
     try {
