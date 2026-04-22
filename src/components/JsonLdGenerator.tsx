@@ -241,6 +241,7 @@ ${JSON.stringify(jsonLdContent, null, 2)}
     { key: 'breadcrumb', label: t('jsonLd.breadcrumbSchema'), desc: t('jsonLd.breadcrumbDesc') },
     { key: 'article', label: t('jsonLd.articleSchema'), desc: t('jsonLd.articleDesc') },
     { key: 'faqPage', label: t('jsonLd.faqSchema'), desc: hasFaqs ? t('jsonLd.faqDescAvailable', { count: faqs!.length }) : t('jsonLd.faqDescUnavailable'), disabled: !hasFaqs },
+    { key: 'product', label: t('jsonLd.productSchema'), desc: isProductPage ? t('jsonLd.productDescDetected') : t('jsonLd.productDesc') },
   ];
 
   return (
