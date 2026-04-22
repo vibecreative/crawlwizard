@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Code2, Copy, CheckCircle2, Star } from "lucide-react";
 import { toast } from "sonner";
+import { ProductSchemaForm, buildProductSchema, type ProductInput } from "./ProductSchemaForm";
 
 interface FaqItem {
   question: string;
@@ -37,6 +38,7 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
   const isContactPage = urlPath.includes('contact');
   const isAboutPage = urlPath.includes('over') || urlPath.includes('about');
   const isBlogPage = urlPath.includes('blog') || urlPath.includes('artikel');
+  const isProductPage = /\/(product|producten|products|shop|winkel|webshop)(\/|$)/.test(urlPath);
   const hasFaqs = faqs && faqs.length > 0;
 
   const recommended: Record<string, boolean> = {
@@ -45,6 +47,7 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
     breadcrumb: !isHomePage,
     article: isBlogPage,
     faqPage: !!hasFaqs,
+    product: isProductPage,
   };
 
   const [selectedSchemas, setSelectedSchemas] = useState({
@@ -53,7 +56,10 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
     breadcrumb: recommended.breadcrumb,
     article: recommended.article,
     faqPage: recommended.faqPage,
+    product: recommended.product,
   });
+
+  const [products, setProducts] = useState<ProductInput[]>([]);
 
   const getDomainName = (url: string) => {
     try {
@@ -194,6 +200,12 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
       const faqSchema = generateFaqPageSchema();
       if (faqSchema) schemas.push(faqSchema);
     }
+    if (selectedSchemas.product) {
+      products.forEach(p => {
+        const ps = buildProductSchema(p, url);
+        if (ps) schemas.push(ps);
+      });
+    }
 
     if (schemas.length === 0) return "";
 
@@ -229,6 +241,7 @@ ${JSON.stringify(jsonLdContent, null, 2)}
     { key: 'breadcrumb', label: t('jsonLd.breadcrumbSchema'), desc: t('jsonLd.breadcrumbDesc') },
     { key: 'article', label: t('jsonLd.articleSchema'), desc: t('jsonLd.articleDesc') },
     { key: 'faqPage', label: t('jsonLd.faqSchema'), desc: hasFaqs ? t('jsonLd.faqDescAvailable', { count: faqs!.length }) : t('jsonLd.faqDescUnavailable'), disabled: !hasFaqs },
+    { key: 'product', label: t('jsonLd.productSchema'), desc: isProductPage ? t('jsonLd.productDescDetected') : t('jsonLd.productDesc') },
   ];
 
   return (
@@ -289,6 +302,10 @@ ${JSON.stringify(jsonLdContent, null, 2)}
             </label>
           );
         })}
+
+        {selectedSchemas.product && (
+          <ProductSchemaForm products={products} onChange={setProducts} />
+        )}
 
         <div className="h-px bg-border my-4" />
 
