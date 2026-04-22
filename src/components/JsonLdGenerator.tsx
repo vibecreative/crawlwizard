@@ -200,6 +200,12 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorPr
       const faqSchema = generateFaqPageSchema();
       if (faqSchema) schemas.push(faqSchema);
     }
+    if (selectedSchemas.product) {
+      products.forEach(p => {
+        const ps = buildProductSchema(p, url);
+        if (ps) schemas.push(ps);
+      });
+    }
 
     if (schemas.length === 0) return "";
 
