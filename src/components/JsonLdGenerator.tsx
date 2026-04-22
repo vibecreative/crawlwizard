@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Code2, Copy, CheckCircle2, Star } from "lucide-react";
 import { toast } from "sonner";
+import { ProductSchemaForm, buildProductSchema, type ProductInput } from "./ProductSchemaForm";
 
 interface FaqItem {
   question: string;
