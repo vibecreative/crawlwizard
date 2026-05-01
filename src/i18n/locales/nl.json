@@ -731,7 +731,13 @@
     "productAvailOutOfStock": "Niet op voorraad",
     "productAvailPreOrder": "Pre-order",
     "noProductsYet": "Nog geen producten toegevoegd. Klik op \"Product toevoegen\" om te beginnen.",
-    "productNameRequired": "Vul minimaal een productnaam in om Product schema te genereren."
+    "productNameRequired": "Vul minimaal een productnaam in om Product schema te genereren.",
+    "currentTitle": "Huidige JSON-LD op deze pagina",
+    "currentFound": "{{count}} schema('s) gevonden",
+    "currentNone": "Geen JSON-LD gevonden",
+    "currentIntro": "Dit is de JSON-LD code die momenteel op de pagina staat (gevonden tijdens de laatste analyse).",
+    "currentNoneHint": "Er is geen JSON-LD structured data aangetroffen op deze pagina. Genereer hieronder een nieuwe JSON-LD om aan de pagina toe te voegen.",
+    "copyCurrentButton": "Kopieer huidige JSON-LD"
   },
   "cookie": {
     "title": "Cookie-instellingen",

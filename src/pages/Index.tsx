@@ -50,6 +50,8 @@ const Index = () => {
   const [showWebsiteResults, setShowWebsiteResults] = useState(false);
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
+  const [singlePageProjectName, setSinglePageProjectName] = useState<string>("");
+  const [isSavingSinglePage, setIsSavingSinglePage] = useState(false);
   const shouldStopAnalysisRef = useRef(false);
   const [userPlan, setUserPlan] = useState<string>("free");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -109,6 +111,12 @@ const Index = () => {
       };
 
       setAnalysisData(data);
+      try {
+        const u = new URL(url);
+        setSinglePageProjectName(`${u.hostname}${u.pathname === '/' ? '' : u.pathname}`);
+      } catch {
+        setSinglePageProjectName(url);
+      }
       toast.success("Analyse voltooid!");
       
       setTimeout(() => {
@@ -326,7 +334,71 @@ const Index = () => {
     }
   };
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  const handleSaveSinglePageAsProject = async () => {
+    if (!user || !analysisData || !singlePageProjectName.trim()) return;
+    setIsSavingSinglePage(true);
+    try {
+      const targetUserId = (isAdmin && viewAsUserId) ? viewAsUserId : user.id;
+      let baseUrl = analysisData.url;
+      try { baseUrl = new URL(analysisData.url).origin; } catch {}
+
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          user_id: targetUserId,
+          name: singlePageProjectName.trim(),
+          base_url: baseUrl,
+          total_pages: 1,
+          analyzed_pages: 1,
+          status: 'completed'
+        })
+        .select()
+        .single();
+      if (projectError) throw projectError;
+
+      const hasH1 = analysisData.headings.some(h => h.level === 1);
+      const hasMetaDescription = !!analysisData.meta.description;
+      const hasStructuredData = analysisData.structuredData.length > 0;
+      const headingIssues = calculateHeadingIssues(analysisData.headings);
+      const seoScore = calculateSeoScore(
+        hasH1,
+        hasMetaDescription,
+        hasStructuredData,
+        headingIssues,
+        analysisData.headings,
+        analysisData.meta,
+        analysisData.structuredData
+      );
+
+      // Strip large html field to keep storage small
+      const { html: _omit, ...rest } = analysisData;
+      const slimAnalysisData = { ...rest, html: '' };
+
+      const { error: pageError } = await supabase.from('project_pages').insert([{
+        project_id: project.id,
+        url: analysisData.url,
+        title: analysisData.meta.title || null,
+        meta_description: analysisData.meta.description || null,
+        status: 'completed',
+        seo_score: seoScore,
+        has_h1: hasH1,
+        has_meta_description: hasMetaDescription,
+        has_structured_data: hasStructuredData,
+        heading_issues: headingIssues,
+        analysis_data: slimAnalysisData as any,
+        position: 1,
+      }]);
+      if (pageError) throw pageError;
+
+      toast.success("Pagina opgeslagen als project!");
+      navigate(isAdmin && viewAsUserId ? `/dashboard?viewAs=${viewAsUserId}` : '/dashboard');
+    } catch (error) {
+      console.error('Error saving single page project:', error);
+      toast.error("Fout bij opslaan van project");
+    } finally {
+      setIsSavingSinglePage(false);
+    }
+  };
 
   return (
     <div className="min-h-screen pt-16 sm:pt-12 pb-12 px-3 sm:px-4">
@@ -475,6 +547,47 @@ const Index = () => {
               userPlan={userPlan}
               userId={user?.id}
             />
+
+            {(userPlan === 'scale' || userPlan === 'enterprise') && (
+              <div className="flex flex-col items-center gap-4 p-6 border rounded-lg bg-card max-w-4xl mx-auto">
+                <div className="flex items-center gap-2 text-lg font-medium">
+                  <FolderOpen className="h-5 w-5 text-primary" />
+                  Pagina opslaan als project
+                </div>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  Bewaar deze geanalyseerde pagina als losstaand project in je dashboard.
+                </p>
+                <div className="w-full max-w-md space-y-2">
+                  <Label htmlFor="singlePageProjectName">Projectnaam</Label>
+                  <Input
+                    id="singlePageProjectName"
+                    type="text"
+                    placeholder="Voer een projectnaam in..."
+                    value={singlePageProjectName}
+                    onChange={(e) => setSinglePageProjectName(e.target.value)}
+                    className="text-center"
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveSinglePageAsProject}
+                  disabled={isSavingSinglePage || !singlePageProjectName.trim()}
+                  className="gradient-primary"
+                  size="lg"
+                >
+                  {isSavingSinglePage ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Project opslaan...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Project opslaan
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

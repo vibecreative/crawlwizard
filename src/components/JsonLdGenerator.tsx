@@ -4,13 +4,18 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Code2, Copy, CheckCircle2, Star } from "lucide-react";
+import { Code2, Copy, CheckCircle2, Star, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ProductSchemaForm, buildProductSchema, type ProductInput } from "./ProductSchemaForm";
 
 interface FaqItem {
   question: string;
   answer: string;
+}
+
+interface StructuredDataItem {
+  type: string;
+  data: any;
 }
 
 interface JsonLdGeneratorProps {
@@ -24,11 +29,33 @@ interface JsonLdGeneratorProps {
   };
   headings: Array<{ level: number; text: string }>;
   faqs?: FaqItem[];
+  currentStructuredData?: StructuredDataItem[];
 }
 
-export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorProps) => {
+export const JsonLdGenerator = ({ url, meta, headings, faqs, currentStructuredData }: JsonLdGeneratorProps) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const [copiedCurrent, setCopiedCurrent] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+
+  const currentJsonLdString = (() => {
+    if (!currentStructuredData || currentStructuredData.length === 0) return "";
+    const blocks = currentStructuredData.map(item => item.data);
+    const content = blocks.length === 1 ? blocks[0] : blocks;
+    return JSON.stringify(content, null, 2);
+  })();
+
+  const handleCopyCurrent = async () => {
+    if (!currentJsonLdString) return;
+    try {
+      await navigator.clipboard.writeText(`<script type="application/ld+json">\n${currentJsonLdString}\n</script>`);
+      setCopiedCurrent(true);
+      toast.success(t('jsonLd.copySuccess'));
+      setTimeout(() => setCopiedCurrent(false), 2000);
+    } catch {
+      toast.error(t('jsonLd.copyFailed'));
+    }
+  };
 
   // Page-type detection for smart recommendations
   const urlPath = (() => {
@@ -262,6 +289,44 @@ ${JSON.stringify(jsonLdContent, null, 2)}
       </div>
 
       <div className="space-y-4 mb-6">
+        {/* Current JSON-LD on page */}
+        <div className="rounded-lg border border-border bg-secondary/30">
+          <button
+            type="button"
+            onClick={() => setShowCurrent(v => !v)}
+            className="w-full flex items-center justify-between p-3 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <Code2 className="h-4 w-4 text-primary" />
+              <span className="font-medium text-sm">{t('jsonLd.currentTitle')}</span>
+              <Badge variant={currentJsonLdString ? "default" : "secondary"} className="text-[10px]">
+                {currentJsonLdString
+                  ? t('jsonLd.currentFound', { count: currentStructuredData!.length })
+                  : t('jsonLd.currentNone')}
+              </Badge>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showCurrent ? 'rotate-180' : ''}`} />
+          </button>
+          {showCurrent && (
+            <div className="p-3 pt-0 space-y-2">
+              {currentJsonLdString ? (
+                <>
+                  <p className="text-xs text-muted-foreground">{t('jsonLd.currentIntro')}</p>
+                  <pre className="bg-background p-3 rounded text-xs overflow-x-auto max-h-64 border border-border">
+                    <code>{currentJsonLdString}</code>
+                  </pre>
+                  <Button size="sm" variant="outline" onClick={handleCopyCurrent} className="gap-2">
+                    {copiedCurrent ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedCurrent ? t('jsonLd.copied') : t('jsonLd.copyCurrentButton')}
+                  </Button>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">{t('jsonLd.currentNoneHint')}</p>
+              )}
+            </div>
+          )}
+        </div>
+
         {schemaItems.map(({ key, label, desc, disabled }) => {
           const isRecommended = recommended[key];
           return (
