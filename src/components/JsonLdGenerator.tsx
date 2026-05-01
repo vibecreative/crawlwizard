@@ -13,6 +13,11 @@ interface FaqItem {
   answer: string;
 }
 
+interface StructuredDataItem {
+  type: string;
+  data: any;
+}
+
 interface JsonLdGeneratorProps {
   url: string;
   meta: {
@@ -24,11 +29,33 @@ interface JsonLdGeneratorProps {
   };
   headings: Array<{ level: number; text: string }>;
   faqs?: FaqItem[];
+  currentStructuredData?: StructuredDataItem[];
 }
 
-export const JsonLdGenerator = ({ url, meta, headings, faqs }: JsonLdGeneratorProps) => {
+export const JsonLdGenerator = ({ url, meta, headings, faqs, currentStructuredData }: JsonLdGeneratorProps) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const [copiedCurrent, setCopiedCurrent] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+
+  const currentJsonLdString = (() => {
+    if (!currentStructuredData || currentStructuredData.length === 0) return "";
+    const blocks = currentStructuredData.map(item => item.data);
+    const content = blocks.length === 1 ? blocks[0] : blocks;
+    return JSON.stringify(content, null, 2);
+  })();
+
+  const handleCopyCurrent = async () => {
+    if (!currentJsonLdString) return;
+    try {
+      await navigator.clipboard.writeText(`<script type="application/ld+json">\n${currentJsonLdString}\n</script>`);
+      setCopiedCurrent(true);
+      toast.success(t('jsonLd.copySuccess'));
+      setTimeout(() => setCopiedCurrent(false), 2000);
+    } catch {
+      toast.error(t('jsonLd.copyFailed'));
+    }
+  };
 
   // Page-type detection for smart recommendations
   const urlPath = (() => {
