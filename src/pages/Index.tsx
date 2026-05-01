@@ -111,6 +111,12 @@ const Index = () => {
       };
 
       setAnalysisData(data);
+      try {
+        const u = new URL(url);
+        setSinglePageProjectName(`${u.hostname}${u.pathname === '/' ? '' : u.pathname}`);
+      } catch {
+        setSinglePageProjectName(url);
+      }
       toast.success("Analyse voltooid!");
       
       setTimeout(() => {
