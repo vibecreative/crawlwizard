@@ -50,6 +50,8 @@ const Index = () => {
   const [showWebsiteResults, setShowWebsiteResults] = useState(false);
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [projectName, setProjectName] = useState<string>("");
+  const [singlePageProjectName, setSinglePageProjectName] = useState<string>("");
+  const [isSavingSinglePage, setIsSavingSinglePage] = useState(false);
   const shouldStopAnalysisRef = useRef(false);
   const [userPlan, setUserPlan] = useState<string>("free");
   const [isAdmin, setIsAdmin] = useState(false);
