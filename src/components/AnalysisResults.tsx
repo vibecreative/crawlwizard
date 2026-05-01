@@ -428,7 +428,7 @@ export const AnalysisResults = ({
 
       {/* JSON-LD Generator - Scale+ */}
       {!isFree ? (
-        <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} />
+        <JsonLdGenerator url={data.url} meta={data.meta} headings={data.headings} faqs={data.faqs} currentStructuredData={data.structuredData} />
       ) : (
         <LockedFeatureCard 
           title={t('jsonLd.title')} 
