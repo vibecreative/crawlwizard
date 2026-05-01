@@ -59,18 +59,12 @@ export const ProductSchemaForm = ({ products, onChange }: ProductSchemaFormProps
 
   return (
     <div className="space-y-4 p-4 rounded-lg border border-border bg-secondary/20">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h4 className="font-medium flex items-center gap-2">
-            <Package className="h-4 w-4 text-primary" />
-            {t("jsonLd.productsTitle")}
-          </h4>
-          <p className="text-xs text-muted-foreground mt-1">{t("jsonLd.productsIntro")}</p>
-        </div>
-        <Button type="button" size="sm" variant="outline" onClick={addProduct} className="gap-1 shrink-0">
-          <Plus className="h-4 w-4" />
-          {t("jsonLd.addProduct")}
-        </Button>
+      <div>
+        <h4 className="font-medium flex items-center gap-2">
+          <Package className="h-4 w-4 text-primary" />
+          {t("jsonLd.productsTitle")}
+        </h4>
+        <p className="text-xs text-muted-foreground mt-1">{t("jsonLd.productsIntro")}</p>
       </div>
 
       {products.length === 0 && (
