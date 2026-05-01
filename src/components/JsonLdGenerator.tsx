@@ -289,8 +289,45 @@ ${JSON.stringify(jsonLdContent, null, 2)}
       </div>
 
       <div className="space-y-4 mb-6">
-        {schemaItems.map(({ key, label, desc, disabled }) => {
-          const isRecommended = recommended[key];
+        {/* Current JSON-LD on page */}
+        <div className="rounded-lg border border-border bg-secondary/30">
+          <button
+            type="button"
+            onClick={() => setShowCurrent(v => !v)}
+            className="w-full flex items-center justify-between p-3 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <Code2 className="h-4 w-4 text-primary" />
+              <span className="font-medium text-sm">{t('jsonLd.currentTitle')}</span>
+              <Badge variant={currentJsonLdString ? "default" : "secondary"} className="text-[10px]">
+                {currentJsonLdString
+                  ? t('jsonLd.currentFound', { count: currentStructuredData!.length })
+                  : t('jsonLd.currentNone')}
+              </Badge>
+            </div>
+            <ChevronDownIcon open={showCurrent} />
+          </button>
+          {showCurrent && (
+            <div className="p-3 pt-0 space-y-2">
+              {currentJsonLdString ? (
+                <>
+                  <p className="text-xs text-muted-foreground">{t('jsonLd.currentIntro')}</p>
+                  <pre className="bg-background p-3 rounded text-xs overflow-x-auto max-h-64 border border-border">
+                    <code>{currentJsonLdString}</code>
+                  </pre>
+                  <Button size="sm" variant="outline" onClick={handleCopyCurrent} className="gap-2">
+                    {copiedCurrent ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedCurrent ? t('jsonLd.copied') : t('jsonLd.copyCurrentButton')}
+                  </Button>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">{t('jsonLd.currentNoneHint')}</p>
+              )}
+            </div>
+          )}
+        </div>
+
+
           return (
             <label
               key={key}
