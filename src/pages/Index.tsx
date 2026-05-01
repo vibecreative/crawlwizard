@@ -374,7 +374,7 @@ const Index = () => {
       const { html: _omit, ...rest } = analysisData;
       const slimAnalysisData = { ...rest, html: '' };
 
-      const { error: pageError } = await supabase.from('project_pages').insert({
+      const { error: pageError } = await supabase.from('project_pages').insert([{
         project_id: project.id,
         url: analysisData.url,
         title: analysisData.meta.title || null,
@@ -385,9 +385,9 @@ const Index = () => {
         has_meta_description: hasMetaDescription,
         has_structured_data: hasStructuredData,
         heading_issues: headingIssues,
-        analysis_data: slimAnalysisData,
+        analysis_data: slimAnalysisData as any,
         position: 1,
-      });
+      }]);
       if (pageError) throw pageError;
 
       toast.success("Pagina opgeslagen als project!");
