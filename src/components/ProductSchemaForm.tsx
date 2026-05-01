@@ -220,6 +220,13 @@ export const ProductSchemaForm = ({ products, onChange }: ProductSchemaFormProps
           </div>
         </div>
       ))}
+
+      <div className="flex justify-center pt-2">
+        <Button type="button" size="sm" variant="outline" onClick={addProduct} className="gap-1">
+          <Plus className="h-4 w-4" />
+          {t("jsonLd.addProduct")}
+        </Button>
+      </div>
     </div>
   );
 };
