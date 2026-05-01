@@ -731,7 +731,13 @@
     "productAvailOutOfStock": "Out of stock",
     "productAvailPreOrder": "Pre-order",
     "noProductsYet": "No products added yet. Click \"Add product\" to get started.",
-    "productNameRequired": "Enter at least a product name to generate Product schema."
+    "productNameRequired": "Enter at least a product name to generate Product schema.",
+    "currentTitle": "Current JSON-LD on this page",
+    "currentFound": "{{count}} schema(s) found",
+    "currentNone": "No JSON-LD found",
+    "currentIntro": "This is the JSON-LD code currently on the page (detected during the last analysis).",
+    "currentNoneHint": "No JSON-LD structured data was detected on this page. Generate a new JSON-LD below to add to the page.",
+    "copyCurrentButton": "Copy current JSON-LD"
   },
   "cookie": {
     "title": "Cookie Settings",
