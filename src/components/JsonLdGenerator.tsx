@@ -327,7 +327,8 @@ ${JSON.stringify(jsonLdContent, null, 2)}
           )}
         </div>
 
-
+        {schemaItems.map(({ key, label, desc, disabled }) => {
+          const isRecommended = recommended[key];
           return (
             <label
               key={key}
