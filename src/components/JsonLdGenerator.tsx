@@ -305,7 +305,7 @@ ${JSON.stringify(jsonLdContent, null, 2)}
                   : t('jsonLd.currentNone')}
               </Badge>
             </div>
-            <ChevronDownIcon open={showCurrent} />
+            <ChevronDown className={`h-4 w-4 transition-transform ${showCurrent ? 'rotate-180' : ''}`} />
           </button>
           {showCurrent && (
             <div className="p-3 pt-0 space-y-2">
