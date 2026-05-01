@@ -547,6 +547,47 @@ const Index = () => {
               userPlan={userPlan}
               userId={user?.id}
             />
+
+            {(userPlan === 'scale' || userPlan === 'enterprise') && (
+              <div className="flex flex-col items-center gap-4 p-6 border rounded-lg bg-card max-w-4xl mx-auto">
+                <div className="flex items-center gap-2 text-lg font-medium">
+                  <FolderOpen className="h-5 w-5 text-primary" />
+                  Pagina opslaan als project
+                </div>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  Bewaar deze geanalyseerde pagina als losstaand project in je dashboard.
+                </p>
+                <div className="w-full max-w-md space-y-2">
+                  <Label htmlFor="singlePageProjectName">Projectnaam</Label>
+                  <Input
+                    id="singlePageProjectName"
+                    type="text"
+                    placeholder="Voer een projectnaam in..."
+                    value={singlePageProjectName}
+                    onChange={(e) => setSinglePageProjectName(e.target.value)}
+                    className="text-center"
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveSinglePageAsProject}
+                  disabled={isSavingSinglePage || !singlePageProjectName.trim()}
+                  className="gradient-primary"
+                  size="lg"
+                >
+                  {isSavingSinglePage ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Project opslaan...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Project opslaan
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
