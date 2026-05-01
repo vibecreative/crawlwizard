@@ -334,7 +334,71 @@ const Index = () => {
     }
   };
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  const handleSaveSinglePageAsProject = async () => {
+    if (!user || !analysisData || !singlePageProjectName.trim()) return;
+    setIsSavingSinglePage(true);
+    try {
+      const targetUserId = (isAdmin && viewAsUserId) ? viewAsUserId : user.id;
+      let baseUrl = analysisData.url;
+      try { baseUrl = new URL(analysisData.url).origin; } catch {}
+
+      const { data: project, error: projectError } = await supabase
+        .from('projects')
+        .insert({
+          user_id: targetUserId,
+          name: singlePageProjectName.trim(),
+          base_url: baseUrl,
+          total_pages: 1,
+          analyzed_pages: 1,
+          status: 'completed'
+        })
+        .select()
+        .single();
+      if (projectError) throw projectError;
+
+      const hasH1 = analysisData.headings.some(h => h.level === 1);
+      const hasMetaDescription = !!analysisData.meta.description;
+      const hasStructuredData = analysisData.structuredData.length > 0;
+      const headingIssues = calculateHeadingIssues(analysisData.headings);
+      const seoScore = calculateSeoScore(
+        hasH1,
+        hasMetaDescription,
+        hasStructuredData,
+        headingIssues,
+        analysisData.headings,
+        analysisData.meta,
+        analysisData.structuredData
+      );
+
+      // Strip large html field to keep storage small
+      const { html: _omit, ...rest } = analysisData;
+      const slimAnalysisData = { ...rest, html: '' };
+
+      const { error: pageError } = await supabase.from('project_pages').insert({
+        project_id: project.id,
+        url: analysisData.url,
+        title: analysisData.meta.title || null,
+        meta_description: analysisData.meta.description || null,
+        status: 'completed',
+        seo_score: seoScore,
+        has_h1: hasH1,
+        has_meta_description: hasMetaDescription,
+        has_structured_data: hasStructuredData,
+        heading_issues: headingIssues,
+        analysis_data: slimAnalysisData,
+        position: 1,
+      });
+      if (pageError) throw pageError;
+
+      toast.success("Pagina opgeslagen als project!");
+      navigate(isAdmin && viewAsUserId ? `/dashboard?viewAs=${viewAsUserId}` : '/dashboard');
+    } catch (error) {
+      console.error('Error saving single page project:', error);
+      toast.error("Fout bij opslaan van project");
+    } finally {
+      setIsSavingSinglePage(false);
+    }
+  };
 
   return (
     <div className="min-h-screen pt-16 sm:pt-12 pb-12 px-3 sm:px-4">
