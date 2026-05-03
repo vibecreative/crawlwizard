@@ -168,10 +168,21 @@ export const parseStructuredData = (html: string): StructuredDataItem[] => {
               ? obj["@type"]
               : [obj["@type"]];
             types.forEach((type: string) => {
-              const typeLabel = `JSON-LD: ${type}`;
-              if (!typeMap.has(typeLabel)) {
-                typeMap.set(typeLabel, obj);
+              const baseLabel = `JSON-LD: ${type}`;
+              // Allow multiple instances of repeatable types (Product, Offer, FAQPage entries, etc.)
+              const repeatableTypes = new Set([
+                "Product", "Offer", "AggregateOffer", "Review", "Article",
+                "NewsArticle", "BlogPosting", "Event", "Recipe", "Service",
+                "JobPosting", "Course", "VideoObject", "ImageObject", "Person",
+              ]);
+              let label = baseLabel;
+              if (typeMap.has(label)) {
+                if (!repeatableTypes.has(type)) return;
+                let i = 2;
+                while (typeMap.has(`${baseLabel} (${i})`)) i++;
+                label = `${baseLabel} (${i})`;
               }
+              typeMap.set(label, obj);
             });
           }
         }
