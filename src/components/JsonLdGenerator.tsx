@@ -325,10 +325,45 @@ ${JSON.stringify(jsonLdContent, null, 2)}
                   <pre className="bg-background p-3 rounded text-xs overflow-x-auto max-h-64 border border-border">
                     <code>{currentJsonLdString}</code>
                   </pre>
-                  <Button size="sm" variant="outline" onClick={handleCopyCurrent} className="gap-2">
-                    {copiedCurrent ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                    {copiedCurrent ? t('jsonLd.copied') : t('jsonLd.copyCurrentButton')}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={handleCopyCurrent} className="gap-2">
+                      {copiedCurrent ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      {copiedCurrent ? t('jsonLd.copied') : t('jsonLd.copyCurrentButton')}
+                    </Button>
+                    {detectedProducts.length > 0 && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="gap-2"
+                        onClick={() => {
+                          const imported: ProductInput[] = detectedProducts.map((d: any) => {
+                            const offer = Array.isArray(d.offers) ? d.offers[0] : d.offers;
+                            const brand = typeof d.brand === 'string' ? d.brand : d.brand?.name || '';
+                            const image = Array.isArray(d.image) ? d.image[0] : d.image;
+                            const hasPrice = !!offer?.price;
+                            const base = createEmptyProduct();
+                            return {
+                              ...base,
+                              name: d.name || '',
+                              description: d.description || '',
+                              brand: brand || '',
+                              sku: d.sku || d.mpn || '',
+                              imageUrl: image || '',
+                              priceMode: hasPrice ? 'price' : 'quote',
+                              price: hasPrice ? String(offer.price) : '',
+                              availability: (offer?.availability || '').toString().split('/').pop() || base.availability,
+                            } as ProductInput;
+                          });
+                          setProducts(imported);
+                          setSelectedSchemas(prev => ({ ...prev, product: true }));
+                          toast.success(t('jsonLd.importedProducts', { count: imported.length, defaultValue: `${imported.length} product(en) geïmporteerd` }));
+                        }}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        {t('jsonLd.importProducts', { count: detectedProducts.length, defaultValue: `Importeer ${detectedProducts.length} product(en) in formulier` })}
+                      </Button>
+                    )}
+                  </div>
                 </>
               ) : (
                 <p className="text-xs text-muted-foreground italic">{t('jsonLd.currentNoneHint')}</p>
