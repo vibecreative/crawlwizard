@@ -36,7 +36,17 @@ export const JsonLdGenerator = ({ url, meta, headings, faqs, currentStructuredDa
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [copiedCurrent, setCopiedCurrent] = useState(false);
-  const [showCurrent, setShowCurrent] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(true);
+
+  const detectedProducts = useMemo(() => {
+    if (!currentStructuredData) return [] as any[];
+    return currentStructuredData
+      .filter(it => {
+        const ty = it.data?.["@type"];
+        return ty === "Product" || (Array.isArray(ty) && ty.includes("Product"));
+      })
+      .map(it => it.data);
+  }, [currentStructuredData]);
 
   const currentJsonLdString = (() => {
     if (!currentStructuredData || currentStructuredData.length === 0) return "";
