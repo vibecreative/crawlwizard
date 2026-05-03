@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Code2, Copy, CheckCircle2, Star, ChevronDown } from "lucide-react";
+import { Code2, Copy, CheckCircle2, Star, ChevronDown, Download } from "lucide-react";
 import { toast } from "sonner";
-import { ProductSchemaForm, buildProductSchema, type ProductInput } from "./ProductSchemaForm";
+import { ProductSchemaForm, buildProductSchema, createEmptyProduct, type ProductInput } from "./ProductSchemaForm";
 
 interface FaqItem {
   question: string;
