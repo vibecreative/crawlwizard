@@ -299,6 +299,19 @@ ${JSON.stringify(jsonLdContent, null, 2)}
       </div>
 
       <div className="space-y-4 mb-6">
+        {/* Explainer: difference between current and generated code */}
+        <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 text-sm space-y-2">
+          <p className="font-medium text-primary">ℹ️ {t('jsonLd.explainerTitle', { defaultValue: 'Actuele code vs. gegenereerde code' })}</p>
+          <p className="text-muted-foreground">
+            <strong className="text-foreground">{t('jsonLd.explainerCurrentLabel', { defaultValue: 'Actuele JSON-LD' })}:</strong>{' '}
+            {t('jsonLd.explainerCurrent', { defaultValue: 'dit is de structured data die nu live op de pagina staat (gevonden tijdens de analyse). Gebruik dit om te controleren wat zoekmachines en AI nu zien.' })}
+          </p>
+          <p className="text-muted-foreground">
+            <strong className="text-foreground">{t('jsonLd.explainerGeneratedLabel', { defaultValue: 'Gegenereerde JSON-LD' })}:</strong>{' '}
+            {t('jsonLd.explainerGenerated', { defaultValue: 'een voorstel dat CrawlWizard voor je opbouwt op basis van de aangevinkte schema-types en (optioneel) je handmatig ingevoerde producten. Kopieer deze code in de <head> van je pagina om de structured data uit te breiden of te verbeteren.' })}
+          </p>
+        </div>
+
         {/* Current JSON-LD on page */}
         <div className="rounded-lg border border-border bg-secondary/30">
           <button
