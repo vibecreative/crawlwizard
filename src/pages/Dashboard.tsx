@@ -291,7 +291,8 @@ const Dashboard = () => {
     if (viewAsUserId) params.set('viewAs', viewAsUserId);
     navigate(`/analyze?${params.toString()}`);
   };
-    if (score === null) return "text-muted-foreground";
+
+  const getScoreColor = (score: number | null) => {
     if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
     if (score >= 60) return "text-amber-600 dark:text-amber-400";
     return "text-destructive";
