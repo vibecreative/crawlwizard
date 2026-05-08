@@ -8,14 +8,6 @@ const corsHeaders = {
 
 const CREDITS_REQUIRED = 2;
 
-async function checkCredits(supabase: any, userId: string, creditsNeeded: number) {
-  const { data, error } = await supabase.rpc('get_remaining_credits', { _user_id: userId });
-  if (error) throw new Error('Could not check credits');
-  const credits = typeof data === 'string' ? JSON.parse(data) : data;
-  if (credits.remaining < creditsNeeded) return { allowed: false, ...credits };
-  return { allowed: true, ...credits };
-}
-
 function getAdminClient() {
   return createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
@@ -23,9 +15,16 @@ function getAdminClient() {
   );
 }
 
-async function logCreditUsage(userId: string, actionType: string, credits: number) {
+async function consumeCredits(userId: string, amount: number, actionType: string) {
   const adminClient = getAdminClient();
-  await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
+  const { data, error } = await adminClient.rpc('consume_credits', { _user_id: userId, _amount: amount, _action_type: actionType });
+  if (error) throw new Error('Could not consume credits');
+  return typeof data === 'string' ? JSON.parse(data) : data;
+}
+
+async function refundCredits(userId: string, amount: number, actionType: string) {
+  const adminClient = getAdminClient();
+  await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: `refund_${actionType}`, credits_used: -amount });
 }
 
 async function resolveEffectiveUserId(callerUserId: string, viewAsUserId?: string): Promise<string> {
