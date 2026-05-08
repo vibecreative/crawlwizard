@@ -551,8 +551,13 @@ const Index = () => {
                     <div className="flex flex-col items-center gap-4 p-6 border rounded-lg bg-card">
                       <div className="flex items-center gap-2 text-lg font-medium">
                         <FolderOpen className="h-5 w-5 text-primary" />
-                        Project opslaan
+                        {reanalyzeProjectId ? "Heranalyse opslaan" : "Project opslaan"}
                       </div>
+                      {reanalyzeProjectId && (
+                        <p className="text-sm text-muted-foreground text-center max-w-md">
+                          Bestaande pagina-data van dit project wordt vervangen door deze nieuwe analyse.
+                        </p>
+                      )}
                       <div className="w-full max-w-md space-y-2">
                         <Label htmlFor="projectName">Projectnaam</Label>
                         <Input
@@ -573,12 +578,12 @@ const Index = () => {
                         {isSavingProject ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Project opslaan...
+                            {reanalyzeProjectId ? "Heranalyse opslaan..." : "Project opslaan..."}
                           </>
                         ) : (
                           <>
                             <Save className="mr-2 h-4 w-4" />
-                            Project opslaan
+                            {reanalyzeProjectId ? "Heranalyse opslaan" : "Project opslaan"}
                           </>
                         )}
                       </Button>
