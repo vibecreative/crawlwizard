@@ -78,9 +78,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { data: creditsData } = await adminClient.rpc("get_remaining_credits", { _user_id: effectiveUserId });
-    const remaining = creditsData?.remaining ?? 0;
-    if (remaining <= 0) {
+    const { data: consumeData, error: consumeErr } = await adminClient.rpc("consume_credits", { _user_id: effectiveUserId, _amount: 1, _action_type: "meta_tag_generation" });
+    if (consumeErr) throw consumeErr;
+    const consumed = typeof consumeData === 'string' ? JSON.parse(consumeData) : consumeData;
+    if (!consumed?.allowed) {
       return new Response(JSON.stringify({ error: "No AI credits remaining this month." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
