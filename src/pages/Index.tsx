@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { SitemapUrl } from "@/lib/api/sitemap";
+import { SitemapUrl, sitemapApi } from "@/lib/api/sitemap";
 import { FileText, Globe, LogOut, Save, Loader2, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
