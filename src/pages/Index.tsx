@@ -35,8 +35,13 @@ import {
 const Index = () => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const viewAsUserId = searchParams.get("viewAs");
+  const reanalyzeProjectIdParam = searchParams.get("reanalyze");
+  const reanalyzeBaseUrl = searchParams.get("baseUrl");
+  const reanalyzeName = searchParams.get("name");
+  const [reanalyzeProjectId, setReanalyzeProjectId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("single");
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
