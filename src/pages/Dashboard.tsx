@@ -508,6 +508,15 @@ const Dashboard = () => {
                             {avgScore ?? "-"}
                           </span>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => handleReanalyzeProject(project, e)}
+                          title={t('dashboard.reanalyze')}
+                        >
+                          <RotateCw className="h-3.5 w-3.5 text-primary" />
+                        </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
