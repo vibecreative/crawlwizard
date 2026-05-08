@@ -196,52 +196,55 @@ serve(async (req) => {
     const limitedQuestions = questions.slice(0, 5);
     const totalCredits = limitedQuestions.length * CREDITS_PER_QUESTION;
 
-    const creditCheck = await checkCredits(adminClient, effectiveUserId, totalCredits);
+    const creditCheck = await consumeCredits(effectiveUserId, totalCredits, 'ai_ranking_check');
     if (!creditCheck.allowed) {
-      return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({
         error: 'credits_exhausted',
-        message: `Insufficient credits. This check costs ${totalCredits} credits, you have ${creditCheck.remaining} remaining.`,
+        message: `Insufficient credits. This check costs ${totalCredits} credits, you have ${creditCheck.remaining ?? 0} remaining.`,
         credits: creditCheck
       }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Use admin client so admins acting via viewAs can insert under target user_id (bypass RLS)
-    const { data: check, error: checkError } = await adminClient
-      .from("ai_ranking_checks")
-      .insert({ user_id: effectiveUserId, page_id: pageId, domain })
-      .select("id")
-      .single();
-    if (checkError) throw checkError;
+    try {
+      // Use admin client so admins acting via viewAs can insert under target user_id (bypass RLS)
+      const { data: check, error: checkError } = await adminClient
+        .from("ai_ranking_checks")
+        .insert({ user_id: effectiveUserId, page_id: pageId, domain })
+        .select("id")
+        .single();
+      if (checkError) throw checkError;
 
-    const results: any[] = [];
-    for (const question of limitedQuestions) {
-      const modelPromises = MODELS.map(async (model) => {
-        const result = await askModel(LOVABLE_API_KEY, model.id, question, domain, lang);
-        return {
-          check_id: check.id,
-          question,
-          model: model.id,
-          ai_response: result.response,
-          is_mentioned: result.isMentioned,
-          mention_position: result.mentionPosition,
-          sentiment: result.sentiment,
-        };
+      const results: any[] = [];
+      for (const question of limitedQuestions) {
+        const modelPromises = MODELS.map(async (model) => {
+          const result = await askModel(LOVABLE_API_KEY, model.id, question, domain, lang);
+          return {
+            check_id: check.id,
+            question,
+            model: model.id,
+            ai_response: result.response,
+            is_mentioned: result.isMentioned,
+            mention_position: result.mentionPosition,
+            sentiment: result.sentiment,
+          };
+        });
+        const questionResults = await Promise.all(modelPromises);
+        results.push(...questionResults);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      const { error: insertError } = await adminClient.from("ai_ranking_results").insert(results);
+      if (insertError) console.error("Insert error:", insertError);
+
+      await adminClient.from("ai_ranking_checks").update({ status: "completed" }).eq("id", check.id);
+
+      return new Response(JSON.stringify({ checkId: check.id, results }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      const questionResults = await Promise.all(modelPromises);
-      results.push(...questionResults);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (err) {
+      await refundCredits(effectiveUserId, totalCredits, 'ai_ranking_check');
+      throw err;
     }
-
-    const { error: insertError } = await adminClient.from("ai_ranking_results").insert(results);
-    if (insertError) console.error("Insert error:", insertError);
-
-    await adminClient.from("ai_ranking_checks").update({ status: "completed" }).eq("id", check.id);
-
-    await logCreditUsage(effectiveUserId, 'ai_ranking_check', totalCredits);
-
-    return new Response(JSON.stringify({ checkId: check.id, results }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   } catch (error) {
     console.error("check-ai-ranking error:", error);
     return new Response(
