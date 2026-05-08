@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { SitemapUrl } from "@/lib/api/sitemap";
+import { SitemapUrl, sitemapApi } from "@/lib/api/sitemap";
 import { FileText, Globe, LogOut, Save, Loader2, FolderOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,8 +35,13 @@ import {
 const Index = () => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const viewAsUserId = searchParams.get("viewAs");
+  const reanalyzeProjectIdParam = searchParams.get("reanalyze");
+  const reanalyzeBaseUrl = searchParams.get("baseUrl");
+  const reanalyzeName = searchParams.get("name");
+  const [reanalyzeProjectId, setReanalyzeProjectId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("single");
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingFaqs, setIsGeneratingFaqs] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
@@ -80,6 +85,31 @@ const Index = () => {
         });
     }
   }, [isAdmin, viewAsUserId]);
+
+  // Handle reanalyze flow: switch to website tab and auto-discover sitemap
+  useEffect(() => {
+    if (!reanalyzeProjectIdParam || !reanalyzeBaseUrl) return;
+    setReanalyzeProjectId(reanalyzeProjectIdParam);
+    setActiveTab("website");
+    if (reanalyzeName) setProjectName(reanalyzeName);
+    setWebsiteBaseUrl(reanalyzeBaseUrl);
+    toast.info("Sitemap opnieuw ophalen voor heranalyse...");
+    sitemapApi.parseSitemap(reanalyzeBaseUrl).then((result) => {
+      if (result.success && result.urls && result.urls.length > 0) {
+        setDiscoveredUrls(result.urls);
+        toast.success(`${result.totalFound} pagina's gevonden. Selecteer en start de heranalyse.`);
+      } else {
+        toast.error(result.error || "Kon sitemap niet ophalen");
+      }
+    });
+    // Clear the params from URL so refresh doesn't re-trigger
+    const next = new URLSearchParams(searchParams);
+    next.delete("reanalyze");
+    next.delete("baseUrl");
+    next.delete("name");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reanalyzeProjectIdParam, reanalyzeBaseUrl]);
 
   // ── Single Page Analysis ─────────────────────────────────────────────────
 
@@ -287,24 +317,47 @@ const Index = () => {
     
     try {
       const targetUserId = (isAdmin && viewAsUserId) ? viewAsUserId : user.id;
-      const { data: project, error: projectError } = await supabase
-        .from('projects')
-        .insert({
-          user_id: targetUserId,
-          name: projectName.trim(),
-          base_url: websiteBaseUrl,
-          total_pages: websiteResults.length,
-          analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
-          status: 'completed'
-        })
-        .select()
-        .single();
-      
-      if (projectError) throw projectError;
+      let projectId = reanalyzeProjectId;
+
+      if (projectId) {
+        // Reanalyze: update existing project and wipe old pages
+        const { error: updateError } = await supabase
+          .from('projects')
+          .update({
+            name: projectName.trim(),
+            base_url: websiteBaseUrl,
+            total_pages: websiteResults.length,
+            analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
+            status: 'completed',
+          })
+          .eq('id', projectId);
+        if (updateError) throw updateError;
+
+        const { error: delError } = await supabase
+          .from('project_pages')
+          .delete()
+          .eq('project_id', projectId);
+        if (delError) throw delError;
+      } else {
+        const { data: project, error: projectError } = await supabase
+          .from('projects')
+          .insert({
+            user_id: targetUserId,
+            name: projectName.trim(),
+            base_url: websiteBaseUrl,
+            total_pages: websiteResults.length,
+            analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
+            status: 'completed'
+          })
+          .select()
+          .single();
+        if (projectError) throw projectError;
+        projectId = project.id;
+      }
       
       const orderedResults = sortByUrlHierarchy(websiteResults);
       const pagesToInsert = orderedResults.map((result, idx) => ({
-        project_id: project.id,
+        project_id: projectId!,
         url: result.url,
         title: result.title || null,
         status: result.status === 'success' ? 'completed' : result.status === 'error' ? 'failed' : result.status,
@@ -324,7 +377,8 @@ const Index = () => {
       
       if (pagesError) throw pagesError;
       
-      toast.success("Project opgeslagen!");
+      toast.success(reanalyzeProjectId ? "Project opnieuw geanalyseerd!" : "Project opgeslagen!");
+      setReanalyzeProjectId(null);
       navigate(isAdmin && viewAsUserId ? `/dashboard?viewAs=${viewAsUserId}` : '/dashboard');
     } catch (error) {
       console.error('Error saving project:', error);
@@ -431,7 +485,7 @@ const Index = () => {
           </div>
         )}
         <div className="mb-16">
-          <Tabs defaultValue="single" className="w-full max-w-4xl mx-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
             <TabsList className="grid w-full grid-cols-2 mb-8 h-auto">
               <TabsTrigger value="single" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-2.5">
                 <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
@@ -497,8 +551,13 @@ const Index = () => {
                     <div className="flex flex-col items-center gap-4 p-6 border rounded-lg bg-card">
                       <div className="flex items-center gap-2 text-lg font-medium">
                         <FolderOpen className="h-5 w-5 text-primary" />
-                        Project opslaan
+                        {reanalyzeProjectId ? "Heranalyse opslaan" : "Project opslaan"}
                       </div>
+                      {reanalyzeProjectId && (
+                        <p className="text-sm text-muted-foreground text-center max-w-md">
+                          Bestaande pagina-data van dit project wordt vervangen door deze nieuwe analyse.
+                        </p>
+                      )}
                       <div className="w-full max-w-md space-y-2">
                         <Label htmlFor="projectName">Projectnaam</Label>
                         <Input
@@ -519,12 +578,12 @@ const Index = () => {
                         {isSavingProject ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Project opslaan...
+                            {reanalyzeProjectId ? "Heranalyse opslaan..." : "Project opslaan..."}
                           </>
                         ) : (
                           <>
                             <Save className="mr-2 h-4 w-4" />
-                            Project opslaan
+                            {reanalyzeProjectId ? "Heranalyse opslaan" : "Project opslaan"}
                           </>
                         )}
                       </Button>

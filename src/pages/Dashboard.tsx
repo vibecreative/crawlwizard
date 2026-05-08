@@ -27,7 +27,8 @@ import {
   Eye,
   Shield,
   Search,
-  XCircle
+  XCircle,
+  RotateCw
 } from "lucide-react";
 import {
   DndContext,
@@ -280,8 +281,18 @@ const Dashboard = () => {
     }
   };
 
+  const handleReanalyzeProject = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(t('dashboard.reanalyzeConfirm'))) return;
+    const params = new URLSearchParams();
+    params.set('reanalyze', project.id);
+    params.set('baseUrl', project.base_url);
+    params.set('name', project.name);
+    if (viewAsUserId) params.set('viewAs', viewAsUserId);
+    navigate(`/analyze?${params.toString()}`);
+  };
+
   const getScoreColor = (score: number | null) => {
-    if (score === null) return "text-muted-foreground";
     if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
     if (score >= 60) return "text-amber-600 dark:text-amber-400";
     return "text-destructive";
@@ -497,6 +508,15 @@ const Dashboard = () => {
                             {avgScore ?? "-"}
                           </span>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => handleReanalyzeProject(project, e)}
+                          title={t('dashboard.reanalyze')}
+                        >
+                          <RotateCw className="h-3.5 w-3.5 text-primary" />
+                        </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"

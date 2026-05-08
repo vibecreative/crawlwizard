@@ -196,6 +196,8 @@
     "deleteConfirm": "Are you sure you want to delete this project?",
     "projectDeleted": "Project deleted",
     "projectDeleteFailed": "Could not delete project",
+    "reanalyze": "Re-analyze",
+    "reanalyzeConfirm": "Are you sure you want to re-analyze this project? All current page data will be replaced by the new analysis.",
     "loadProjectsFailed": "Could not load projects",
     "loadPagesFailed": "Could not load pages",
     "details": "Details",
