@@ -40,9 +40,9 @@ const ContactForm = () => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from("contact_messages")
-        .insert({ name: result.data.name, email: result.data.email, message: result.data.message });
+      const { error } = await supabase.functions.invoke("submit-contact", {
+        body: { name: result.data.name, email: result.data.email, message: result.data.message },
+      });
 
       if (error) throw error;
 
