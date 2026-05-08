@@ -461,7 +461,7 @@ const Index = () => {
           </div>
         )}
         <div className="mb-16">
-          <Tabs defaultValue="single" className="w-full max-w-4xl mx-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
             <TabsList className="grid w-full grid-cols-2 mb-8 h-auto">
               <TabsTrigger value="single" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-2.5">
                 <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
