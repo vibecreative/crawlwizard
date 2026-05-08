@@ -187,6 +187,8 @@ ${truncatedContent}`;
     });
 
     if (!response.ok) {
+      // Refund credits since AI call failed
+      await adminClient.from("ai_credit_usage").insert({ user_id: effectiveUserId, action_type: "refund_meta_tag_generation", credits_used: -1 });
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Too many requests, try again later." }), {
           status: 429,
@@ -211,12 +213,6 @@ ${truncatedContent}`;
     }
 
     const suggestions = JSON.parse(toolCall.function.arguments);
-
-    await adminClient.from("ai_credit_usage").insert({
-      user_id: effectiveUserId,
-      action_type: "meta_tag_generation",
-      credits_used: 1,
-    });
 
     return new Response(JSON.stringify(suggestions), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
