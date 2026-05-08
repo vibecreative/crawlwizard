@@ -151,6 +151,24 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
@@ -372,6 +390,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_credits: {
+        Args: { _action_type: string; _amount: number; _user_id: string }
+        Returns: Json
+      }
       get_remaining_credits: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {

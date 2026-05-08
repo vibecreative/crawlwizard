@@ -78,9 +78,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { data: creditsData } = await adminClient.rpc("get_remaining_credits", { _user_id: effectiveUserId });
-    const remaining = creditsData?.remaining ?? 0;
-    if (remaining <= 0) {
+    const { data: consumeData, error: consumeErr } = await adminClient.rpc("consume_credits", { _user_id: effectiveUserId, _amount: 1, _action_type: "meta_tag_generation" });
+    if (consumeErr) throw consumeErr;
+    const consumed = typeof consumeData === 'string' ? JSON.parse(consumeData) : consumeData;
+    if (!consumed?.allowed) {
       return new Response(JSON.stringify({ error: "No AI credits remaining this month." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -186,6 +187,8 @@ ${truncatedContent}`;
     });
 
     if (!response.ok) {
+      // Refund credits since AI call failed
+      await adminClient.from("ai_credit_usage").insert({ user_id: effectiveUserId, action_type: "refund_meta_tag_generation", credits_used: -1 });
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Too many requests, try again later." }), {
           status: 429,
@@ -210,12 +213,6 @@ ${truncatedContent}`;
     }
 
     const suggestions = JSON.parse(toolCall.function.arguments);
-
-    await adminClient.from("ai_credit_usage").insert({
-      user_id: effectiveUserId,
-      action_type: "meta_tag_generation",
-      credits_used: 1,
-    });
 
     return new Response(JSON.stringify(suggestions), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

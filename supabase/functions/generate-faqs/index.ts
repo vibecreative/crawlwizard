@@ -9,14 +9,6 @@ const corsHeaders = {
 const MAX_CONTENT_SIZE = 1_000_000;
 const CREDITS_REQUIRED = 1;
 
-async function checkCredits(supabase: any, userId: string, creditsNeeded: number) {
-  const { data, error } = await supabase.rpc('get_remaining_credits', { _user_id: userId });
-  if (error) throw new Error('Could not check credits');
-  const credits = typeof data === 'string' ? JSON.parse(data) : data;
-  if (credits.remaining < creditsNeeded) return { allowed: false, ...credits };
-  return { allowed: true, ...credits };
-}
-
 function getAdminClient() {
   return createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
@@ -24,9 +16,16 @@ function getAdminClient() {
   );
 }
 
-async function logCreditUsage(userId: string, actionType: string, credits: number) {
+async function consumeCredits(userId: string, amount: number, actionType: string) {
   const adminClient = getAdminClient();
-  await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: actionType, credits_used: credits });
+  const { data, error } = await adminClient.rpc('consume_credits', { _user_id: userId, _amount: amount, _action_type: actionType });
+  if (error) throw new Error('Could not consume credits');
+  return typeof data === 'string' ? JSON.parse(data) : data;
+}
+
+async function refundCredits(userId: string, amount: number, actionType: string) {
+  const adminClient = getAdminClient();
+  await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: `refund_${actionType}`, credits_used: -amount });
 }
 
 async function resolveEffectiveUserId(callerUserId: string, viewAsUserId?: string): Promise<string> {
@@ -135,11 +134,11 @@ serve(async (req) => {
     const { html, brandContext, language, viewAsUserId } = body;
     const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
 
-    const creditCheck = await checkCredits(getAdminClient(), effectiveUserId, CREDITS_REQUIRED);
+    const creditCheck = await consumeCredits(effectiveUserId, CREDITS_REQUIRED, 'faq_generation');
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
-        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used}/${creditCheck.limit} gebruikt.`,
+        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used ?? 0}/${creditCheck.limit ?? 0} gebruikt.`,
         credits: creditCheck
       }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -213,14 +212,13 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      await refundCredits(effectiveUserId, CREDITS_REQUIRED, 'faq_generation');
       if (response.status === 429) return new Response(JSON.stringify({ error: 'Rate limit reached, try again later.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       if (response.status === 402) return new Response(JSON.stringify({ error: 'Credits exhausted.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       const errorText = await response.text();
       console.error('AI gateway error:', response.status, errorText);
       throw new Error('AI gateway error');
     }
-
-    await logCreditUsage(effectiveUserId, 'faq_generation', CREDITS_REQUIRED);
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
