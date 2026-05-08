@@ -86,6 +86,31 @@ const Index = () => {
     }
   }, [isAdmin, viewAsUserId]);
 
+  // Handle reanalyze flow: switch to website tab and auto-discover sitemap
+  useEffect(() => {
+    if (!reanalyzeProjectIdParam || !reanalyzeBaseUrl) return;
+    setReanalyzeProjectId(reanalyzeProjectIdParam);
+    setActiveTab("website");
+    if (reanalyzeName) setProjectName(reanalyzeName);
+    setWebsiteBaseUrl(reanalyzeBaseUrl);
+    toast.info("Sitemap opnieuw ophalen voor heranalyse...");
+    sitemapApi.parseSitemap(reanalyzeBaseUrl).then((result) => {
+      if (result.success && result.urls && result.urls.length > 0) {
+        setDiscoveredUrls(result.urls);
+        toast.success(`${result.totalFound} pagina's gevonden. Selecteer en start de heranalyse.`);
+      } else {
+        toast.error(result.error || "Kon sitemap niet ophalen");
+      }
+    });
+    // Clear the params from URL so refresh doesn't re-trigger
+    const next = new URLSearchParams(searchParams);
+    next.delete("reanalyze");
+    next.delete("baseUrl");
+    next.delete("name");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reanalyzeProjectIdParam, reanalyzeBaseUrl]);
+
   // ── Single Page Analysis ─────────────────────────────────────────────────
 
   const analyzeUrl = async (url: string, primaryKeyword = '', secondaryKeywords: string[] = []) => {
