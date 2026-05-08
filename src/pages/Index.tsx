@@ -377,7 +377,8 @@ const Index = () => {
       
       if (pagesError) throw pagesError;
       
-      toast.success("Project opgeslagen!");
+      toast.success(reanalyzeProjectId ? "Project opnieuw geanalyseerd!" : "Project opgeslagen!");
+      setReanalyzeProjectId(null);
       navigate(isAdmin && viewAsUserId ? `/dashboard?viewAs=${viewAsUserId}` : '/dashboard');
     } catch (error) {
       console.error('Error saving project:', error);
