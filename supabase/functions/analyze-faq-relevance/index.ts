@@ -76,12 +76,12 @@ serve(async (req) => {
     const { question, websiteUrl, pageContent, viewAsUserId } = body;
     const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
 
-    // Credit check
-    const creditCheck = await checkCredits(getAdminClient(), effectiveUserId, CREDITS_REQUIRED);
+    // Atomic credit consumption
+    const creditCheck = await consumeCredits(effectiveUserId, CREDITS_REQUIRED, 'faq_analysis');
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
-        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used}/${creditCheck.limit} gebruikt.`,
+        message: `Je hebt geen AI-credits meer over deze maand. ${creditCheck.used ?? 0}/${creditCheck.limit ?? 0} gebruikt.`,
         credits: creditCheck
       }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
