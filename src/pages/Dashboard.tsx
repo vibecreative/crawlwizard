@@ -281,7 +281,16 @@ const Dashboard = () => {
     }
   };
 
-  const getScoreColor = (score: number | null) => {
+  const handleReanalyzeProject = (project: Project, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(t('dashboard.reanalyzeConfirm'))) return;
+    const params = new URLSearchParams();
+    params.set('reanalyze', project.id);
+    params.set('baseUrl', project.base_url);
+    params.set('name', project.name);
+    if (viewAsUserId) params.set('viewAs', viewAsUserId);
+    navigate(`/analyze?${params.toString()}`);
+  };
     if (score === null) return "text-muted-foreground";
     if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
     if (score >= 60) return "text-amber-600 dark:text-amber-400";
