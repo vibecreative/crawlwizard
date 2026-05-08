@@ -317,24 +317,47 @@ const Index = () => {
     
     try {
       const targetUserId = (isAdmin && viewAsUserId) ? viewAsUserId : user.id;
-      const { data: project, error: projectError } = await supabase
-        .from('projects')
-        .insert({
-          user_id: targetUserId,
-          name: projectName.trim(),
-          base_url: websiteBaseUrl,
-          total_pages: websiteResults.length,
-          analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
-          status: 'completed'
-        })
-        .select()
-        .single();
-      
-      if (projectError) throw projectError;
+      let projectId = reanalyzeProjectId;
+
+      if (projectId) {
+        // Reanalyze: update existing project and wipe old pages
+        const { error: updateError } = await supabase
+          .from('projects')
+          .update({
+            name: projectName.trim(),
+            base_url: websiteBaseUrl,
+            total_pages: websiteResults.length,
+            analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
+            status: 'completed',
+          })
+          .eq('id', projectId);
+        if (updateError) throw updateError;
+
+        const { error: delError } = await supabase
+          .from('project_pages')
+          .delete()
+          .eq('project_id', projectId);
+        if (delError) throw delError;
+      } else {
+        const { data: project, error: projectError } = await supabase
+          .from('projects')
+          .insert({
+            user_id: targetUserId,
+            name: projectName.trim(),
+            base_url: websiteBaseUrl,
+            total_pages: websiteResults.length,
+            analyzed_pages: websiteResults.filter(r => r.status === 'success').length,
+            status: 'completed'
+          })
+          .select()
+          .single();
+        if (projectError) throw projectError;
+        projectId = project.id;
+      }
       
       const orderedResults = sortByUrlHierarchy(websiteResults);
       const pagesToInsert = orderedResults.map((result, idx) => ({
-        project_id: project.id,
+        project_id: projectId!,
         url: result.url,
         title: result.title || null,
         status: result.status === 'success' ? 'completed' : result.status === 'error' ? 'failed' : result.status,
