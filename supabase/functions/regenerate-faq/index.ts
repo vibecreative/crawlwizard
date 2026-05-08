@@ -109,11 +109,11 @@ serve(async (req) => {
     const { html, previousQuestion, analysisExplanation, brandContext, language, viewAsUserId } = body;
     const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
 
-    const creditCheck = await checkCredits(getAdminClient(), effectiveUserId, CREDITS_REQUIRED);
+    const creditCheck = await consumeCredits(effectiveUserId, CREDITS_REQUIRED, 'faq_regeneration');
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({ 
         error: 'credits_exhausted',
-        message: `No AI credits remaining this month. ${creditCheck.used}/${creditCheck.limit} used.`,
+        message: `No AI credits remaining this month. ${creditCheck.used ?? 0}/${creditCheck.limit ?? 0} used.`,
         credits: creditCheck
       }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
