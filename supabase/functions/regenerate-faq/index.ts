@@ -184,14 +184,13 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      await refundCredits(effectiveUserId, CREDITS_REQUIRED, 'faq_regeneration');
       if (response.status === 429) return new Response(JSON.stringify({ error: 'Rate limit reached.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       if (response.status === 402) return new Response(JSON.stringify({ error: 'Credits exhausted.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       const errorText = await response.text();
       console.error('AI gateway error:', response.status, errorText);
       throw new Error('AI gateway error');
     }
-
-    await logCreditUsage(effectiveUserId, 'faq_regeneration', CREDITS_REQUIRED);
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
