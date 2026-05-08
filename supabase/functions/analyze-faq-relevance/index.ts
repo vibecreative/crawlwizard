@@ -187,6 +187,7 @@ Beoordeel hoe goed deze pagina als bron kan dienen voor een AI-antwoord op boven
     });
 
     if (!response.ok) {
+      await refundCredits(effectiveUserId, CREDITS_REQUIRED, 'faq_analysis');
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Rate limit bereikt, probeer het later opnieuw.' }), {
           status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -199,9 +200,6 @@ Beoordeel hoe goed deze pagina als bron kan dienen voor een AI-antwoord op boven
       console.error('AI gateway error:', response.status, errorText);
       throw new Error('AI gateway error');
     }
-
-    // Log credit usage after successful AI call
-    await logCreditUsage(effectiveUserId, 'faq_analysis', CREDITS_REQUIRED);
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
