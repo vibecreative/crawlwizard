@@ -97,6 +97,23 @@ const Dashboard = () => {
     }
   }, [viewAsUserId, isAdmin]);
 
+  // Auto-expand project from URL (e.g. when returning from page details)
+  const projectParam = searchParams.get("project");
+  useEffect(() => {
+    if (projectParam && projects.some(p => p.id === projectParam)) {
+      setExpandedProject(projectParam);
+      const project = projects.find(p => p.id === projectParam);
+      if (project && !project.pages) fetchProjectPages(projectParam);
+      // Clean URL while keeping viewAs
+      const params = new URLSearchParams();
+      if (viewAsUserId) params.set("viewAs", viewAsUserId);
+      setSearchParams(params, { replace: true });
+      setTimeout(() => {
+        document.getElementById(`project-${projectParam}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [projectParam, projects]);
+
   useEffect(() => {
     if (user?.id) {
       supabase
