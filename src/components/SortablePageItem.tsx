@@ -22,6 +22,9 @@ interface SortablePageItemProps {
 
 export const SortablePageItem = ({ page, getScoreBg, getScoreColor }: SortablePageItemProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const viewAsUserId = searchParams.get("viewAs");
+  const pageHref = viewAsUserId ? `/page/${page.id}?viewAs=${viewAsUserId}` : `/page/${page.id}`;
   const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: page.id });
 
