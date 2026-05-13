@@ -501,6 +501,7 @@ const Dashboard = () => {
               return (
                 <Card 
                   key={project.id} 
+                  id={`project-${project.id}`}
                   className={`cursor-pointer transition-all shadow-soft border-border/50 hover:border-primary/30 ${isExpanded ? 'border-primary/30' : ''}`}
                   onClick={() => handleExpandProject(project.id)}
                 >
