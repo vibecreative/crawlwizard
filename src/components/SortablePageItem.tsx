@@ -52,7 +52,7 @@ export const SortablePageItem = ({ page, getScoreBg, getScoreColor }: SortablePa
       </button>
       <div
         className="flex-1 min-w-0 mr-2 sm:mr-3 cursor-pointer hover:text-primary transition-colors"
-        onClick={() => navigate(`/page/${page.id}`)}
+        onClick={() => navigate(pageHref)}
       >
         <p className="text-[11px] sm:text-xs font-medium truncate">
           {page.title || (() => { try { return new URL(page.url).pathname || "/"; } catch { return page.url; } })()}
@@ -74,7 +74,7 @@ export const SortablePageItem = ({ page, getScoreBg, getScoreColor }: SortablePa
           variant="outline"
           size="sm"
           className="h-7 text-[10px] px-1.5 sm:px-2"
-          onClick={() => navigate(`/page/${page.id}`)}
+          onClick={() => navigate(pageHref)}
         >
           <Eye className="h-3 w-3 sm:mr-1" />
           <span className="hidden sm:inline">{t('dashboard.details')}</span>
