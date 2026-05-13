@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, ExternalLink, GripVertical } from "lucide-react";
@@ -22,6 +22,9 @@ interface SortablePageItemProps {
 
 export const SortablePageItem = ({ page, getScoreBg, getScoreColor }: SortablePageItemProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const viewAsUserId = searchParams.get("viewAs");
+  const pageHref = viewAsUserId ? `/page/${page.id}?viewAs=${viewAsUserId}` : `/page/${page.id}`;
   const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: page.id });
 
@@ -49,7 +52,7 @@ export const SortablePageItem = ({ page, getScoreBg, getScoreColor }: SortablePa
       </button>
       <div
         className="flex-1 min-w-0 mr-2 sm:mr-3 cursor-pointer hover:text-primary transition-colors"
-        onClick={() => navigate(`/page/${page.id}`)}
+        onClick={() => navigate(pageHref)}
       >
         <p className="text-[11px] sm:text-xs font-medium truncate">
           {page.title || (() => { try { return new URL(page.url).pathname || "/"; } catch { return page.url; } })()}
@@ -71,7 +74,7 @@ export const SortablePageItem = ({ page, getScoreBg, getScoreColor }: SortablePa
           variant="outline"
           size="sm"
           className="h-7 text-[10px] px-1.5 sm:px-2"
-          onClick={() => navigate(`/page/${page.id}`)}
+          onClick={() => navigate(pageHref)}
         >
           <Eye className="h-3 w-3 sm:mr-1" />
           <span className="hidden sm:inline">{t('dashboard.details')}</span>
