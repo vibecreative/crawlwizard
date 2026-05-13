@@ -107,7 +107,13 @@ const PageDetails = () => {
     }
   };
 
-  const handleBack = () => navigate("/dashboard");
+  const handleBack = () => {
+    const params = new URLSearchParams();
+    if (pageData?.project_id) params.set("project", pageData.project_id);
+    if (viewAsUserId) params.set("viewAs", viewAsUserId);
+    const qs = params.toString();
+    navigate(`/dashboard${qs ? `?${qs}` : ""}`);
+  };
 
   const handleReanalyze = async () => {
     if (!pageData) return;
