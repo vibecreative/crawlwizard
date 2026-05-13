@@ -529,10 +529,12 @@ const Index = () => {
             </TabsContent>
             
             <TabsContent value="website">
-              <WebsiteAnalyzer 
-                onUrlsDiscovered={handleUrlsDiscovered} 
-                isLoading={isAnalyzingWebsite} 
-              />
+              {!reanalyzeProjectId && (
+                <WebsiteAnalyzer 
+                  onUrlsDiscovered={handleUrlsDiscovered} 
+                  isLoading={isAnalyzingWebsite} 
+                />
+              )}
               
               {discoveredUrls.length > 0 && !showWebsiteResults && (
                 <div className="mt-8">
