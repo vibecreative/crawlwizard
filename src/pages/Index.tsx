@@ -485,8 +485,16 @@ const Index = () => {
           </div>
         )}
         <div className="mb-16">
+          {reanalyzeProjectId && (
+            <div className="max-w-4xl mx-auto mb-6 bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-3 text-sm">
+              <div className="font-medium text-amber-700 dark:text-amber-400 mb-1">Heranalyse modus</div>
+              <p className="text-muted-foreground">
+                Je bent het project <strong>{projectName || reanalyzeName}</strong> aan het heranalyseren. De sitemap is opnieuw opgehaald — selecteer hieronder de pagina's en start de heranalyse.
+              </p>
+            </div>
+          )}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 mb-8 h-auto">
+            <TabsList className={`grid w-full grid-cols-2 mb-8 h-auto ${reanalyzeProjectId ? 'hidden' : ''}`}>
               <TabsTrigger value="single" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-2.5">
                 <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>Enkele pagina</span>
