@@ -178,13 +178,16 @@ serve(async (req) => {
     }
 
     const { questions, domain, pageId, language, viewAsUserId }: RankingRequest & { viewAsUserId?: string } = await req.json();
+    console.log('[check-ai-ranking] request', { caller: user.id, viewAsUserId, pageId, domain, questionsCount: questions?.length });
     const lang = language === 'en' ? 'en' : 'nl';
     const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
+    console.log('[check-ai-ranking] effectiveUserId', effectiveUserId);
     const adminClient = getAdminClient();
 
-    const { data: profile } = await adminClient.from("profiles").select("plan").eq("id", effectiveUserId).single();
+    const { data: profile, error: profileError } = await adminClient.from("profiles").select("plan").eq("id", effectiveUserId).single();
+    console.log('[check-ai-ranking] profile lookup', { profile, profileError });
     if (!profile || profile.plan !== "enterprise") {
-      return new Response(JSON.stringify({ error: "Enterprise plan required" }), {
+      return new Response(JSON.stringify({ error: "Enterprise plan required", plan: profile?.plan ?? null }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -197,6 +200,7 @@ serve(async (req) => {
     const totalCredits = limitedQuestions.length * CREDITS_PER_QUESTION;
 
     const creditCheck = await consumeCredits(effectiveUserId, totalCredits, 'ai_ranking_check');
+    console.log('[check-ai-ranking] creditCheck', creditCheck);
     if (!creditCheck.allowed) {
       return new Response(JSON.stringify({
         error: 'credits_exhausted',
