@@ -43,13 +43,22 @@ async function refundCredits(userId: string, amount: number, actionType: string)
   await adminClient.from('ai_credit_usage').insert({ user_id: userId, action_type: `refund_${actionType}`, credits_used: -amount });
 }
 
-async function resolveEffectiveUserId(callerUserId: string, viewAsUserId?: string): Promise<string> {
-  if (!viewAsUserId || viewAsUserId === callerUserId) return callerUserId;
+async function resolveEffectiveUserContext(
+  callerUserId: string,
+  viewAsUserId?: string
+): Promise<{ effectiveUserId: string; isAdminViewAs: boolean }> {
+  if (!viewAsUserId || viewAsUserId === callerUserId) {
+    return { effectiveUserId: callerUserId, isAdminViewAs: false };
+  }
+
   const adminClient = getAdminClient();
   const { data } = await adminClient.from('user_roles').select('role').eq('user_id', callerUserId).eq('role', 'admin').maybeSingle();
-  if (!data) return callerUserId;
+  if (!data) return { effectiveUserId: callerUserId, isAdminViewAs: false };
+
   const { data: target } = await adminClient.from('profiles').select('id').eq('id', viewAsUserId).maybeSingle();
-  return target?.id ? viewAsUserId : callerUserId;
+  return target?.id
+    ? { effectiveUserId: viewAsUserId, isAdminViewAs: true }
+    : { effectiveUserId: callerUserId, isAdminViewAs: false };
 }
 
 async function askModel(
@@ -180,13 +189,13 @@ serve(async (req) => {
     const { questions, domain, pageId, language, viewAsUserId }: RankingRequest & { viewAsUserId?: string } = await req.json();
     console.log('[check-ai-ranking] request', { caller: user.id, viewAsUserId, pageId, domain, questionsCount: questions?.length });
     const lang = language === 'en' ? 'en' : 'nl';
-    const effectiveUserId = await resolveEffectiveUserId(user.id, viewAsUserId);
-    console.log('[check-ai-ranking] effectiveUserId', effectiveUserId);
+    const { effectiveUserId, isAdminViewAs } = await resolveEffectiveUserContext(user.id, viewAsUserId);
+    console.log('[check-ai-ranking] effectiveUserContext', { effectiveUserId, isAdminViewAs });
     const adminClient = getAdminClient();
 
     const { data: profile, error: profileError } = await adminClient.from("profiles").select("plan").eq("id", effectiveUserId).single();
     console.log('[check-ai-ranking] profile lookup', { profile, profileError });
-    if (!profile || profile.plan !== "enterprise") {
+    if (!profile || (profile.plan !== "enterprise" && !isAdminViewAs)) {
       return new Response(JSON.stringify({ error: "Enterprise plan required", plan: profile?.plan ?? null }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
