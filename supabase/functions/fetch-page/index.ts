@@ -134,11 +134,24 @@ serve(async (req) => {
 
     console.log('Fetching page:', url);
 
-    const response = await safeFetch(url, {
+    // Append cache-busting query param to bypass CDN / proxy caches on re-analysis
+    const cacheBustedUrl = (() => {
+      try {
+        const u = new URL(url);
+        u.searchParams.set('_cb', Date.now().toString());
+        return u.toString();
+      } catch {
+        return url;
+      }
+    })();
+
+    const response = await safeFetch(cacheBustedUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; CrawlWizard/1.0; +https://crawlwizard.app)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'nl,en;q=0.9',
+        'Cache-Control': 'no-cache, no-store, max-age=0',
+        'Pragma': 'no-cache',
       },
     });
 
