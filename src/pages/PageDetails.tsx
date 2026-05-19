@@ -343,6 +343,7 @@ const PageDetails = () => {
           pageId={pageData.id}
           userId={user?.id}
           brandContext={brandContext}
+          projectId={pageData.project_id}
         />
       </main>
     </div>

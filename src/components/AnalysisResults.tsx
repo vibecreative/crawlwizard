@@ -29,6 +29,7 @@ interface AnalysisResultsProps {
   pageId?: string;
   userId?: string;
   brandContext?: string;
+  projectId?: string;
 }
 
 const LockedFeatureCard = ({ title, description, onUpgrade, upgradeLabel }: { title: string; description: string; onUpgrade: () => void; upgradeLabel: string }) => (
@@ -67,7 +68,8 @@ export const AnalysisResults = ({
   userPlan,
   pageId,
   userId,
-  brandContext
+  brandContext,
+  projectId,
 }: AnalysisResultsProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -416,7 +418,7 @@ export const AnalysisResults = ({
 
       {/* Structured Data Analysis - Scale+ */}
       {!isFree ? (
-        <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} />
+        <StructuredDataAnalysis structuredData={data.structuredData} url={data.url} projectId={projectId} currentPageId={pageId} />
       ) : (
         <LockedFeatureCard 
           title={t('analysis.richSnippets')} 
