@@ -33,6 +33,145 @@ const extractTypesFromAnalysis = (analysisData: any): Set<string> => {
   return types;
 };
 
+// ── Schema validation ───────────────────────────────────────────────────────
+type ValidationIssue = { field: string; severity: "required" | "recommended"; message: string };
+type ValidationResult = { type: string; issues: ValidationIssue[]; checked: boolean };
+
+const hasField = (obj: any, field: string): boolean => {
+  if (!obj || typeof obj !== "object") return false;
+  const v = obj[field];
+  if (v === undefined || v === null) return false;
+  if (typeof v === "string" && v.trim() === "") return false;
+  if (Array.isArray(v) && v.length === 0) return false;
+  return true;
+};
+
+// Some schemas place validated entities inside @graph siblings — flatten them.
+const collectNodesOfType = (data: any, typeName: string): any[] => {
+  const out: any[] = [];
+  const visit = (n: any) => {
+    if (!n) return;
+    if (Array.isArray(n)) return n.forEach(visit);
+    if (typeof n !== "object") return;
+    const t = n["@type"];
+    const types = Array.isArray(t) ? t : t ? [t] : [];
+    if (types.includes(typeName)) out.push(n);
+    if (Array.isArray(n["@graph"])) n["@graph"].forEach(visit);
+  };
+  visit(data);
+  return out.length > 0 ? out : [data];
+};
+
+const validateSchema = (typeName: string, rawData: any): ValidationIssue[] => {
+  const nodes = collectNodesOfType(rawData, typeName);
+  // Use the first matching node (typical case: one per script)
+  const node = nodes[0] || rawData;
+  const issues: ValidationIssue[] = [];
+  const req = (field: string, msg: string) => {
+    if (!hasField(node, field)) issues.push({ field, severity: "required", message: msg });
+  };
+  const rec = (field: string, msg: string) => {
+    if (!hasField(node, field)) issues.push({ field, severity: "recommended", message: msg });
+  };
+
+  switch (typeName) {
+    case "Organization":
+      req("name", "Naam van de organisatie ontbreekt.");
+      req("url", "Website-URL ontbreekt.");
+      rec("logo", "Logo ontbreekt — vereist voor Google Knowledge Panel.");
+      rec("sameAs", "sameAs (social profielen) aanbevolen voor entiteitsherkenning.");
+      rec("contactPoint", "contactPoint aanbevolen voor klantcontact.");
+      break;
+    case "LocalBusiness":
+      req("name", "Bedrijfsnaam ontbreekt.");
+      req("address", "Adres (PostalAddress) ontbreekt — essentieel voor lokale SEO.");
+      rec("telephone", "Telefoonnummer aanbevolen.");
+      rec("openingHoursSpecification", "Openingstijden aanbevolen voor rich results.");
+      rec("geo", "Geo-coördinaten aanbevolen voor kaartweergave.");
+      rec("image", "Afbeelding aanbevolen.");
+      rec("priceRange", "priceRange aanbevolen.");
+      break;
+    case "WebSite":
+      req("name", "Sitenaam ontbreekt.");
+      req("url", "URL ontbreekt.");
+      rec("potentialAction", "SearchAction (sitelinks searchbox) aanbevolen.");
+      break;
+    case "BreadcrumbList":
+      req("itemListElement", "itemListElement (broodkruimels) ontbreekt.");
+      if (Array.isArray(node?.itemListElement)) {
+        const bad = node.itemListElement.some(
+          (el: any) => !hasField(el, "name") || (!hasField(el, "item") && !hasField(el, "@id"))
+        );
+        if (bad) issues.push({ field: "itemListElement", severity: "required", message: "Eén of meer items missen 'name' of 'item'." });
+      }
+      break;
+    case "Product":
+      req("name", "Productnaam ontbreekt.");
+      req("image", "Productafbeelding ontbreekt — vereist voor rich snippet.");
+      rec("description", "Beschrijving aanbevolen.");
+      rec("brand", "Merk aanbevolen.");
+      rec("offers", "Offers (prijs/voorraad) aanbevolen voor rich snippet.");
+      rec("aggregateRating", "aggregateRating of review aanbevolen voor sterren.");
+      break;
+    case "Offer":
+      req("price", "Prijs ontbreekt.");
+      req("priceCurrency", "priceCurrency ontbreekt.");
+      rec("availability", "availability aanbevolen.");
+      break;
+    case "Article":
+    case "BlogPosting":
+    case "NewsArticle":
+      req("headline", "Headline ontbreekt.");
+      req("author", "Auteur ontbreekt.");
+      req("datePublished", "datePublished ontbreekt.");
+      rec("image", "Afbeelding aanbevolen voor Google Discover.");
+      rec("dateModified", "dateModified aanbevolen.");
+      rec("publisher", "publisher (Organization) aanbevolen.");
+      break;
+    case "FAQPage":
+      req("mainEntity", "mainEntity (vragen) ontbreekt.");
+      if (Array.isArray(node?.mainEntity)) {
+        const bad = node.mainEntity.some(
+          (q: any) => !hasField(q, "name") || !q?.acceptedAnswer || !hasField(q.acceptedAnswer, "text")
+        );
+        if (bad) issues.push({ field: "mainEntity", severity: "required", message: "Eén of meer vragen missen 'name' of 'acceptedAnswer.text'." });
+      }
+      break;
+    case "Review":
+      req("itemReviewed", "itemReviewed ontbreekt.");
+      req("reviewRating", "reviewRating ontbreekt.");
+      req("author", "Auteur ontbreekt.");
+      break;
+    case "AggregateRating":
+      req("ratingValue", "ratingValue ontbreekt.");
+      if (!hasField(node, "reviewCount") && !hasField(node, "ratingCount")) {
+        issues.push({ field: "reviewCount/ratingCount", severity: "required", message: "reviewCount of ratingCount ontbreekt." });
+      }
+      break;
+    case "Event":
+      req("name", "Eventnaam ontbreekt.");
+      req("startDate", "startDate ontbreekt.");
+      req("location", "location ontbreekt.");
+      rec("offers", "Ticket-offers aanbevolen.");
+      break;
+    case "Recipe":
+      req("name", "Recept-naam ontbreekt.");
+      req("recipeIngredient", "recipeIngredient ontbreekt.");
+      req("recipeInstructions", "recipeInstructions ontbreekt.");
+      rec("image", "Afbeelding aanbevolen.");
+      break;
+    default:
+      return [];
+  }
+  return issues;
+};
+
+const VALIDATABLE_TYPES = new Set([
+  "Organization", "LocalBusiness", "WebSite", "BreadcrumbList",
+  "Product", "Offer", "Article", "BlogPosting", "NewsArticle",
+  "FAQPage", "Review", "AggregateRating", "Event", "Recipe",
+]);
+
 export const StructuredDataAnalysis = ({ structuredData, url, projectId, currentPageId }: StructuredDataAnalysisProps) => {
   const { t } = useTranslation();
   const hasStructuredData = structuredData.length > 0;
