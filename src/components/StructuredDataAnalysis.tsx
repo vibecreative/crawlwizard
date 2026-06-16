@@ -232,6 +232,28 @@ export const StructuredDataAnalysis = ({ structuredData, url, projectId, current
   const sitewideOnPage = categorized.filter((c) => c.isSitewide);
   const pageSpecificOnPage = categorized.filter((c) => !c.isSitewide);
 
+  // ── Validation of present schemas ───────────────────────────────────────
+  const validationResults: ValidationResult[] = useMemo(() => {
+    return categorized.map((item) => {
+      if (!VALIDATABLE_TYPES.has(item.baseType)) {
+        return { type: item.baseType, issues: [], checked: false };
+      }
+      return {
+        type: item.baseType,
+        issues: validateSchema(item.baseType, item.data),
+        checked: true,
+      };
+    });
+  }, [categorized]);
+
+  const checkedResults = validationResults.filter((r) => r.checked);
+  const requiredIssuesCount = checkedResults.reduce(
+    (n, r) => n + r.issues.filter((i) => i.severity === "required").length, 0
+  );
+  const recommendedIssuesCount = checkedResults.reduce(
+    (n, r) => n + r.issues.filter((i) => i.severity === "recommended").length, 0
+  );
+
   // ── Gap analysis ────────────────────────────────────────────────────────
   const presentTypes = new Set(categorized.map((c) => c.baseType));
   const has = (...names: string[]) => names.some((n) => presentTypes.has(n));
