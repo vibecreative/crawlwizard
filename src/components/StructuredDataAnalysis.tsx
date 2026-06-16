@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Code2, AlertCircle, CheckCircle2, Lightbulb, Globe, FileText, Info } from "lucide-react";
+import { Code2, AlertCircle, CheckCircle2, Lightbulb, Globe, FileText, Info, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,145 @@ const extractTypesFromAnalysis = (analysisData: any): Set<string> => {
   }
   return types;
 };
+
+// ── Schema validation ───────────────────────────────────────────────────────
+type ValidationIssue = { field: string; severity: "required" | "recommended"; message: string };
+type ValidationResult = { type: string; issues: ValidationIssue[]; checked: boolean };
+
+const hasField = (obj: any, field: string): boolean => {
+  if (!obj || typeof obj !== "object") return false;
+  const v = obj[field];
+  if (v === undefined || v === null) return false;
+  if (typeof v === "string" && v.trim() === "") return false;
+  if (Array.isArray(v) && v.length === 0) return false;
+  return true;
+};
+
+// Some schemas place validated entities inside @graph siblings — flatten them.
+const collectNodesOfType = (data: any, typeName: string): any[] => {
+  const out: any[] = [];
+  const visit = (n: any) => {
+    if (!n) return;
+    if (Array.isArray(n)) return n.forEach(visit);
+    if (typeof n !== "object") return;
+    const t = n["@type"];
+    const types = Array.isArray(t) ? t : t ? [t] : [];
+    if (types.includes(typeName)) out.push(n);
+    if (Array.isArray(n["@graph"])) n["@graph"].forEach(visit);
+  };
+  visit(data);
+  return out.length > 0 ? out : [data];
+};
+
+const validateSchema = (typeName: string, rawData: any): ValidationIssue[] => {
+  const nodes = collectNodesOfType(rawData, typeName);
+  // Use the first matching node (typical case: one per script)
+  const node = nodes[0] || rawData;
+  const issues: ValidationIssue[] = [];
+  const req = (field: string, msg: string) => {
+    if (!hasField(node, field)) issues.push({ field, severity: "required", message: msg });
+  };
+  const rec = (field: string, msg: string) => {
+    if (!hasField(node, field)) issues.push({ field, severity: "recommended", message: msg });
+  };
+
+  switch (typeName) {
+    case "Organization":
+      req("name", "Naam van de organisatie ontbreekt.");
+      req("url", "Website-URL ontbreekt.");
+      rec("logo", "Logo ontbreekt — vereist voor Google Knowledge Panel.");
+      rec("sameAs", "sameAs (social profielen) aanbevolen voor entiteitsherkenning.");
+      rec("contactPoint", "contactPoint aanbevolen voor klantcontact.");
+      break;
+    case "LocalBusiness":
+      req("name", "Bedrijfsnaam ontbreekt.");
+      req("address", "Adres (PostalAddress) ontbreekt — essentieel voor lokale SEO.");
+      rec("telephone", "Telefoonnummer aanbevolen.");
+      rec("openingHoursSpecification", "Openingstijden aanbevolen voor rich results.");
+      rec("geo", "Geo-coördinaten aanbevolen voor kaartweergave.");
+      rec("image", "Afbeelding aanbevolen.");
+      rec("priceRange", "priceRange aanbevolen.");
+      break;
+    case "WebSite":
+      req("name", "Sitenaam ontbreekt.");
+      req("url", "URL ontbreekt.");
+      rec("potentialAction", "SearchAction (sitelinks searchbox) aanbevolen.");
+      break;
+    case "BreadcrumbList":
+      req("itemListElement", "itemListElement (broodkruimels) ontbreekt.");
+      if (Array.isArray(node?.itemListElement)) {
+        const bad = node.itemListElement.some(
+          (el: any) => !hasField(el, "name") || (!hasField(el, "item") && !hasField(el, "@id"))
+        );
+        if (bad) issues.push({ field: "itemListElement", severity: "required", message: "Eén of meer items missen 'name' of 'item'." });
+      }
+      break;
+    case "Product":
+      req("name", "Productnaam ontbreekt.");
+      req("image", "Productafbeelding ontbreekt — vereist voor rich snippet.");
+      rec("description", "Beschrijving aanbevolen.");
+      rec("brand", "Merk aanbevolen.");
+      rec("offers", "Offers (prijs/voorraad) aanbevolen voor rich snippet.");
+      rec("aggregateRating", "aggregateRating of review aanbevolen voor sterren.");
+      break;
+    case "Offer":
+      req("price", "Prijs ontbreekt.");
+      req("priceCurrency", "priceCurrency ontbreekt.");
+      rec("availability", "availability aanbevolen.");
+      break;
+    case "Article":
+    case "BlogPosting":
+    case "NewsArticle":
+      req("headline", "Headline ontbreekt.");
+      req("author", "Auteur ontbreekt.");
+      req("datePublished", "datePublished ontbreekt.");
+      rec("image", "Afbeelding aanbevolen voor Google Discover.");
+      rec("dateModified", "dateModified aanbevolen.");
+      rec("publisher", "publisher (Organization) aanbevolen.");
+      break;
+    case "FAQPage":
+      req("mainEntity", "mainEntity (vragen) ontbreekt.");
+      if (Array.isArray(node?.mainEntity)) {
+        const bad = node.mainEntity.some(
+          (q: any) => !hasField(q, "name") || !q?.acceptedAnswer || !hasField(q.acceptedAnswer, "text")
+        );
+        if (bad) issues.push({ field: "mainEntity", severity: "required", message: "Eén of meer vragen missen 'name' of 'acceptedAnswer.text'." });
+      }
+      break;
+    case "Review":
+      req("itemReviewed", "itemReviewed ontbreekt.");
+      req("reviewRating", "reviewRating ontbreekt.");
+      req("author", "Auteur ontbreekt.");
+      break;
+    case "AggregateRating":
+      req("ratingValue", "ratingValue ontbreekt.");
+      if (!hasField(node, "reviewCount") && !hasField(node, "ratingCount")) {
+        issues.push({ field: "reviewCount/ratingCount", severity: "required", message: "reviewCount of ratingCount ontbreekt." });
+      }
+      break;
+    case "Event":
+      req("name", "Eventnaam ontbreekt.");
+      req("startDate", "startDate ontbreekt.");
+      req("location", "location ontbreekt.");
+      rec("offers", "Ticket-offers aanbevolen.");
+      break;
+    case "Recipe":
+      req("name", "Recept-naam ontbreekt.");
+      req("recipeIngredient", "recipeIngredient ontbreekt.");
+      req("recipeInstructions", "recipeInstructions ontbreekt.");
+      rec("image", "Afbeelding aanbevolen.");
+      break;
+    default:
+      return [];
+  }
+  return issues;
+};
+
+const VALIDATABLE_TYPES = new Set([
+  "Organization", "LocalBusiness", "WebSite", "BreadcrumbList",
+  "Product", "Offer", "Article", "BlogPosting", "NewsArticle",
+  "FAQPage", "Review", "AggregateRating", "Event", "Recipe",
+]);
 
 export const StructuredDataAnalysis = ({ structuredData, url, projectId, currentPageId }: StructuredDataAnalysisProps) => {
   const { t } = useTranslation();
@@ -92,6 +231,28 @@ export const StructuredDataAnalysis = ({ structuredData, url, projectId, current
 
   const sitewideOnPage = categorized.filter((c) => c.isSitewide);
   const pageSpecificOnPage = categorized.filter((c) => !c.isSitewide);
+
+  // ── Validation of present schemas ───────────────────────────────────────
+  const validationResults: ValidationResult[] = useMemo(() => {
+    return categorized.map((item) => {
+      if (!VALIDATABLE_TYPES.has(item.baseType)) {
+        return { type: item.baseType, issues: [], checked: false };
+      }
+      return {
+        type: item.baseType,
+        issues: validateSchema(item.baseType, item.data),
+        checked: true,
+      };
+    });
+  }, [categorized]);
+
+  const checkedResults = validationResults.filter((r) => r.checked);
+  const requiredIssuesCount = checkedResults.reduce(
+    (n, r) => n + r.issues.filter((i) => i.severity === "required").length, 0
+  );
+  const recommendedIssuesCount = checkedResults.reduce(
+    (n, r) => n + r.issues.filter((i) => i.severity === "recommended").length, 0
+  );
 
   // ── Gap analysis ────────────────────────────────────────────────────────
   const presentTypes = new Set(categorized.map((c) => c.baseType));
@@ -228,6 +389,95 @@ export const StructuredDataAnalysis = ({ structuredData, url, projectId, current
                 ))}
               </div>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Validation of present schemas */}
+      {hasStructuredData && checkedResults.length > 0 && (
+        <div className="mb-6 space-y-3">
+          <h4 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
+            {requiredIssuesCount === 0 ? (
+              <ShieldCheck className="h-4 w-4 text-green-600" />
+            ) : (
+              <ShieldAlert className="h-4 w-4 text-orange-600" />
+            )}
+            Validatie van aanwezige schema's
+          </h4>
+
+          {requiredIssuesCount === 0 && recommendedIssuesCount === 0 ? (
+            <Alert className="border-green-500/50 bg-green-500/10">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700 dark:text-green-400">
+                Alle gecontroleerde schema's bevatten de verplichte en aanbevolen velden.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground">
+                {requiredIssuesCount > 0 && (
+                  <><strong className="text-orange-700 dark:text-orange-400">{requiredIssuesCount}</strong> verplichte </>
+                )}
+                {requiredIssuesCount > 0 && recommendedIssuesCount > 0 && "en "}
+                {recommendedIssuesCount > 0 && (
+                  <><strong>{recommendedIssuesCount}</strong> aanbevolen </>
+                )}
+                {requiredIssuesCount + recommendedIssuesCount === 1 ? "veld ontbreekt" : "velden ontbreken"} in de aanwezige schema's.
+              </p>
+
+              <div className="space-y-2">
+                {checkedResults.filter((r) => r.issues.length > 0).map((r, i) => {
+                  const hasRequired = r.issues.some((x) => x.severity === "required");
+                  return (
+                    <div
+                      key={i}
+                      className={`p-3 rounded-lg border ${
+                        hasRequired ? "border-orange-500/40 bg-orange-500/5" : "border-border bg-secondary/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <strong className="text-sm text-foreground">{r.type}</strong>
+                        {hasRequired ? (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-orange-500/40 text-orange-700 dark:text-orange-400">
+                            Incompleet
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-border text-muted-foreground">
+                            Optimaliseerbaar
+                          </Badge>
+                        )}
+                      </div>
+                      <ul className="space-y-1">
+                        {r.issues.map((issue, j) => (
+                          <li key={j} className="text-xs flex items-start gap-2">
+                            <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${
+                              issue.severity === "required" ? "bg-orange-500" : "bg-muted-foreground/50"
+                            }`} />
+                            <span className="text-muted-foreground">
+                              <code className="px-1 py-0.5 rounded bg-secondary text-foreground text-[11px]">{issue.field}</code>
+                              <span className="ml-2">{issue.message}</span>
+                              {issue.severity === "recommended" && (
+                                <span className="ml-1 text-[10px] uppercase tracking-wider opacity-70">(aanbevolen)</span>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+
+                {checkedResults.filter((r) => r.issues.length === 0).length > 0 && (
+                  <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5 text-xs text-green-700 dark:text-green-400 flex items-center gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>
+                      Compleet:{" "}
+                      {checkedResults.filter((r) => r.issues.length === 0).map((r) => r.type).join(", ")}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
       )}
