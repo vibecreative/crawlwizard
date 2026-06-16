@@ -260,11 +260,11 @@ const Admin = () => {
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return "-";
-    const locale = i18n.language === 'nl' ? 'nl-NL' : 'en-US';
-    return new Date(dateStr).toLocaleDateString(locale, {
+    // Force DD/MM/YY across locales
+    return new Date(dateStr).toLocaleDateString('en-GB', {
       day: "2-digit",
       month: "2-digit",
-      year: "numeric",
+      year: "2-digit",
     });
   };
 
