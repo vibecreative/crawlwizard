@@ -20,39 +20,34 @@ function validateUrl(url: string): { valid: boolean; error?: string } {
   }
 
   // Block internal/private IPs and localhost (SSRF protection)
-  const blockedPatterns = [
-    'localhost',
-    '127.0.0.1',
-    '0.0.0.0',
-    '10.',
-    '172.16.',
-    '172.17.',
-    '172.18.',
-    '172.19.',
-    '172.20.',
-    '172.21.',
-    '172.22.',
-    '172.23.',
-    '172.24.',
-    '172.25.',
-    '172.26.',
-    '172.27.',
-    '172.28.',
-    '172.29.',
-    '172.30.',
-    '172.31.',
-    '192.168.',
-    '169.254.',
-    '[::1]',
-    'fc00:',
-    'fe80:',
-  ];
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname.toLowerCase();
+  } catch {
+    return { valid: false, error: 'Invalid URL format' };
+  }
 
-  const lowerUrl = url.toLowerCase();
-  for (const pattern of blockedPatterns) {
-    if (lowerUrl.includes(pattern)) {
-      return { valid: false, error: 'Invalid URL: internal addresses not allowed' };
-    }
+  const isBlocked =
+    hostname === 'localhost' ||
+    hostname.endsWith('.local') ||
+    /^127\./.test(hostname) ||
+    /^0\./.test(hostname) ||
+    hostname === '0.0.0.0' ||
+    hostname.startsWith('10.') ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('169.254.') ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) ||
+    hostname === '[::1]' ||
+    hostname === '::1' ||
+    hostname.startsWith('[::ffff:127.') ||
+    hostname.startsWith('::ffff:127.') ||
+    hostname.startsWith('[::ffff:10.') ||
+    hostname.startsWith('::ffff:10.') ||
+    hostname.startsWith('fc00:') ||
+    hostname.startsWith('fe80:');
+
+  if (isBlocked) {
+    return { valid: false, error: 'Invalid URL: internal addresses not allowed' };
   }
 
   return { valid: true };
