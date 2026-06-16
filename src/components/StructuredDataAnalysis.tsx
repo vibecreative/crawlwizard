@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Code2, AlertCircle, CheckCircle2, Lightbulb, Globe, FileText, Info } from "lucide-react";
+import { Code2, AlertCircle, CheckCircle2, Lightbulb, Globe, FileText, Info, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
