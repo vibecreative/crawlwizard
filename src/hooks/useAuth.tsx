@@ -38,9 +38,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string, plan?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string, _plan?: string) => {
     const redirectUrl = `${window.location.origin}/dashboard`;
-    
+
+    // Plan is intentionally NOT passed from the client.
+    // All new accounts default to 'free' server-side. Upgrades happen through admin/billing flows.
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -48,11 +50,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName,
-          plan: plan || 'free'
         }
       }
     });
-    
+
     return { error: error as Error | null };
   };
 
