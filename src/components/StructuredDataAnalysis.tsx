@@ -393,6 +393,95 @@ export const StructuredDataAnalysis = ({ structuredData, url, projectId, current
         </div>
       )}
 
+      {/* Validation of present schemas */}
+      {hasStructuredData && checkedResults.length > 0 && (
+        <div className="mb-6 space-y-3">
+          <h4 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
+            {requiredIssuesCount === 0 ? (
+              <ShieldCheck className="h-4 w-4 text-green-600" />
+            ) : (
+              <ShieldAlert className="h-4 w-4 text-orange-600" />
+            )}
+            Validatie van aanwezige schema's
+          </h4>
+
+          {requiredIssuesCount === 0 && recommendedIssuesCount === 0 ? (
+            <Alert className="border-green-500/50 bg-green-500/10">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700 dark:text-green-400">
+                Alle gecontroleerde schema's bevatten de verplichte en aanbevolen velden.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground">
+                {requiredIssuesCount > 0 && (
+                  <><strong className="text-orange-700 dark:text-orange-400">{requiredIssuesCount}</strong> verplichte </>
+                )}
+                {requiredIssuesCount > 0 && recommendedIssuesCount > 0 && "en "}
+                {recommendedIssuesCount > 0 && (
+                  <><strong>{recommendedIssuesCount}</strong> aanbevolen </>
+                )}
+                {requiredIssuesCount + recommendedIssuesCount === 1 ? "veld ontbreekt" : "velden ontbreken"} in de aanwezige schema's.
+              </p>
+
+              <div className="space-y-2">
+                {checkedResults.filter((r) => r.issues.length > 0).map((r, i) => {
+                  const hasRequired = r.issues.some((x) => x.severity === "required");
+                  return (
+                    <div
+                      key={i}
+                      className={`p-3 rounded-lg border ${
+                        hasRequired ? "border-orange-500/40 bg-orange-500/5" : "border-border bg-secondary/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <strong className="text-sm text-foreground">{r.type}</strong>
+                        {hasRequired ? (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-orange-500/40 text-orange-700 dark:text-orange-400">
+                            Incompleet
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-border text-muted-foreground">
+                            Optimaliseerbaar
+                          </Badge>
+                        )}
+                      </div>
+                      <ul className="space-y-1">
+                        {r.issues.map((issue, j) => (
+                          <li key={j} className="text-xs flex items-start gap-2">
+                            <span className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${
+                              issue.severity === "required" ? "bg-orange-500" : "bg-muted-foreground/50"
+                            }`} />
+                            <span className="text-muted-foreground">
+                              <code className="px-1 py-0.5 rounded bg-secondary text-foreground text-[11px]">{issue.field}</code>
+                              <span className="ml-2">{issue.message}</span>
+                              {issue.severity === "recommended" && (
+                                <span className="ml-1 text-[10px] uppercase tracking-wider opacity-70">(aanbevolen)</span>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+
+                {checkedResults.filter((r) => r.issues.length === 0).length > 0 && (
+                  <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/5 text-xs text-green-700 dark:text-green-400 flex items-center gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>
+                      Compleet:{" "}
+                      {checkedResults.filter((r) => r.issues.length === 0).map((r) => r.type).join(", ")}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Gap analysis */}
       {gaps.length > 0 && (
         <div className="space-y-3">
