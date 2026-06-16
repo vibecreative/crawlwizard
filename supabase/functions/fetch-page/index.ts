@@ -19,7 +19,8 @@ function isPrivateUrl(url: string): boolean {
     const hostname = parsed.hostname.toLowerCase();
     if (
       hostname === 'localhost' ||
-      hostname === '127.0.0.1' ||
+      /^127\./.test(hostname) ||
+      /^0\./.test(hostname) ||
       hostname.startsWith('10.') ||
       hostname.startsWith('192.168.') ||
       hostname.startsWith('172.16.') || hostname.startsWith('172.17.') ||
@@ -33,6 +34,11 @@ function isPrivateUrl(url: string): boolean {
       hostname.startsWith('169.254.') ||
       hostname === '0.0.0.0' ||
       hostname === '[::1]' ||
+      hostname === '::1' ||
+      hostname.startsWith('[::ffff:127.') ||
+      hostname.startsWith('::ffff:127.') ||
+      hostname.startsWith('[::ffff:10.') ||
+      hostname.startsWith('::ffff:10.') ||
       hostname.startsWith('fc00:') ||
       hostname.startsWith('fe80:') ||
       hostname.endsWith('.local')
